@@ -38,7 +38,7 @@ class alpha{
 
  private:
   betafunction betfunc;
-  double mumin, mumax, mustart, alphastart;
+  double mustart, alphastart, mumin, mumax;
   int mucount, numflavours, looporder;
   std::vector<double> xvec, yvec, betavec;
   general_spline_interp* interpolation;

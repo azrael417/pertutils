@@ -30,7 +30,7 @@
 		1881435E141E28A700E1F771 /* pertutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pertutils.hpp; sourceTree = "<group>"; };
 		1881435F141E28A700E1F771 /* runnings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = runnings.cpp; sourceTree = "<group>"; };
 		18814360141E28A700E1F771 /* runnings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = runnings.hpp; sourceTree = "<group>"; };
-		18814389141E363800E1F771 /* pertutils_debug */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = pertutils_debug; path = /Users/thorstenkurth/Dropbox/Documents/Uni/Code/lattice_tools/pertutils/build/Release/pertutils_debug; sourceTree = "<absolute>"; };
+		1881439E141E3B7000E1F771 /* pertutils_debug */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pertutils_debug; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +61,7 @@
 				1881435F141E28A700E1F771 /* runnings.cpp */,
 				18814360141E28A700E1F771 /* runnings.hpp */,
 				1881438C141E363800E1F771 /* pertutils_debug */,
+				1881439E141E3B7000E1F771 /* pertutils_debug */,
 			);
 			sourceTree = "<group>";
 		};
@@ -97,7 +98,7 @@
 			);
 			name = pertutils_debug;
 			productName = pertutils_debug;
-			productReference = 18814389141E363800E1F771 /* pertutils_debug */;
+			productReference = 1881439E141E3B7000E1F771 /* pertutils_debug */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -142,11 +143,29 @@
 		18814392141E363800E1F771 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				DYLIB_CURRENT_VERSION = 1.0;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.cpp;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
+				HEADER_SEARCH_PATHS = "\"/Users/thorstenkurth/Dropbox/Documents/Uni/Code/lattice_tools/pertutils\"";
+				LD_DYLIB_INSTALL_NAME = libpertutils.so;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../../../lib\"",
+					"\"/Users/thorstenkurth/lib\"",
+				);
+				MACH_O_TYPE = mh_dylib;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
+				USER_HEADER_SEARCH_PATHS = "\"/Users/thorstenkurth/Dropbox/Documents/Uni/Code/lattice_tools/mathutils\"";
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
