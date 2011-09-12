@@ -56,7 +56,7 @@ int Xifunc::writefile(std::string filename){
     output << MLsqmax << std::endl;
     output << MLcount << std::endl;
     output << s << std::endl;;
-    for(int i=0; i<xvec.size(); i++){
+    for(unsigned int i=0; i<xvec.size(); i++){
       output << xvec[i] << " " << yvec[i] << std::endl;
     }
   }
@@ -151,7 +151,7 @@ double mpiLovermpi(double mpi, double fpi, double L){
   }
 
   //Levin u transformation:
-  double result, omegan, an, anp1;
+  double result, omegan, an;
   int nrun=nup+1;
   while( (!acc.cnvgd) && ((nrun-(nup+1))<nmax) ){
     if(multiplicities[nrun]==0){
@@ -190,7 +190,7 @@ double mkLovermk(double mpi, double mk, double fpi, double L){
   }
 
   //Levin u transformation:
-  double result, omegan, an, anp1;
+  double result, omegan, an;
   int nrun=nup+1;
   while( (!acc.cnvgd) && ((nrun-(nup+1))<nmax) ){
     if(multiplicities[nrun]==0){
@@ -229,7 +229,7 @@ double fkLoverfk(double mpi, double fpi, double fk, double L){
   }
 
   //Levin u transformation:                                                                                                                                                        
-  double result, omegan, an, anp1;
+  double result, omegan, an;
   int nrun=nup+1;
   while( (!acc.cnvgd) && ((nrun-(nup+1))<nmax) ){
     if(multiplicities[nrun]==0){

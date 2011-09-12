@@ -27,7 +27,7 @@ struct betafunction : public TFunctor{
   void set(std::vector<double> betas){ betavec=betas; }
   double operator()(const double a){
     double result=0.0;
-    for(int i=0; i<betavec.size(); i++){
+    for(unsigned int i=0; i<betavec.size(); i++){
       result-=betavec[i]*pow(a,(i+2));
     }
     return result; 

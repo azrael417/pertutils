@@ -105,9 +105,6 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO) : mumin(MU
   double rho, dummy;
   double avector[2];
 
-  int numflavourbackup=numflavours;
-  int looporderbackup=looporder;
-
   mustart=0.9;
   alphastart=alpha_step_from_mz(mustart,10000,avector);
 
@@ -170,7 +167,7 @@ int alpha::writefile(std::string filename){
     output << mumin << std::endl;
     output << mumax << std::endl;
     output << mucount << std::endl;
-    for(int i=0; i<xvec.size(); i++){
+    for(unsigned int i=0; i<xvec.size(); i++){
       output << xvec[i] << " " << yvec[i] << std::endl;
     }
   }
@@ -493,7 +490,7 @@ double alpha::betathree(){
 
 double alpha::betafunc(double a){
   double result=0.0;
-  for(int i=0; i<betavec.size(); i++){
+  for(unsigned int i=0; i<betavec.size(); i++){
     result-=betavec[i]*pow(a,(i+2));
   }
   return result;
@@ -501,7 +498,7 @@ double alpha::betafunc(double a){
 
 double alpha::pdbetafunc(double a){
   double result=0.0;
-  for(int i=0; i<betavec.size(); i++){
+  for(unsigned int i=0; i<betavec.size(); i++){
     result-=(double)(i+2)*betavec[i]*pow(a,(i+1));
   }
   return result;
@@ -514,7 +511,7 @@ double alpha::dbetafunc(double a){
 
 double alpha::pd2betafunc(double a){
   double result=0.0;
-  for(int i=0; i<betavec.size(); i++){
+  for(unsigned int i=0; i<betavec.size(); i++){
     result-=(double)(i+2)*(i+1)*betavec[i]*pow(a,i);
   }
   return result;
