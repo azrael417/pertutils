@@ -6,10 +6,25 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		1881435B141E28A700E1F771 /* chiptfuncs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chiptfuncs.cpp; sourceTree = "<group>"; };
+		1881435C141E28A700E1F771 /* chiptfuncs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = chiptfuncs.hpp; sourceTree = "<group>"; };
+		1881435D141E28A700E1F771 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		1881435E141E28A700E1F771 /* pertutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pertutils.hpp; sourceTree = "<group>"; };
+		1881435F141E28A700E1F771 /* runnings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = runnings.cpp; sourceTree = "<group>"; };
+		18814360141E28A700E1F771 /* runnings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = runnings.hpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		18C7933A141A6EA600680CE1 = {
 			isa = PBXGroup;
 			children = (
+				1881435B141E28A700E1F771 /* chiptfuncs.cpp */,
+				1881435C141E28A700E1F771 /* chiptfuncs.hpp */,
+				1881435D141E28A700E1F771 /* Makefile */,
+				1881435E141E28A700E1F771 /* pertutils.hpp */,
+				1881435F141E28A700E1F771 /* runnings.cpp */,
+				18814360141E28A700E1F771 /* runnings.hpp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,40 +69,15 @@
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		18C79342141A6EA600680CE1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
-			};
-			name = Debug;
-		};
 		18C79343141A6EA600680CE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				"GCC_C_LANGUAGE_STANDARD[sdk=macosx10.7][arch=x86_64]" = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -98,18 +88,6 @@
 				SDKROOT = macosx;
 			};
 			name = Release;
-		};
-		18C79345141A6EA600680CE1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEBUGGING_SYMBOLS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
 		};
 		18C79346141A6EA600680CE1 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -126,7 +104,6 @@
 		18C7933F141A6EA600680CE1 /* Build configuration list for PBXProject "pertutils" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				18C79342141A6EA600680CE1 /* Debug */,
 				18C79343141A6EA600680CE1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -135,10 +112,10 @@
 		18C79344141A6EA600680CE1 /* Build configuration list for PBXLegacyTarget "pertutils" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				18C79345141A6EA600680CE1 /* Debug */,
 				18C79346141A6EA600680CE1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
