@@ -22,13 +22,13 @@
          <BuildActionEntry
             buildForTesting = "NO"
             buildForRunning = "NO"
-            buildForProfiling = "NO"
+            buildForProfiling = "YES"
             buildForArchiving = "NO"
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "18814388141E363800E1F771"
-               BuildableName = "pertutils_debug"
+               BlueprintIdentifier = "18C64BF2141F7A7C0001F398"
+               BuildableName = "liblibpertutils_debug.dylib"
                BlueprintName = "pertutils_debug"
                ReferencedContainer = "container:pertutils.xcodeproj">
             </BuildableReference>

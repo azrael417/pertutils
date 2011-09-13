@@ -7,21 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		18814393141E366700E1F771 /* chiptfuncs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435B141E28A700E1F771 /* chiptfuncs.cpp */; };
-		18814394141E366700E1F771 /* runnings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435F141E28A700E1F771 /* runnings.cpp */; };
+		18C64BF6141F7A890001F398 /* chiptfuncs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435B141E28A700E1F771 /* chiptfuncs.cpp */; };
+		18C64BF7141F7A890001F398 /* runnings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435F141E28A700E1F771 /* runnings.cpp */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		18814387141E363800E1F771 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1881435B141E28A700E1F771 /* chiptfuncs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chiptfuncs.cpp; sourceTree = "<group>"; };
@@ -30,11 +18,11 @@
 		1881435E141E28A700E1F771 /* pertutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pertutils.hpp; sourceTree = "<group>"; };
 		1881435F141E28A700E1F771 /* runnings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = runnings.cpp; sourceTree = "<group>"; };
 		18814360141E28A700E1F771 /* runnings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = runnings.hpp; sourceTree = "<group>"; };
-		1881439E141E3B7000E1F771 /* pertutils_debug */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pertutils_debug; sourceTree = BUILT_PRODUCTS_DIR; };
+		18C64BF3141F7A7C0001F398 /* libpertutils_debug.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpertutils_debug.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		18814386141E363800E1F771 /* Frameworks */ = {
+		18C64BF0141F7A7C0001F398 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,13 +32,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1881438C141E363800E1F771 /* pertutils_debug */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = pertutils_debug;
-			sourceTree = "<group>";
-		};
 		18C7933A141A6EA600680CE1 = {
 			isa = PBXGroup;
 			children = (
@@ -60,12 +41,21 @@
 				1881435E141E28A700E1F771 /* pertutils.hpp */,
 				1881435F141E28A700E1F771 /* runnings.cpp */,
 				18814360141E28A700E1F771 /* runnings.hpp */,
-				1881438C141E363800E1F771 /* pertutils_debug */,
-				1881439E141E3B7000E1F771 /* pertutils_debug */,
+				18C64BF3141F7A7C0001F398 /* libpertutils_debug.dylib */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		18C64BF1141F7A7C0001F398 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXLegacyTarget section */
 		18C79341141A6EA600680CE1 /* pertutils */ = {
@@ -84,22 +74,22 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
-		18814388141E363800E1F771 /* pertutils_debug */ = {
+		18C64BF2141F7A7C0001F398 /* pertutils_debug */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 18814391141E363800E1F771 /* Build configuration list for PBXNativeTarget "pertutils_debug" */;
+			buildConfigurationList = 18C64BF4141F7A7C0001F398 /* Build configuration list for PBXNativeTarget "pertutils_debug" */;
 			buildPhases = (
-				18814385141E363800E1F771 /* Sources */,
-				18814386141E363800E1F771 /* Frameworks */,
-				18814387141E363800E1F771 /* CopyFiles */,
+				18C64BEF141F7A7C0001F398 /* Sources */,
+				18C64BF0141F7A7C0001F398 /* Frameworks */,
+				18C64BF1141F7A7C0001F398 /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = pertutils_debug;
-			productName = pertutils_debug;
-			productReference = 1881439E141E3B7000E1F771 /* pertutils_debug */;
-			productType = "com.apple.product-type.tool";
+			productName = libpertutils_debug;
+			productReference = 18C64BF3141F7A7C0001F398 /* libpertutils_debug.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
 
@@ -122,49 +112,42 @@
 			projectRoot = "";
 			targets = (
 				18C79341141A6EA600680CE1 /* pertutils */,
-				18814388141E363800E1F771 /* pertutils_debug */,
+				18C64BF2141F7A7C0001F398 /* pertutils_debug */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		18814385141E363800E1F771 /* Sources */ = {
+		18C64BEF141F7A7C0001F398 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				18814393141E366700E1F771 /* chiptfuncs.cpp in Sources */,
-				18814394141E366700E1F771 /* runnings.cpp in Sources */,
+				18C64BF6141F7A890001F398 /* chiptfuncs.cpp in Sources */,
+				18C64BF7141F7A890001F398 /* runnings.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		18814392141E363800E1F771 /* Release */ = {
+		18C64BF5141F7A7C0001F398 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1.0;
 				DYLIB_CURRENT_VERSION = 1.0;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.cpp;
-				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				EXECUTABLE_PREFIX = lib;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
-				HEADER_SEARCH_PATHS = "\"/Users/thorstenkurth/Dropbox/Documents/Uni/Code/lattice_tools/pertutils\"";
-				LD_DYLIB_INSTALL_NAME = libpertutils.so;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../../../../lib\"",
-					"\"/Users/thorstenkurth/lib\"",
-				);
-				MACH_O_TYPE = mh_dylib;
+				HEADER_SEARCH_PATHS = "/Users/thorstenkurth/Dropbox/Documents/Uni/Code/**";
+				INSTALL_PATH = /Users/thorstenkurth/lib;
+				LD_DYLIB_INSTALL_NAME = "/Users/thorstenkurth/lib/$(EXECUTABLE_PATH)";
 				OTHER_LDFLAGS = (
 					"-undefined",
 					dynamic_lookup,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
-				USER_HEADER_SEARCH_PATHS = "\"/Users/thorstenkurth/Dropbox/Documents/Uni/Code/lattice_tools/mathutils\"";
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
@@ -201,10 +184,10 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		18814391141E363800E1F771 /* Build configuration list for PBXNativeTarget "pertutils_debug" */ = {
+		18C64BF4141F7A7C0001F398 /* Build configuration list for PBXNativeTarget "pertutils_debug" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				18814392141E363800E1F771 /* Release */,
+				18C64BF5141F7A7C0001F398 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
