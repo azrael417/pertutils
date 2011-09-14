@@ -28,7 +28,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "18C64BF2141F7A7C0001F398"
-               BuildableName = "liblibpertutils_debug.dylib"
+               BuildableName = "libpertutils_debug.dylib"
                BlueprintName = "pertutils_debug"
                ReferencedContainer = "container:pertutils.xcodeproj">
             </BuildableReference>
