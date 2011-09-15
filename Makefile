@@ -51,7 +51,7 @@ OPT              = -O2 -march=core2
 FLAGS            = -fPIC -Wall -debug
 LD               = icpc
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth/lib/libpertutils.so.1.0 libpertutils.so
+FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth/lib/libpertutils.so.1.0 /home/tkurth/lib/libpertutils.so
 endif
 
 ifeq ($(ARCH),VAN)
@@ -59,7 +59,7 @@ OPT              = -O2 -msse4.2
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth/lib/libpertutils.so.1.0 libpertutils.so
+FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth/lib/libpertutils.so.1.0 /home/tkurth/lib/libpertutils.so
 endif
 
 ifeq ($(ARCH),MAC)
