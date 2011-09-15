@@ -145,7 +145,10 @@
 				);
 				INSTALL_PATH = /Users/thorstenkurth/lib;
 				LD_DYLIB_INSTALL_NAME = "/Users/thorstenkurth/lib/$(EXECUTABLE_PATH)";
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VALID_ARCHS = x86_64;
 			};

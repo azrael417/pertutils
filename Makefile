@@ -47,7 +47,7 @@ endif
 
 #Compiler Optimization Level:
 ifeq ($(ARCH),INTEL)
-OPT              = -O3 -march=core2 -ipo
+OPT              = -O2 -march=core2
 FLAGS            = -fPIC -Wall -debug
 LD               = icpc
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
@@ -55,7 +55,7 @@ FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth
 endif
 
 ifeq ($(ARCH),VAN)
-OPT              = -O3 -msse4.2 -fwhole-program -combine
+OPT              = -O2 -msse4.2
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
@@ -63,10 +63,10 @@ FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth
 endif
 
 ifeq ($(ARCH),MAC)
-OPT              = -O3 -msse4.2 -fwhole-program -combine
+OPT              = -O2 -march=core2
 FLAGS            = -fPIC -Wall -g
 LD               = g++
-LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,/usr/local/lib/libpertutils.dylib -o /Users/thorstenkurth/lib/libpertutils.1.0.dylib *.o
+LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,/Users/thorstenkurth/lib/libpertutils.dylib -o /Users/thorstenkurth/lib/libpertutils.1.0.dylib *.o
 FINISH           = ln -sf /Users/thorstenkurth/lib/libpertutils.1.0.dylib /Users/thorstenkurth/lib/libpertutils.dylib
 endif
 
