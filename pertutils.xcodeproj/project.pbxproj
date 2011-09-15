@@ -133,14 +133,16 @@
 		18C64BF5141F7A7C0001F398 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1.0;
 				DYLIB_CURRENT_VERSION = 1.0;
 				EXECUTABLE_PREFIX = lib;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
-				HEADER_SEARCH_PATHS = "/Users/thorstenkurth/Dropbox/Documents/Uni/Code/**";
+				HEADER_SEARCH_PATHS = (
+					"/Users/thorstenkurth/Documents/Universität/Physik/Arbeitsgruppe\\ Fodor/Code/**",
+				);
 				INSTALL_PATH = /Users/thorstenkurth/lib;
 				LD_DYLIB_INSTALL_NAME = "/Users/thorstenkurth/lib/$(EXECUTABLE_PATH)";
 				OTHER_LDFLAGS = (
@@ -190,6 +192,7 @@
 				18C64BF5141F7A7C0001F398 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		18C7933F141A6EA600680CE1 /* Build configuration list for PBXProject "pertutils" */ = {
 			isa = XCConfigurationList;
