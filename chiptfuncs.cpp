@@ -13,7 +13,7 @@ Xifunc::Xifunc(double MLSQMIN, double MLSQMAX, int MLCOUNT, double ss) : MLsqmin
         dummy=Xifuncnorm(MLsq,s);
         yvec.push_back(dummy);
     }
-    interpolation=new general_spline_interp(xvec,yvec);
+    interpolation=new spline_interp(xvec,yvec);
 }
 
 Xifunc::Xifunc(std::string filename){
@@ -38,7 +38,7 @@ Xifunc::Xifunc(std::string filename){
             yvec.push_back(token);
         }
         input.close();
-        interpolation=new general_spline_interp(xvec,yvec);
+        interpolation=new spline_interp(xvec,yvec);
     }
 }
 

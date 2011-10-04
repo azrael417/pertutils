@@ -38,7 +38,7 @@ alpha::alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int 
     dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
     yvec.push_back(dummy);
   }
-  interpolation=new general_spline_interp(xvec,yvec);
+  interpolation=new spline_interp(xvec,yvec);
 }
 
 void alpha::change_LO(int loopord){
@@ -67,7 +67,7 @@ void alpha::change_LO(int loopord){
     dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
     yvec.push_back(dummy);
   }
-  interpolation=new general_spline_interp(xvec,yvec);
+  interpolation=new spline_interp(xvec,yvec);
 }
 
 void alpha::change_NF(int nf){
@@ -96,7 +96,7 @@ void alpha::change_NF(int nf){
     dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
     yvec.push_back(dummy);
   }
-  interpolation=new general_spline_interp(xvec,yvec);
+  interpolation=new spline_interp(xvec,yvec);
 }
 
 alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO) : mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO){
@@ -122,7 +122,7 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO) : mumin(MU
     dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
     yvec.push_back(dummy);
   }
-  interpolation=new general_spline_interp(xvec,yvec);
+  interpolation=new spline_interp(xvec,yvec);
 }
 
 alpha::alpha(std::string filename){
@@ -148,7 +148,7 @@ alpha::alpha(std::string filename){
       yvec.push_back(token);
     }
     input.close();
-    interpolation=new general_spline_interp(xvec,yvec);
+    interpolation=new spline_interp(xvec,yvec);
   }
 }
 

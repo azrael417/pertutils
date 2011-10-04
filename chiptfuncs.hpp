@@ -5,7 +5,7 @@ class Xifunc{
 private:
   double MLsqmin, MLsqmax, MLcount, MLstep, s;
   std::vector<double> xvec, yvec;
-  general_spline_interp* interpolation;
+  spline_interp* interpolation;
 
 public:
   Xifunc(double MLSQMIN, double MLSQMAX, int MLCOUNT, double ss);

@@ -41,7 +41,7 @@ class alpha{
   double mustart, alphastart, mumin, mumax;
   int mucount, numflavours, looporder;
   std::vector<double> xvec, yvec, betavec;
-  general_spline_interp* interpolation;
+  spline_interp* interpolation;
   void set_betavec();
   double afunc(double astart, double sstart, double sziel, int numsteps);
   double alpha_step_from_mz(double muziel, int numsteps, double* avec);
