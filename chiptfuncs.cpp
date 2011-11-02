@@ -45,6 +45,8 @@ Xifunc::Xifunc(std::string filename){
 //Print stored xvec,yvec into file:
 int Xifunc::writefile(std::string filename){
     std::ofstream output;
+	output.precision(10);
+    output.setf(std::ios::scientific,std::ios::floatfield);
     
     output.open(filename.c_str());
     if(!output.good()){
