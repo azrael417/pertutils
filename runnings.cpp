@@ -17,112 +17,122 @@ void alpha::set_betavec(){
 	betfunc.set(betavec);
 }
 
-alpha::alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO) : mustart(MUSTART), alphastart(ALPHASTART), mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO) {
-	xvec.clear();
-	yvec.clear();
-	double rho, dummy;
-	
-	double rhostart=log(pow(mustart,2));
-	double rhomin=log(pow(mumin,2));
-	double rhomax=log(pow(mumax,2));
-	double rhostep=(rhomax-rhomin)/((double)mucount);
-	
-	set_betavec();
-	
-	double alphamin=afunc(alphastart/pimath,rhostart,rhomin,mucount)*pimath;
-	xvec.push_back(rhomin);
-	yvec.push_back(alphamin);
-	for(int i=1; i<=mucount; i++){
-		rho=rhomin+(double)i*rhostep;
-		xvec.push_back(rho);
-		dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
-		yvec.push_back(dummy);
-	}
-	interpolation=new spline_interp(xvec,yvec);
+alpha::alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : mustart(MUSTART), alphastart(ALPHASTART), mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO), intid(id), stepmin(0.0), integrated(false), interpolated(false){
+    
+    atol=1e-6;
+    rtol=atol;
+    
+    rhomin=log(pow(mumin,2));
+    rhomax=log(pow(mumax,2));
+    set_betavec();
+    perform_integration(alphastart/pimath,log(pow(mustart,2)),rhomin,mucount);
+	double astart=yvec[yvec.size()-1]/pimath;
+    
+    //integration
+    perform_integration(astart,rhomin,rhomax,mucount);
+    
+    //interpolation
+    perform_interpolation();
 }
 
-void alpha::change_LO(int loopord){
+alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO), intid(id), stepmin(0.0), integrated(false), interpolated(false){
+	
+    atol=1e-6;
+    rtol=atol;
+
+	mustart=mumin;
+    rhomin=log(pow(mumin,2));
+	rhomax=log(pow(mumax,2));
+    
+    //obtaining starting values by running from mz:
+	alphastart=alpha_step_from_mz(rhomin);
+    double astart=alphastart/pimath;
+    set_betavec();
+    
+    //integration:
+    perform_integration(astart,rhomin,rhomax,mucount);
+    
+    //interpolation
+    perform_interpolation();
+}
+
+void alpha::perform_integration(double astart, double rmin, double rmax, int stepcount){
+    std::vector<double> avector(1);
+    double rstep=fabs(rmax-rmin)/((double)stepcount);
+    avector[0]=astart;
+    Output out(stepcount);
+    
+    if(intid==0){
+        Odeint<StepperDopr853<betafunction> > doprintegrator(avector,rmin,rmax,atol,rtol,rstep,stepmin,out,betfunc);
+        doprintegrator.integrate();
+    }
+    else{
+        Odeint<StepperBS<betafunction> > bsintegrator(avector,rmin,rmax,atol,rtol,rstep,stepmin,out,betfunc);
+        bsintegrator.integrate();
+    }
+    
+    xvec.clear();
+    yvec.clear();
+    for(int i=0; i<(out.count); i++){
+        xvec.push_back((out.xsave[i]));
+        yvec.push_back((out.ysave[0][i])*pimath);
+    }
+    integrated=true;
+}
+
+void alpha::perform_interpolation(){
+    if(integrated){
+        if(interpolated) delete interpolation;
+        interpolation=new spline_interp(xvec,yvec);
+        
+        interpolated=true;
+    }
+}
+
+void alpha::set_integrator(int id){
+    intid=id;
+    
+    if(intid==0){
+        std::cout << "alpha::set_integrator: integrator set to Dormand-Prince." << std::endl;
+    }
+    else{
+        std::cout << "alpha::set_integrator: integrator set to Bulrisch-Stoer." << std::endl;
+    }
+    integrated=false;
+}
+
+void alpha::set_LO(int loopord){
 	looporder=loopord;
-	delete [] interpolation;
-	
-	xvec.clear();
-	yvec.clear();
-	double rho, dummy;
-	double avector[2];
-	
-	mustart=0.9;
-	alphastart=alpha_step_from_mz(mustart,10000,avector);
-	
-	double rhostart=log(pow(mustart,2));
-	double rhomin=log(pow(mumin,2));
-	double rhomax=log(pow(mumax,2));
-	double rhostep=(rhomax-rhomin)/((double)mucount);
-	
-	double alphamin=afunc(alphastart/pimath,rhostart,rhomin,mucount)*pimath;
-	xvec.push_back(rhomin);
-	yvec.push_back(alphamin);
-	for(int i=1; i<=mucount; i++){
-		rho=rhomin+(double)i*rhostep;
-		xvec.push_back(rho);
-		dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
-		yvec.push_back(dummy);
-	}
-	interpolation=new spline_interp(xvec,yvec);
+	integrated=false;
+    interpolated=false;
+    
+    //obtaining starting values by running from mz:
+	alphastart=alpha_step_from_mz(rhomin);
+    double astart=alphastart/pimath;
+    set_betavec();
+    
+    //integration:
+    perform_integration(astart,rhomin,rhomax,mucount);
+    
+    //interpolation
+    perform_interpolation();
 }
 
-void alpha::change_NF(int nf){
+void alpha::set_NF(int nf){
 	numflavours=nf;
-	delete [] interpolation;
+	integrated=false;
+    interpolated=false;
 	
-	xvec.clear();
-	yvec.clear();
-	double rho, dummy;
-	double avector[2];
-	
-	mustart=0.9;
-	alphastart=alpha_step_from_mz(mustart,10000,avector);
-	
-	double rhostart=log(pow(mustart,2));
-	double rhomin=log(pow(mumin,2));
-	double rhomax=log(pow(mumax,2));
-	double rhostep=(rhomax-rhomin)/((double)mucount);
-	
-	double alphamin=afunc(alphastart/pimath,rhostart,rhomin,mucount)*pimath;
-	xvec.push_back(rhomin);
-	yvec.push_back(alphamin);
-	for(int i=1; i<=mucount; i++){
-		rho=rhomin+(double)i*rhostep;
-		xvec.push_back(rho);
-		dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
-		yvec.push_back(dummy);
-	}
-	interpolation=new spline_interp(xvec,yvec);
-}
-
-alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO) : mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO){
-	xvec.clear();
-	yvec.clear();
-	double rho, dummy;
-	double avector[2];
-	
-	mustart=0.9;
-	alphastart=alpha_step_from_mz(mustart,10000,avector);
-	
-	double rhostart=log(pow(mustart,2));
-	double rhomin=log(pow(mumin,2));
-	double rhomax=log(pow(mumax,2));
-	double rhostep=(rhomax-rhomin)/((double)mucount);
-	
-	double alphamin=afunc(alphastart/pimath,rhostart,rhomin,mucount)*pimath;
-	xvec.push_back(rhomin);
-	yvec.push_back(alphamin);
-	for(int i=1; i<=mucount; i++){
-		rho=rhomin+(double)i*rhostep;
-		xvec.push_back(rho);
-		dummy=afunc(yvec[i-1]/pimath,xvec[i-1],rho,100)*pimath;
-		yvec.push_back(dummy);
-	}
-	interpolation=new spline_interp(xvec,yvec);
+    //obtaining starting values by running from mz:
+	alphastart=alpha_step_from_mz(rhomin);
+    double astart=alphastart/pimath;
+    set_betavec();
+    
+    //integration:
+    perform_integration(astart,rhomin,rhomax,mucount);
+    
+    //interpolation
+    perform_interpolation();
 }
 
 alpha::alpha(std::string filename){
@@ -148,7 +158,10 @@ alpha::alpha(std::string filename){
 			yvec.push_back(token);
 		}
 		input.close();
-		interpolation=new spline_interp(xvec,yvec);
+        
+        //do interpolation:
+        integrated=true;
+        perform_interpolation();
 	}
 }
 
@@ -160,18 +173,23 @@ int alpha::writefile(std::string filename){
 	
 	output.open(filename.c_str());
 	if(!output.good()){
-		std::cerr << "alpha: error, cannot open " << filename << " for writing!" << std::endl;
+		std::cerr << "alpha::writefile: error, cannot open " << filename << " for writing!" << std::endl;
 		return EXIT_FAILURE;
 	}
 	else{
-		output << mustart << std::endl;
-		output << alphastart << std::endl;
-		output << mumin << std::endl;
-		output << mumax << std::endl;
-		output << mucount << std::endl;
-		for(unsigned int i=0; i<xvec.size(); i++){
-			output << xvec[i] << " " << yvec[i] << std::endl;
-		}
+        if(integrated){
+            output << mustart << std::endl;
+            output << alphastart << std::endl;
+            output << mumin << std::endl;
+            output << mumax << std::endl;
+            output << mucount << std::endl;
+            for(unsigned int i=0; i<xvec.size(); i++){
+                output << xvec[i] << " " << yvec[i] << std::endl;
+            }
+        }
+        else{
+            std::cerr << "alpha::writefile: error, please do the integration first!" << std::endl;
+        }
 	}
 	output.close();
 	return EXIT_SUCCESS;
@@ -194,14 +212,28 @@ double alpha::get_alphastart(){
 }
 
 double alpha::operator()(const double mu){
-	double rho=log(pow(mu,2));
-	double result=interpolation->interp(rho);
+    double rho, result;
+    if(interpolated){
+        rho=log(pow(mu,2));
+        result=interpolation->interp(rho);
+    }
+    else{
+        std::cerr << "alpha::operator(): please perform interpolation first!" << std::endl;
+        result=-1.;
+    }
 	return result;
 }
 
 double alpha::get(const double mu){
-	double rho=log(pow(mu,2));
-	double result=interpolation->interp(rho);
+    double rho, result;
+    if(interpolated){
+        rho=log(pow(mu,2));
+        result=interpolation->interp(rho);
+    }
+    else{
+        std::cerr << "alpha::get: please perform interpolation first!" << std::endl;
+        result=-1.;
+    }
 	return result;
 }
 
@@ -210,24 +242,54 @@ alpha::~alpha(){
 	yvec.clear();
 }
 
-double alpha::alpha_step_from_mz(double muziel, int numsteps, double* avec){
-	double must=mz;
-	double alphast=alphas_mz;
-	double alphaerror=alphas_mz_error;
+double alpha::alpha_step_from_mz(double rmin){
+    double rhost=log(pow(mz,2)), rm;
+	double astart=alphas_mz/pimath;
+	int nflavourbackup=numflavours;
+    double result;
+    
+    std::vector<double> thresholds;
+    if(rmin>=log(mb_msbar*mb_msbar)){
+        set_betavec();
+        
+        //integration:
+        perform_integration(astart,rhost,rmin,1000);
+        result=yvec[yvec.size()-1];
+    }
+    else{
+        thresholds.push_back(log(mb_msbar*mb_msbar));
+        if(rmin<log(mc_msbar*mc_msbar)) thresholds.push_back(log(mc_msbar*mc_msbar));
+        thresholds.push_back(0.);
+        
+        rm=rmin;
+        for(unsigned int i=0; i<(thresholds.size()-1); i++){
+            
+            //update flavour content:
+            numflavours=5-i;
+            set_betavec();
+            
+            //integrate:
+            perform_integration(astart,rhost,rm,1000);
+            
+            //update starting values:
+            astart=yvec[yvec.size()-1]/pimath;
+            rhost=thresholds[i];
+            rm=max(rmin,thresholds[i+1]);
+        }
+        result=astart*pimath;
+    }
+    numflavours=nflavourbackup;
+    set_betavec();
+    
+    return result;
+}
+
+/*double alpha::alpha_step_from_mz(double rmin){
+	double rhost=log(pow(mz,2));
+	double astart=alphas_mz/pimath;
 	int nflavour=numflavours;
 	
-	double rhostart=log(must*must);
-	double rhoziel=log(muziel*muziel);
-	double rhozielsave=rhoziel;
-	double astart=alphast/pimath;
-	double aerror=alphaerror/pimath;
-	double* avalues = new double[4];
-	double asave, aerrorsave, rhostep;
-	
-	double* xvalues=new double[numsteps];
-	double* yvalues=new double[numsteps];
-	double* yerrorplus=new double[numsteps];
-	double* yerrorminus=new double[numsteps];
+
 	
 	if(rhozielsave>=log(mb_msbar*mb_msbar)){
 		numflavours=5;
@@ -471,7 +533,7 @@ double alpha::alpha_step_from_mz(double muziel, int numsteps, double* avec){
 	avec[1]=aerrorsave;
 	
 	return asave*pimath;
-}
+}*/
 
 //QCD Beta-function at 4-loop (hep-ph/9910332,p.20, 72):
 double alpha::betazero(){
@@ -525,7 +587,7 @@ double alpha::d2betafunc(double a){
 	return result;
 }
 
-double alpha::afunc(double astart, double sstart, double sziel, int numsteps){ //liefert a(log(mu^2)) bei gegebenem a(log(mu_0^2)) und log(mu_0^2).                                                                                                  
+/*double alpha::afunc(double astart, double sstart, double sziel, int numsteps){ //liefert a(log(mu^2)) bei gegebenem a(log(mu_0^2)) und log(mu_0^2).                                                                                                  
 	double* avalues;
 	double sstep=(sziel-sstart)/numsteps;
 	double result;
@@ -553,5 +615,5 @@ double alpha::afunc(double astart, double sstart, double sziel, int numsteps){ /
 		delete [] yvalues;
 	}
 	return result;
-}
+}*/
 

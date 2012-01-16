@@ -46,12 +46,16 @@ class alpha{
 private:
 	betafunction betfunc;
 	double mustart, alphastart, mumin, mumax;
-	int mucount, numflavours, looporder;
+    int mucount, numflavours, looporder, intid;
+    double atol, rtol, stepmin;
+    bool integrated, interpolated;
+    double rhomin,rhomax;
+	
 	std::vector<double> xvec, yvec, betavec;
 	spline_interp* interpolation;
 	void set_betavec();
-	double afunc(double astart, double sstart, double sziel, int numsteps);
-	double alpha_step_from_mz(double muziel, int numsteps, double* avec);
+	//double afunc(double astart, double sstart, double sziel, int numsteps);
+	double alpha_step_from_mz(double rmin);
 	double betazero();
 	double betaone();
 	double betatwo();
@@ -61,13 +65,15 @@ private:
 	double dbetafunc(double a);
 	double pd2betafunc(double a);
 	double d2betafunc(double a);
+    void perform_integration(double astart, double rmin, double rmax, int stepcount);
+    void perform_interpolation();
 	
 public:
-	alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO);
-	alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO);
+	alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id=0);
+	alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id=0);
 	alpha(std::string filename);
-	void change_LO(int loopord);
-	void change_NF(int nf);
+	void set_LO(int loopord);
+	void set_NF(int nf);
 	int writefile(std::string filename);
 	double operator()(const double mu);
 	double get(const double mu);
@@ -75,7 +81,7 @@ public:
 	double get_mumax();
 	double get_mustart();
 	double get_alphastart();
-	~alpha();
-	
+    void set_integrator(int id);
+	~alpha();	
 };
 #endif
