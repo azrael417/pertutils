@@ -23,23 +23,39 @@ alpha::alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int 
     rtol=atol;
     
 	double astart;
+    rhomin=log(pow(mumin,2));
+    rhomax=log(pow(mumax,2));
 	if( fabs(mustart)>atol && fabs(alphastart)>atol ){
-		rhomin=log(pow(mumin,2));
-		rhomax=log(pow(mumax,2));
 		set_betavec();
 		perform_integration(alphastart/pimath,log(pow(mustart,2)),rhomin,mucount);
 		astart=yvec[yvec.size()-1]/pimath;
     }
 	else{
-		mustart=mumin;
-		rhomin=log(pow(mumin,2));
-		rhomax=log(pow(mumax,2));
+        switch(numflavours){
+            case 3: mustart=0.99*mc_msbar;
+                break;
+            case 4: mustart=0.99*mb_msbar;
+                break;
+            case 5: mustart=mz;
+                break;
+            default: mustart=2.;
+                break;
+        }
+        rhostart=log(pow(mustart,2));
 		
 		//obtaining starting values by running from mz:
-		if(numflavours!=0) alphastart=alpha_step_from_mz(rhomin);
-		else alphastart=alpha_from_lambda(rhomin);
+		if(numflavours!=0){
+            alphastart=alpha_step_from_mz(rhostart);
+        }
+		else{ 
+            alphastart=alpha_from_lambda(rhostart);
+        }
 		astart=alphastart/pimath;
 		set_betavec();
+        
+        //evolve from rhostart to rhomin:
+        perform_integration(astart,rhostart,rhomin,mucount);
+        astart=yvec[yvec.size()-1]/pimath;
 	}
 	std::cout << "alpha::alpha: starting value alpha( " << mumin << "^2 GeV^2 ) = " << astart*pimath << std::endl;
 	
@@ -55,15 +71,34 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : 
     atol=1e-8;
     rtol=atol;
 
-	mustart=mumin;
+    double astart;
     rhomin=log(pow(mumin,2));
 	rhomax=log(pow(mumax,2));
+    switch(numflavours){
+        case 3: mustart=0.99*mc_msbar;
+            break;
+        case 4: mustart=0.99*mb_msbar;
+            break;
+        case 5: mustart=mz;
+            break;
+        default: mustart=2.;
+            break;
+    }
+    rhostart=log(pow(mustart,2));
     
     //obtaining starting values by running from mz:
-	if(numflavours!=0) alphastart=alpha_step_from_mz(rhomin);
-	else alphastart=alpha_from_lambda(rhomin);
-    double astart=alphastart/pimath;
+	if(numflavours!=0){
+        alphastart=alpha_step_from_mz(rhostart);
+    }
+	else{
+        alphastart=alpha_from_lambda(rhostart);
+    }
+    astart=alphastart/pimath;
     set_betavec();
+    
+    //evolve from rhostart to rhomin:
+    perform_integration(astart,rhostart,rhomin,mucount);
+    astart=yvec[yvec.size()-1]/pimath;
     std::cout << "alpha::alpha: starting value alpha( " << mumin << "^2 GeV^2 ) = " << astart*pimath << std::endl;
 	
     //integration:
@@ -107,7 +142,7 @@ void alpha::perform_integration(double astart, double rmin, double rmax, int ste
 }
 
 void alpha::perform_interpolation(){
-    if(integrated){
+    if(integrated && yvec.size()>1){
         if(interpolated) delete interpolation;
         interpolation=new spline_interp(xvec,yvec);
         
@@ -240,10 +275,15 @@ double alpha::get_alphastart(){
 }
 
 double alpha::operator()(const double mu){
-    double rho, result;
+    double result;
+    double rho=log(pow(mu,2));
+    
     if(interpolated){
-        rho=log(pow(mu,2));
         result=interpolation->interp(rho);
+    }
+    else if(yvec.size()==1){
+        if(fabs(rho-xvec[0])<atol) result=yvec[0];
+        else result=-1.;
     }
     else{
         std::cerr << "alpha::operator(): please perform interpolation first!" << std::endl;
@@ -253,10 +293,15 @@ double alpha::operator()(const double mu){
 }
 
 double alpha::get(const double mu){
-    double rho, result;
+    double result;
+    double rho=log(pow(mu,2));
+    
     if(interpolated){
-        rho=log(pow(mu,2));
         result=interpolation->interp(rho);
+    }
+    else if(yvec.size()==1){
+        if(fabs(rho-xvec[0])<atol) result=yvec[0];
+        else result=-1.;
     }
     else{
         std::cerr << "alpha::get: please perform interpolation first!" << std::endl;
@@ -285,303 +330,44 @@ double alpha::alpha_from_lambda(double rmin){
 }
 
 double alpha::alpha_step_from_mz(double rmin){
-    double rhost=log(pow(mz,2)), rm;
+    double rup,rdown;
 	double astart=alphas_mz/pimath;
 	int nflavourbackup=numflavours;
     double result;
     int nsteps;
 	
+    std::cout << "Running down from Mz" << std::endl;
+    
     std::vector<double> thresholds;
-    if(rmin>=log(mb_msbar*mb_msbar)){
+    thresholds.push_back(log(mz*mz));
+    if(rmin<log(mb_msbar*mb_msbar)) thresholds.push_back(log(mb_msbar*mb_msbar));
+    if(rmin<log(mc_msbar*mc_msbar)) thresholds.push_back(log(mc_msbar*mc_msbar));
+    thresholds.push_back(0.);
+    
+    for(unsigned int i=0; i<(thresholds.size()-1); i++){
+        
+        //update flavour content:
+        rup=thresholds[i];
+        rdown=max(rmin,thresholds[i+1]);
+        numflavours=5-i;
         set_betavec();
         
-        //integration:
-        perform_integration(astart,rhost,rmin,1000);
-        result=yvec[yvec.size()-1];
-    }
-    else{
-        thresholds.push_back(log(mb_msbar*mb_msbar));
-        if(rmin<log(mc_msbar*mc_msbar)) thresholds.push_back(log(mc_msbar*mc_msbar));
-        thresholds.push_back(0.);
+        //integrate:
+        nsteps=(int)lround(fabs(rup-rdown)*1.e2);
+        perform_integration(astart,rup,rdown,nsteps);
         
-        rm=rmin;
-        for(unsigned int i=0; i<(thresholds.size()-1); i++){
-			
-            //update flavour content:
-            numflavours=5-i;
-            set_betavec();
-			
-            //integrate:
-			nsteps=(int)lround(fabs(rhost-rm)*10);
-			std::cout << "HIER!" << std::endl;
-			std::cout << "rm= " << rm << " rhost= " << rhost << " astart=" << astart << " nsteps= " << nsteps << std::endl;
-            perform_integration(astart,rhost,rm,nsteps);
-            
-            //update starting values:
-            astart=yvec[yvec.size()-1]/pimath;
-            rhost=thresholds[i];
-            rm=max(rm,thresholds[i+1]);
-			
-			
-        }
-        result=astart*pimath;
+        //update starting values:
+        astart=yvec[yvec.size()-1]/pimath;
+        std::cout << "nf= " << numflavours << ", alpha(" << exp(rdown/2) << "^2 GeV^2)= " << astart*pimath << std::endl;
     }
+    
+    //reset stuff:
+    result=astart*pimath;
     numflavours=nflavourbackup;
     set_betavec();
     
     return result;
 }
-
-/*double alpha::alpha_step_from_mz(double rmin){
-	double rhost=log(pow(mz,2));
-	double astart=alphas_mz/pimath;
-	int nflavour=numflavours;
-	
-
-	
-	if(rhozielsave>=log(mb_msbar*mb_msbar)){
-		numflavours=5;
-		set_betavec();
-		
-		rhostep=(rhoziel-rhostart)/numsteps;
-		avalues[0]=astart;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yvalues,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yvalues,numsteps);                                                                                                                                                                             
-		asave=yvalues[numsteps-1];
-		
-		avalues[0]=astart+aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);                                                                                                                                                                          
-		
-		avalues[0]=astart-aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);                                                                                                                                                                         
-		aerrorsave=(yerrorplus[numsteps-1]-yerrorminus[numsteps-1])/2.;
-	}
-	else if(rhozielsave>=log(mc_msbar*mc_msbar)){
-		//Rennen auf m_b:                                                                                                                                                                                                                     
-		numflavours=5;
-		set_betavec();
-		
-		rhoziel=log(mb_msbar*mb_msbar);
-		rhostep=(rhoziel-rhostart)/numsteps;
-		
-		//Central Value:                                                                                                                                                                                                                      
-		avalues[0]=astart;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yvalues,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yvalues,numsteps);                                                                                                                                                                             
-		asave=yvalues[numsteps-1];
-		
-		//Obere und untere Grenze:                                                                                                                                                                                                            
-		avalues[0]=astart+aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);                                                                                                                                                                          
-		
-		avalues[0]=astart-aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);                                                                                                                                                                         
-		aerrorsave=(yerrorplus[numsteps-1]-yerrorminus[numsteps-1])/2.;
-		astart=asave;
-		aerror=aerrorsave;
-		
-		std::cout << "alpha_s(m_b^2= " << mb_msbar << "^2) = " << astart*pimath << " +/- " << aerror*pimath << " " << std::endl;
-		
-		//Rennen vor m_c:                                                                                                                                                                                                                     
-		numflavours=4;
-		set_betavec();
-		
-		rhostart=log(mb_msbar*mb_msbar);
-		rhoziel=rhozielsave;
-		rhostep=(rhoziel-rhostart)/numsteps;
-		
-		//Central Value:                                                                                                                                                                                                                      
-		avalues[0]=astart;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yvalues,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yvalues,numsteps);                                                                                                                                                                             
-		asave=yvalues[numsteps-1];
-		
-		//Obere und untere Grenze:                                                                                                                                                                                                            
-		avalues[0]=astart+aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);                                                                                                                                                                          
-		
-		avalues[0]=astart-aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);                                                                                                                                                                         
-		aerrorsave=(yerrorplus[numsteps-1]-yerrorminus[numsteps-1])/2.;
-	}
-	else{
-		//Rennen auf m_b:                                                                                                                                                                                                                     
-		numflavours=5;
-		set_betavec();
-		
-		rhoziel=log(mb_msbar*mb_msbar);
-		rhostep=(rhoziel-rhostart)/numsteps;
-		
-		//Central Value:                                                                                                                                                                                                                      
-		avalues[0]=astart;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yvalues,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yvalues,numsteps);                                                                                                                                                                             
-		asave=yvalues[numsteps-1];
-		
-		//Obere und untere Grenze:                                                                                                                                                                                                            
-		avalues[0]=astart+aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);                                                                                                                                                                          
-		
-		avalues[0]=astart-aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);                                                                                                                                                                         
-		aerrorsave=(yerrorplus[numsteps-1]-yerrorminus[numsteps-1])/2.;
-		astart=asave;
-		aerror=aerrorsave;
-		
-		std::cout << "alpha_s(m_b^2= " << mb_msbar << "^2) = " << astart*pimath << " +/- " << aerror*pimath << std::endl;
-		
-		//Rennen auf m_c:                                                                                                                                                                                                                     
-		numflavours=4;
-		set_betavec();
-		
-		rhostart=log(mb_msbar*mb_msbar);
-		rhoziel=log(mc_msbar*mc_msbar);
-		rhostep=(rhoziel-rhostart)/numsteps;
-		
-		rhostart=log(mb_msbar*mb_msbar);
-		rhoziel=log(mc_msbar*mc_msbar);
-		rhostep=(rhoziel-rhostart)/numsteps;
-		
-		//Central Value:                                                                                                                                                                                                                      
-		avalues[0]=astart;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yvalues,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yvalues,numsteps);                                                                                                                                                                             
-		asave=yvalues[numsteps-1];
-		
-		//Obere und untere Grenze:                                                                                                                                                                                                            
-		avalues[0]=astart+aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);                                                                                                                                                                          
-		
-		avalues[0]=astart-aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);                                                                                                                                                                         
-		aerrorsave=(yerrorplus[numsteps-1]-yerrorminus[numsteps-1])/2.;
-		astart=asave;
-		aerror=aerrorsave;
-		
-		std::cout << "alpha_s(m_c^2= " << mc_msbar << "^2) = ) = " << astart*pimath << " +/- " << aerror*pimath << std::endl;
-		
-		//Rennen unter mc_c:                                                                                                                                                                                                                  
-		numflavours=3;
-		set_betavec();
-		
-		rhostart=log(mc_msbar*mc_msbar);
-		rhoziel=rhozielsave;
-		rhostep=(rhoziel-rhostart)/numsteps;
-		
-		//Central Value:                                                                                                                                                                                                                      
-		avalues[0]=astart;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yvalues,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yvalues,numsteps);                                                                                                                                                                             
-		asave=yvalues[numsteps-1];
-		
-		//Obere und untere Grenze:                                                                                                                                                                                                            
-		avalues[0]=astart+aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorplus,numsteps);                                                                                                                                                                          
-		
-		avalues[0]=astart-aerror;
-		avalues[1]=rhostep*betafunc(avalues[0]);
-		avalues[2]=(rhostep*rhostep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(rhostep*rhostep*rhostep/6.)*d2betafunc(avalues[0]);
-		
-		mvalPC(betfunc,avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);
-		//rk4(avalues,rhostart,rhostep,xvalues,yerrorminus,numsteps);                                                                                                                                                                         
-		aerrorsave=(yerrorplus[numsteps-1]-yerrorminus[numsteps-1])/2.;
-	}
-	std::cout << "alpha_s(" << muziel <<"^2 GeV^2) = " << asave*pimath << " +/- " << aerrorsave*pimath << std::endl;
-	
-	numflavours=nflavour;
-	set_betavec();
-	
-	delete [] avalues;
-	delete [] xvalues;
-	delete [] yvalues;
-	delete [] yerrorplus;
-	delete [] yerrorminus;
-	
-	avec[0]=asave;
-	avec[1]=aerrorsave;
-	
-	return asave*pimath;
-}*/
 
 //QCD Beta-function at 4-loop (hep-ph/9910332,p.20, 72):
 double alpha::betazero(){
@@ -634,34 +420,3 @@ double alpha::d2betafunc(double a){
 	result+=pow(betafunc(a),2)*pd2betafunc(a);
 	return result;
 }
-
-/*double alpha::afunc(double astart, double sstart, double sziel, int numsteps){ //liefert a(log(mu^2)) bei gegebenem a(log(mu_0^2)) und log(mu_0^2).                                                                                                  
-	double* avalues;
-	double sstep=(sziel-sstart)/numsteps;
-	double result;
-	double *xvalues, *yvalues;
-	
-	if(fabs(sziel-sstart)<1e-7){
-		result=astart;
-	}
-	else{
-		avalues = new double[4];
-		xvalues=new double[numsteps];
-		yvalues=new double[numsteps];
-		
-		avalues[0]=astart;
-		avalues[1]=sstep*betafunc(avalues[0]);
-		avalues[2]=(sstep*sstep/2.)*dbetafunc(avalues[0]);
-		avalues[3]=(sstep*sstep*sstep/6.)*d2betafunc(avalues[0]);
-		
-		betfunc.set(betavec);
-		mvalPC(betfunc,avalues,sstart,sstep,xvalues,yvalues,numsteps);
-		result=yvalues[numsteps-1];
-		
-		delete[] avalues;
-		delete [] xvalues;
-		delete [] yvalues;
-	}
-	return result;
-}*/
-

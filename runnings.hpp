@@ -50,7 +50,7 @@ private:
     int mucount, numflavours, looporder, intid;
     double atol, rtol, stepmin;
     bool integrated, interpolated;
-    double rhomin,rhomax;
+    double rhomin,rhomax,rhostart;
 	
 	std::vector<double> xvec, yvec, betavec;
 	spline_interp* interpolation;
