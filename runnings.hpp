@@ -34,6 +34,7 @@ struct betafunction : public TFunctor{
 	}
 	
 	void operator()(const double x, std::vector<double> &y, std::vector<double> &dydx){
+#pragma unused(x,dydx)
 		dydx[0]=0.0;
 		for(unsigned int i=0; i<betavec.size(); i++){
 			dydx[0]-=betavec[i]*pow(y[0],(i+2));
@@ -56,6 +57,7 @@ private:
 	void set_betavec();
 	//double afunc(double astart, double sstart, double sziel, int numsteps);
 	double alpha_step_from_mz(double rmin);
+	double alpha_from_lambda(double rmin);
 	double betazero();
 	double betaone();
 	double betatwo();

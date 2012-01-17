@@ -45,7 +45,8 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : 
 	rhomax=log(pow(mumax,2));
     
     //obtaining starting values by running from mz:
-	alphastart=alpha_step_from_mz(rhomin);
+	if(numflavours!=0) alphastart=alpha_step_from_mz(rhomin);
+	else alphastart=alpha_from_lambda(rhomin);
     double astart=alphastart/pimath;
     set_betavec();
     
@@ -58,7 +59,7 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : 
 
 void alpha::perform_integration(double astart, double rmin, double rmax, int stepcount){
     std::vector<double> avector(1);
-    double rstep=fabs(rmax-rmin)/((double)stepcount);
+    double rstep=(rmax-rmin)/((double)stepcount);
     avector[0]=astart;
     Output out(stepcount);
     
@@ -107,7 +108,8 @@ void alpha::set_LO(int loopord){
     interpolated=false;
     
     //obtaining starting values by running from mz:
-	alphastart=alpha_step_from_mz(rhomin);
+	if(numflavours!=0) alphastart=alpha_step_from_mz(rhomin);
+	else alphastart=alpha_from_lambda(rhomin);
     double astart=alphastart/pimath;
     set_betavec();
     
@@ -124,7 +126,8 @@ void alpha::set_NF(int nf){
     interpolated=false;
 	
     //obtaining starting values by running from mz:
-	alphastart=alpha_step_from_mz(rhomin);
+	if(numflavours!=0) alphastart=alpha_step_from_mz(rhomin);
+	else alphastart=alpha_from_lambda(rhomin);
     double astart=alphastart/pimath;
     set_betavec();
     
@@ -240,6 +243,20 @@ double alpha::get(const double mu){
 alpha::~alpha(){
 	xvec.clear();
 	yvec.clear();
+}
+
+double alpha::alpha_from_lambda(double rmin){
+	int numflavoursbackup=numflavours;
+	numflavours=0;
+	set_betavec();
+	double L=rmin-log(LQCD*LQCD);
+	
+	double result=1./(betavec[0]*L)*(1.-betavec[1]*log(L)/(pow(betavec[0],2)*L)+1./(pow(betavec[0]*L,2))*(pow(betavec[1],2)/pow(betavec[0],2)*(pow(log(L),2)-log(L)-1.)+betavec[2]/betavec[0]));
+	
+	numflavours=numflavoursbackup;
+	set_betavec();
+	
+	return result*pimath;
 }
 
 double alpha::alpha_step_from_mz(double rmin){
