@@ -19,15 +19,30 @@ void alpha::set_betavec(){
 
 alpha::alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : mustart(MUSTART), alphastart(ALPHASTART), mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO), intid(id), stepmin(0.0), integrated(false), interpolated(false){
     
-    atol=1e-6;
+    atol=1e-8;
     rtol=atol;
     
-    rhomin=log(pow(mumin,2));
-    rhomax=log(pow(mumax,2));
-    set_betavec();
-    perform_integration(alphastart/pimath,log(pow(mustart,2)),rhomin,mucount);
-	double astart=yvec[yvec.size()-1]/pimath;
-    
+	double astart;
+	if( fabs(mustart)>atol && fabs(alphastart)>atol ){
+		rhomin=log(pow(mumin,2));
+		rhomax=log(pow(mumax,2));
+		set_betavec();
+		perform_integration(alphastart/pimath,log(pow(mustart,2)),rhomin,mucount);
+		astart=yvec[yvec.size()-1]/pimath;
+    }
+	else{
+		mustart=mumin;
+		rhomin=log(pow(mumin,2));
+		rhomax=log(pow(mumax,2));
+		
+		//obtaining starting values by running from mz:
+		if(numflavours!=0) alphastart=alpha_step_from_mz(rhomin);
+		else alphastart=alpha_from_lambda(rhomin);
+		astart=alphastart/pimath;
+		set_betavec();
+	}
+	std::cout << "alpha::alpha: starting value alpha( " << mumin << "^2 GeV^2 ) = " << astart*pimath << std::endl;
+	
     //integration
     perform_integration(astart,rhomin,rhomax,mucount);
     
@@ -37,7 +52,7 @@ alpha::alpha(double MUSTART, double ALPHASTART, double MUMIN, double MUMAX, int 
 
 alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : mumin(MUMIN), mumax(MUMAX), mucount(MUCOUNT), numflavours(NF), looporder(LO), intid(id), stepmin(0.0), integrated(false), interpolated(false){
 	
-    atol=1e-6;
+    atol=1e-8;
     rtol=atol;
 
 	mustart=mumin;
@@ -49,7 +64,8 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : 
 	else alphastart=alpha_from_lambda(rhomin);
     double astart=alphastart/pimath;
     set_betavec();
-    
+    std::cout << "alpha::alpha: starting value alpha( " << mumin << "^2 GeV^2 ) = " << astart*pimath << std::endl;
+	
     //integration:
     perform_integration(astart,rhomin,rhomax,mucount);
     
@@ -63,21 +79,30 @@ void alpha::perform_integration(double astart, double rmin, double rmax, int ste
     avector[0]=astart;
     Output out(stepcount);
     
-    if(intid==0){
-        Odeint<StepperDopr853<betafunction> > doprintegrator(avector,rmin,rmax,atol,rtol,rstep,stepmin,out,betfunc);
-        doprintegrator.integrate();
-    }
-    else{
-        Odeint<StepperBS<betafunction> > bsintegrator(avector,rmin,rmax,atol,rtol,rstep,stepmin,out,betfunc);
-        bsintegrator.integrate();
-    }
-    
-    xvec.clear();
-    yvec.clear();
-    for(int i=0; i<(out.count); i++){
-        xvec.push_back((out.xsave[i]));
-        yvec.push_back((out.ysave[0][i])*pimath);
-    }
+	if(fabs(rmin-rmax)<atol){
+		xvec.clear();
+		yvec.clear();
+		xvec.push_back(rmin);
+		yvec.push_back(astart*pimath);
+	}
+	
+	else{
+		if(intid==0){
+			Odeint<StepperDopr853<betafunction> > doprintegrator(avector,rmin,rmax,atol,rtol,rstep,stepmin,out,betfunc);
+			doprintegrator.integrate();
+		}
+		else{
+			Odeint<StepperBS<betafunction> > bsintegrator(avector,rmin,rmax,atol,rtol,rstep*10.,stepmin,out,betfunc);
+			bsintegrator.integrate();
+		}
+		
+		xvec.clear();
+		yvec.clear();
+		for(int i=0; i<(out.count); i++){
+			xvec.push_back((out.xsave[i]));
+			yvec.push_back((out.ysave[0][i])*pimath);
+		}
+	}
     integrated=true;
 }
 
@@ -264,7 +289,8 @@ double alpha::alpha_step_from_mz(double rmin){
 	double astart=alphas_mz/pimath;
 	int nflavourbackup=numflavours;
     double result;
-    
+    int nsteps;
+	
     std::vector<double> thresholds;
     if(rmin>=log(mb_msbar*mb_msbar)){
         set_betavec();
@@ -280,18 +306,23 @@ double alpha::alpha_step_from_mz(double rmin){
         
         rm=rmin;
         for(unsigned int i=0; i<(thresholds.size()-1); i++){
-            
+			
             //update flavour content:
             numflavours=5-i;
             set_betavec();
-            
+			
             //integrate:
-            perform_integration(astart,rhost,rm,1000);
+			nsteps=(int)lround(fabs(rhost-rm)*10);
+			std::cout << "HIER!" << std::endl;
+			std::cout << "rm= " << rm << " rhost= " << rhost << " astart=" << astart << " nsteps= " << nsteps << std::endl;
+            perform_integration(astart,rhost,rm,nsteps);
             
             //update starting values:
             astart=yvec[yvec.size()-1]/pimath;
             rhost=thresholds[i];
-            rm=max(rmin,thresholds[i+1]);
+            rm=max(rm,thresholds[i+1]);
+			
+			
         }
         result=astart*pimath;
     }
