@@ -34,7 +34,7 @@ struct betafunction : public TFunctor{
 	}
 	
 	void operator()(const double x, std::vector<double> &y, std::vector<double> &dydx){
-#pragma unused(x,dydx)
+#pragma unused(x)
 		dydx[0]=0.0;
 		for(unsigned int i=0; i<betavec.size(); i++){
 			dydx[0]-=betavec[i]*pow(y[0],(i+2));
