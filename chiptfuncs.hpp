@@ -1,7 +1,11 @@
 #ifndef _CHIPTFUNCS
 #define _CHIPTFUNCS
 
-//Finite volume functions:
+//******************************************************************
+//******************************************************************
+//START chiPT FV functions
+//******************************************************************
+//******************************************************************
 class Xifunc{
 private:
   double MLsqmin, MLsqmax, MLcount, MLstep, s;
@@ -41,18 +45,38 @@ double mpiLovermpi(double mpi, double fpi, double L);
 double mkLovermk(double mpi, double mk, double fpi, double L);
 double fkLoverfk(double mpi, double fpi, double fk, double L);
 double fpiLoverfpi(double mpi, double fpi, double L);
+//******************************************************************
+//******************************************************************
+//END chiPT FV functions
+//******************************************************************
+//******************************************************************
 
-//Zeta-Function on a torus:
+
+//******************************************************************
+//******************************************************************
+//START Zeta-function on a torus
+//******************************************************************
+//******************************************************************
+//implementation of expression (5) in arXiv:1107.5023
 class Zetafunc{
 private:
-	fourvec<double> boost;
-	double gamma,lambda;
+	threevec<double> boost;
+	double gamma,lambda, qsq, ghatwnorm;
 	int l,m;
+	unsigned int MAXRUN;
+	double integrand1(const double t);
+	double integrand2(const double t);
+	dcomplex term1(double q2);
+	dcomplex term2(double q2);
+	dcomplex term3(double q2);
 	
 public:
-	Zetafunc(fourvec<double> boostvec, double gammaa, int ll=0, int mm=0, double lambdaa=1.) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm) {};
-	dcomplex operator()(const double qsq);
+	Zetafunc(threevec<double> boostvec, double gammaa, int ll=0, int mm=0, double lambdaa=1., unsigned int maxrun=1000) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {};
+	dcomplex operator()(const double q2);
 };
-
-
+//******************************************************************
+//******************************************************************
+//END Zeta-function on a torus
+//******************************************************************
+//******************************************************************
 #endif

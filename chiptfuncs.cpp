@@ -1,6 +1,11 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
+//******************************************************************
+//******************************************************************
+//START chiPT FV functions
+//******************************************************************
+//******************************************************************
 Xifunc::Xifunc(double MLSQMIN, double MLSQMAX, int MLCOUNT, double ss) : MLsqmin(MLSQMIN), MLsqmax(MLSQMAX), MLcount(MLCOUNT), s(ss) {
     MLstep=(MLsqmax-MLsqmin)/((double)MLcount);
     
@@ -295,3 +300,66 @@ double fpiLoverfpi(double mpi, double fpi, double L){
     }
     return result;
 }
+//******************************************************************
+//******************************************************************
+//END chiPT FV functions
+//******************************************************************
+//******************************************************************
+
+
+//******************************************************************
+//******************************************************************
+//START Zeta-function on a torus
+//******************************************************************
+//******************************************************************
+double Zetafunc::integrand1(const double t){
+	return exp(t*qsq)/sqrt(t);
+}
+
+//removd pi^{3/2+l} from integrand since it will be computed often in the integral and sum
+double Zetafunc::integrand2(const double t){
+	return pow(t,-(1.5+(double)l))*exp(t*qsq)*exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
+}
+
+dcomplex Zetafunc::term2(double q2){
+	double dresult,tmp;
+	qsq=q2;
+	
+	if(l!=0) dresult=0.;
+	else{
+		tmp=2*qsq*qromb(integrand1,0.,lambda);
+		tmp-=2./sqrt(lambda)*exp(lambda*qsq);
+		dresult=gamma*pimath/2.*tmp;
+	}
+	dcomplex result(dresult,0.);
+	return result;
+}
+
+dcomplex Zetafunc::term3(double q2){
+	double tmp;
+	dcomplex result;
+	threevec<double> w,ghatw,wpar,wperp;
+	qsq=q2;
+	for(int z=-MAXRUN; z<=MAXRUN; z++){
+		w.set_coord(2)=(double)z;
+		for(int y=-MAXRUN; y<=MAXRUN; y++){
+			w.set_coord(1)=(double)y;
+			for(int x=-MAXRUN; x<=MAXRUN; x++){
+				w.set_coord(0)=(double)x;
+				orthogonal_projection(w,boostvec,wpar,wperp);
+				ghatw=gamma*wpar+wperp;
+				ghatwnorm=ghatw.norm();
+				tmp=qromb(integrand2,0.,lambda);
+				tmp*=pow(ghatwnorm,l);
+			}
+		}
+	}
+	result*=gamma*pow(pimath,(double)(1.5+l));
+	
+	return result;
+}
+//******************************************************************
+//******************************************************************
+//END Zeta-function on a torus
+//******************************************************************
+//******************************************************************
