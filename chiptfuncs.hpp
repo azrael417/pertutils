@@ -1,6 +1,7 @@
 #ifndef _CHIPTFUNCS
 #define _CHIPTFUNCS
 
+//Finite volume functions:
 class Xifunc{
 private:
   double MLsqmin, MLsqmax, MLcount, MLstep, s;
@@ -40,4 +41,18 @@ double mpiLovermpi(double mpi, double fpi, double L);
 double mkLovermk(double mpi, double mk, double fpi, double L);
 double fkLoverfk(double mpi, double fpi, double fk, double L);
 double fpiLoverfpi(double mpi, double fpi, double L);
+
+//Zeta-Function on a torus:
+class Zetafunc{
+private:
+	fourvec<double> boost;
+	double gamma,lambda;
+	int l,m;
+	
+public:
+	Zetafunc(fourvec<double> boostvec, double gammaa, int ll=0, int mm=0, double lambdaa=1.) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm) {};
+	dcomplex operator()(const double qsq);
+};
+
+
 #endif
