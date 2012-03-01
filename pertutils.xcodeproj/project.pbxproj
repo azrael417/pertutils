@@ -35,12 +35,12 @@
 		18C7933A141A6EA600680CE1 = {
 			isa = PBXGroup;
 			children = (
-				1881435B141E28A700E1F771 /* chiptfuncs.cpp */,
-				1881435C141E28A700E1F771 /* chiptfuncs.hpp */,
 				1881435D141E28A700E1F771 /* Makefile */,
 				1881435E141E28A700E1F771 /* pertutils.hpp */,
-				1881435F141E28A700E1F771 /* runnings.cpp */,
+				1881435C141E28A700E1F771 /* chiptfuncs.hpp */,
+				1881435B141E28A700E1F771 /* chiptfuncs.cpp */,
 				18814360141E28A700E1F771 /* runnings.hpp */,
+				1881435F141E28A700E1F771 /* runnings.cpp */,
 				18C64BF3141F7A7C0001F398 /* libpertutils_debug.dylib */,
 			);
 			sourceTree = "<group>";

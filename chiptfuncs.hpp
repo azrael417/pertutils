@@ -1,6 +1,11 @@
 #ifndef _CHIPTFUNCS
 #define _CHIPTFUNCS
 
+//******************************************************************
+//******************************************************************
+//START chiPT FV functions
+//******************************************************************
+//******************************************************************
 class Xifunc{
 private:
   double MLsqmin, MLsqmax, MLcount, MLstep, s;
@@ -40,4 +45,39 @@ double mpiLovermpi(double mpi, double fpi, double L);
 double mkLovermk(double mpi, double mk, double fpi, double L);
 double fkLoverfk(double mpi, double fpi, double fk, double L);
 double fpiLoverfpi(double mpi, double fpi, double L);
+//******************************************************************
+//******************************************************************
+//END chiPT FV functions
+//******************************************************************
+//******************************************************************
+
+
+//******************************************************************
+//******************************************************************
+//START Zeta-function on a torus
+//******************************************************************
+//******************************************************************
+//implementation of expression (5) in arXiv:1107.5023
+class Zetafunc{
+private:
+	threevec<double> boost;
+	double gamma,lambda, qsq, ghatwnorm;
+	int l,m;
+	int MAXRUN;
+	double integrand2(const double t);
+	dcomplex term1(double q2);
+	double term1zeroboost(double q2);
+	double term2(double q2);
+	dcomplex term3(double q2);
+	double term3zeroboost(double q2);
+	
+public:
+	Zetafunc(double gammaa, int ll=0, int mm=0, threevec<double> boostvec=threevec<double>(0.,0.,0.), double lambdaa=1., int maxrun=1000) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {};
+	dcomplex operator()(const double q2);
+};
+//******************************************************************
+//******************************************************************
+//END Zeta-function on a torus
+//******************************************************************
+//******************************************************************
 #endif
