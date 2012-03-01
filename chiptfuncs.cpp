@@ -1,6 +1,7 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
+
 //******************************************************************
 //******************************************************************
 //START chiPT FV functions
@@ -312,8 +313,13 @@ double fpiLoverfpi(double mpi, double fpi, double L){
 //START Zeta-function on a torus
 //******************************************************************
 //******************************************************************
-double Zetafunc::integrand1(const double t){
-	return exp(t*qsq)/sqrt(t);
+dcomplex Zetafunc::operator()(const double q2){
+	dcomplex result;
+	//special treatment since sums are real:
+	if(boost.norm()<1.e-9){
+		
+	}
+	return result;
 }
 
 //removd pi^{3/2+l} from integrand since it will be computed often in the integral and sum
@@ -321,36 +327,49 @@ double Zetafunc::integrand2(const double t){
 	return pow(t,-(1.5+(double)l))*exp(t*qsq)*exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
 }
 
-dcomplex Zetafunc::term2(double q2){
-	double dresult,tmp;
+//this term is proportional to Dason's Integral: term2=2/q *exp(lambda*q^2)*F(sqrt(lambda)q)
+//where F(x)=exp(-x^2) int_0^x ds exp(-s^2):
+double Zetafunc::term2(double q2){
+	double result,tmp;
 	qsq=q2;
 	
-	if(l!=0) dresult=0.;
+	if(l!=0) result=0.;
 	else{
-		tmp=2*qsq*qromb(integrand1,0.,lambda);
+		tmp=4.*sqrt(qsq)*exp(lambda*qsq)*dawson(sqrt(lambda*qsq));
 		tmp-=2./sqrt(lambda)*exp(lambda*qsq);
-		dresult=gamma*pimath/2.*tmp;
+		result=gamma*pimath/2.*tmp;
 	}
-	dcomplex result(dresult,0.);
 	return result;
 }
 
 dcomplex Zetafunc::term3(double q2){
-	double tmp;
-	dcomplex result;
+	double tmp,r,theta,phi,wdprod;
+	dcomplex result(0.,0.), tmpcomp1, tmpcomp2, tmpcomp3;
 	threevec<double> w,ghatw,wpar,wperp;
 	qsq=q2;
 	for(int z=-MAXRUN; z<=MAXRUN; z++){
-		w.set_coord(2)=(double)z;
+		w[2]=z;
 		for(int y=-MAXRUN; y<=MAXRUN; y++){
-			w.set_coord(1)=(double)y;
+			w[1]=y;
 			for(int x=-MAXRUN; x<=MAXRUN; x++){
-				w.set_coord(0)=(double)x;
-				orthogonal_projection(w,boostvec,wpar,wperp);
+				w[0]=x;
+				
+				//compute scalar product and orthogonal projection:
+				wdprod=w*boost;
+				orthogonal_projection(w,boost,wpar,wperp);
 				ghatw=gamma*wpar+wperp;
 				ghatwnorm=ghatw.norm();
+				
+				//solve the integral:
 				tmp=qromb(integrand2,0.,lambda);
 				tmp*=pow(ghatwnorm,l);
+				
+				//compute the complex parts:
+				ghatw.get_spherical_coordinates(r,theta,phi);
+				tmpcomp1=spherical_harmonicsy(l,m,theta,phi);
+				tmpcomp2(cos(pimath*wdprod),-sin(pimath*wdprod));
+				tmpcomp3=tmpcomp1*tmpcomp2*tmp;
+				result+=tmpcomp3;
 			}
 		}
 	}
