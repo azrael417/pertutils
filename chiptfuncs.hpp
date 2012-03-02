@@ -74,6 +74,8 @@ private:
 public:
 	Zetafunc(double gammaa, int ll=0, int mm=0, threevec<double> boostvec=threevec<double>(0.,0.,0.), double lambdaa=1., int maxrun=1000) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {};
 	dcomplex operator()(const double q2);
+	
+	friend double qromb(double &func, double a, double b, const double eps=1.e-10);
 };
 //******************************************************************
 //******************************************************************

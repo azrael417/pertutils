@@ -344,7 +344,7 @@ double Zetafunc::term2(double q2){
 
 dcomplex Zetafunc::term3(double q2){
 	double tmp,r,theta,phi,wdprod;
-	dcomplex result(0.,0.), tmpcomp1, tmpcomp2, tmpcomp3;
+	dcomplex result(0.,0.),tmpcomp1,tmpcomp2,tmpcomp3;
 	threevec<double> w,ghatw,wpar,wperp;
 	qsq=q2;
 	for(int z=-MAXRUN; z<=MAXRUN; z++){
