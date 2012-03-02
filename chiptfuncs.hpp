@@ -57,22 +57,54 @@ double fpiLoverfpi(double mpi, double fpi, double L);
 //START Zeta-function on a torus
 //******************************************************************
 //******************************************************************
-//implementation of expression (5) in arXiv:1107.5023
+//implementation of expression (5) in arXiv:1107.5023, first the integrand:
+struct Zetafuncint : TFunctor{
+	double qsq, ghatwnorm;
+	int l;
+	bool improved;
+	Zetafuncint() : improved(false){};
+	Zetafuncint(const double q2, const double ghatw, const int lval, const bool imprvd=false) : qsq(q2), ghatwnorm(ghatw), l(lval), improved(imprvd){};
+	void set(const double q2, const double ghatw, const int lval, const bool imprvd=false){
+		qsq=q2;
+		ghatwnorm=ghatw;
+		l=lval;
+		improved=imprvd;
+	}
+	double operator()(const double t){
+		if(!improved) return pow(t,-(1.5+(double)l))*exp(t*qsq)*exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
+		else return pow(t,-1.5)*exp(t*qsq)*pow((EllipticTheta(pimath*pimath/t)-1.),3);
+	};
+};
+
 class Zetafunc{
 private:
 	threevec<double> boost;
-	double gamma,lambda, qsq, ghatwnorm;
+	bool is_zeroboost, is_improved;
+	double gamma,lambda;
 	int l,m;
 	int MAXRUN;
-	double integrand2(const double t);
-	dcomplex term1(double q2);
-	double term1zeroboost(double q2);
-	double term2(double q2);
-	dcomplex term3(double q2);
-	double term3zeroboost(double q2);
+	//double integrand2(const double t);
+	Zetafuncint integrand2;
+	dcomplex term1(const double q2);
+	double term1zeroboost(const double q2);
+	double term2(const double q2);
+	dcomplex term3(const double q2);
+	double term3zeroboost(const double q2);
 	
 public:
-	Zetafunc(double gammaa, int ll=0, int mm=0, threevec<double> boostvec=threevec<double>(0.,0.,0.), double lambdaa=1., int maxrun=1000) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {};
+	Zetafunc(const int ll=0, const int mm=0, const double gammaa=1., const threevec<double> boostvec=threevec<double>(0.,0.,0.), const double lambdaa=1., const int maxrun=1000) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {
+		if(fabs(boost.norm()<1.e-9)){
+			gamma=1.;
+			is_zeroboost=true;
+			if(l==m==0){
+				is_improved=true;
+			}
+		}
+		else{
+			is_zeroboost=false;
+			is_improved=false;
+		}
+	};
 	dcomplex operator()(const double q2);
 	
 	friend double qromb(double &func, double a, double b, const double eps=1.e-10);
