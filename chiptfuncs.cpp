@@ -313,17 +313,21 @@ double fpiLoverfpi(double mpi, double fpi, double L){
 //START Zeta-function on a torus
 //******************************************************************
 //******************************************************************
+void Zetafunc::set_numterms_sum(const int maxrun){
+	MAXRUN=maxrun;
+}
+
 dcomplex Zetafunc::operator()(const double q2){
 	dcomplex result;
 	//special treatment since sums are real:
 	if(is_zeroboost){
-		double dresult=term1zeroboost(q2)+term3zeroboost(q2);
+		double dresult=term1zeroboost(q2);//+term3zeroboost(q2);
 		result(dresult,0.);
 	}
 	else{
-		result=term1(q2)+term3(q2);
+		result=term1(q2);//+term3(q2);
 	}
-	result+=term2(q2);
+	//result+=term2(q2);
 	
 	return result;
 }
@@ -361,30 +365,63 @@ double Zetafunc::term1zeroboost(const double q2){
 	double result=0.,rsq,theta,phi,fact;
 	threevec<double> nvec;
 	
-	for(int z=-MAXRUN; z<=MAXRUN; z++){
-		for(int x=-MAXRUN; x<=MAXRUN; x++){
-			//y=0 treatet first:
-			nvec((double)x,0.,(double)z);
-			
-			nvec.get_spherical_coordinates(rsq,theta,phi);
-			fact=pow(rsq,l); //compute |r|^l
-			rsq*=rsq; //compute r^2
-			fact*=exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
-			fact*=plegendre(l,m,cos(theta)); //multiply with real part of spherical harmonics
-			result+=fact;
-			
-			//y=-K and +k treated in single term
-			for(int y=1; y<=MAXRUN; y++){ //adding phi and -phi together to obtain real valued output!
-				nvec((double)x,(double)y,(double)z);
+	if(!is_improved){
+		for(int z=-MAXRUN; z<=MAXRUN; z++){
+			for(int x=-MAXRUN; x<=MAXRUN; x++){
+				//y=0 treatet first:
+				nvec((double)x,0.,(double)z);
 				
 				nvec.get_spherical_coordinates(rsq,theta,phi);
 				fact=pow(rsq,l); //compute |r|^l
 				rsq*=rsq; //compute r^2
 				fact*=exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
-				fact*=2.*cos((double)m*phi)*plegendre(l,m,cos(theta)); //multiply with real part of spherical harmonics
+				fact*=plegendre(l,m,cos(theta)); //multiply with real part of spherical harmonics
 				result+=fact;
+				
+				//y=-K and +k treated in single term
+				for(int y=1; y<=MAXRUN; y++){ //adding phi and -phi together to obtain real valued output!
+					nvec((double)x,(double)y,(double)z);
+					
+					nvec.get_spherical_coordinates(rsq,theta,phi);
+					fact=pow(rsq,l); //compute |r|^l
+					rsq*=rsq; //compute r^2
+					fact*=exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
+					fact*=2.*cos((double)m*phi)*plegendre(l,m,cos(theta)); //multiply with real part of spherical harmonics
+					result+=fact;
+				}
 			}
 		}
+	}
+	else{
+		//zero term:
+		result=-exp(lambda*q2)/q2;
+		
+		//x!=0, y=z=0, 3 times for different combinations (replace x e.g. with y) and factor 2 for +/-:
+		for(int x=1; x<=MAXRUN; x++){
+			rsq=x*x;
+			result+=6.*exp(-lambda*(rsq-q2))/(rsq-q2)*pow(fabs(x),l);
+		}
+		
+		//x,y!=0,z=0, 3 times for different combinations and factor 4 for +/-:
+		for(int x=1; x<=MAXRUN; x++){
+			for(int y=1; y<=MAXRUN; y++){
+				rsq=x*x+y*y;
+				result+=12.*exp(-lambda*(rsq-q2))/(rsq-q2)*pow(sqrt(rsq),l);
+			}
+		}
+		
+		//x,y,z!=0,z=0 and factor 8 for +/-:
+		for(int x=1; x<=MAXRUN; x++){
+			for(int y=1; y<=MAXRUN; y++){
+				for(int z=1; z<=MAXRUN; z++){
+					rsq=x*x+y*y+z*z;
+					fact=pow(sqrt(rsq),l); //compute |r|^l
+					fact*=8.*exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
+					result+=fact;
+				}
+			}
+		}
+		result/=sqrt(4.*pimath);
 	}
 	return result;
 }
