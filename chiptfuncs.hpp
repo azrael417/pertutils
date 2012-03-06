@@ -79,37 +79,35 @@ struct Zetafuncint : TFunctor{
 class Zetafunc{
 private:
 	threevec<double> boost;
-	bool is_zeroboost, is_improved;
+	bool is_improved, is_zeroboost;
 	double gamma,lambda;
 	int l,m;
 	int MAXRUN;
-	//double integrand2(const double t);
 	Zetafuncint integrand2;
 	dcomplex term1(const double q2);
-	double term1zeroboost(const double q2);
+	double term1improved(const double q2);
 	double term2(const double q2);
 	dcomplex term3(const double q2);
-	double term3zeroboost(const double q2);
+	double term3improved(const double q2);
 	
 public:
 	Zetafunc(const int ll=0, const int mm=0, const double gammaa=1., const threevec<double> boostvec=threevec<double>(0.,0.,0.), const double lambdaa=1., const int maxrun=10) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {
-		if(fabs(boost.norm()<1.e-9)){
-			gamma=1.;
-			is_zeroboost=true;
-			is_improved=false;
-			if( (l==0) && (m==0) ){
-				is_improved=true;
-			}
+		if( (l==0) && (m==0) ){
+			is_improved=true;
 		}
 		else{
-			is_zeroboost=false;
 			is_improved=false;
 		}
+		if(boost.norm()<1.e-9){
+			is_zeroboost=true;
+			gamma=1.;
+		}
+		else is_zeroboost=false;
 	};
 	dcomplex operator()(const double q2);
 	void set_numterms_sum(const int run);
 	
-	friend double qromb(double &func, double a, double b, const double eps=1.e-10);
+	friend double qromb(double &func, double a, double b, const double eps);
 };
 //******************************************************************
 //******************************************************************
