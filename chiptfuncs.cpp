@@ -317,6 +317,16 @@ void Zetafunc::set_numterms_sum(const int maxrun){
 	MAXRUN=maxrun;
 }
 
+void Zetafunc::set_boost(const threevec<double> boostvec, const double gammaa){
+	boost=boostvec;
+	gamma=gammaa;
+	if(boost.norm()<1.e-9){
+		is_zeroboost=true;
+		gamma=1.;
+	}
+	else is_zeroboost=false;
+}
+
 dcomplex Zetafunc::operator()(const double q2){
 	dcomplex result;
 	//special treatment since sums are real:

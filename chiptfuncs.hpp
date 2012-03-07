@@ -106,6 +106,7 @@ public:
 	};
 	dcomplex operator()(const double q2);
 	void set_numterms_sum(const int run);
+	void set_boost(const threevec<double> boostvec, const double gammaa);
 	
 	friend double qromb(double &func, double a, double b, const double eps);
 };
