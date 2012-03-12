@@ -313,67 +313,175 @@ double fpiLoverfpi(double mpi, double fpi, double L){
 //START Zeta-function on a torus
 //******************************************************************
 //******************************************************************
+void Zetafunc::set_numterms_sum(const int maxrun){
+	MAXRUN=maxrun;
+}
+
+void Zetafunc::set_boost(const threevec<double> boostvec, const double gammaa){
+	boost=boostvec;
+	gamma=gammaa;
+	if(boost.norm()<1.e-9){
+		is_zeroboost=true;
+		gamma=1.;
+	}
+	else is_zeroboost=false;
+}
+
 dcomplex Zetafunc::operator()(const double q2){
 	dcomplex result;
 	//special treatment since sums are real:
-	if(boost.norm()<1.e-9){
-		
+	if(is_improved){
+		double dresult=term1improved(q2)+term3improved(q2);
+		result(dresult,0.);
 	}
+	else{
+		result=term1(q2)+term3(q2);
+	}
+	result+=term2(q2);
+	
 	return result;
 }
 
-//removd pi^{3/2+l} from integrand since it will be computed often in the integral and sum
-double Zetafunc::integrand2(const double t){
-	return pow(t,-(1.5+(double)l))*exp(t*qsq)*exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
+//this is term1, which is the simple sum:
+dcomplex Zetafunc::term1(const double q2){
+	dcomplex result(0.,0.),tmpcomp;
+	double fact,rsq,theta,phi;
+	threevec<double> nvec,npar,nperp,rvec;
+	
+	for(int z=-MAXRUN; z<=MAXRUN; z++){
+		for(int y=-MAXRUN; y<=MAXRUN; y++){
+			for(int x=-MAXRUN; x<=MAXRUN; x++){
+				nvec((double)x,(double)y,(double)z);
+				
+				//compute r:
+				if(!is_zeroboost){
+					orthogonal_projection(nvec,boost,npar,nperp);
+					rvec=npar/gamma-boost/(2.*gamma)+nperp;
+				}
+				else{
+					rvec=nvec;
+				}
+				rvec.get_spherical_coordinates(rsq,theta,phi);
+				if(l!=0)fact=pow(rsq,l); //compute |r|^l
+				else fact=1.;
+				rsq*=rsq; //compute r^2
+				
+				//compute prefact:
+				fact*=exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
+				tmpcomp=fact*spherical_harmonicy(l,m,theta,phi); //multiply with spherical harmonics
+				result+=tmpcomp;
+			}
+		}
+	}
+	
+	return result;
 }
 
-//this term is proportional to Dason's Integral: term2=2/q *exp(lambda*q^2)*F(sqrt(lambda)q)
-//where F(x)=exp(-x^2) int_0^x ds exp(-s^2):
-double Zetafunc::term2(double q2){
-	double result,tmp;
-	qsq=q2;
+double Zetafunc::term1improved(const double q2){
+	double result=0.,rsq;
+	threevec<double> nvec;
 	
-	if(l!=0) result=0.;
-	else{
-		tmp=4.*sqrt(qsq)*exp(lambda*qsq)*dawson(sqrt(lambda*qsq));
-		tmp-=2./sqrt(lambda)*exp(lambda*qsq);
+	//zero term:
+	result=-exp(lambda*q2)/q2;
+	
+	//x!=0, y=z=0, 3 times for different combinations (replace x e.g. with y) and factor 2 for +/-:
+	for(int x=1; x<=MAXRUN; x++){
+		rsq=x*x;
+		result+=6.*exp(-lambda*(rsq-q2))/(rsq-q2)*pow(fabs(x),l);
+	}
+	
+	//x,y!=0,z=0, 3 times for different combinations and factor 4 for +/-:
+	for(int x=1; x<=MAXRUN; x++){
+		for(int y=1; y<=MAXRUN; y++){
+			rsq=x*x+y*y;
+			result+=12.*exp(-lambda*(rsq-q2))/(rsq-q2)*pow(sqrt(rsq),l);
+		}
+	}
+	
+	//x,y,z!=0 and factor 8 for +/-:
+	for(int x=1; x<=MAXRUN; x++){
+		for(int y=1; y<=MAXRUN; y++){
+			for(int z=1; z<=MAXRUN; z++){
+				rsq=x*x+y*y+z*z;
+				result+=8.*exp(-lambda*(rsq-q2))/(rsq-q2)*pow(sqrt(rsq),l); //compute the ratio
+			}
+		}
+	}
+	result/=sqrt(4.*pimath);
+
+	return result;
+}
+
+//this term is proportional to Dawson's Integral: term2=2/q *exp(lambda*q^2)*F(sqrt(lambda)q)
+//where F(x)=exp(-x^2) int_0^x ds exp(-s^2):
+double Zetafunc::term2(const double q2){
+	double result=0.,tmp;
+	
+	if(l==0){
+		tmp=4.*sqrt(q2)*exp(lambda*q2)*dawson(sqrt(lambda*q2));
+		tmp-=2./sqrt(lambda)*exp(lambda*q2);
 		result=gamma*pimath/2.*tmp;
 	}
 	return result;
 }
 
-dcomplex Zetafunc::term3(double q2){
-	double tmp,r,theta,phi,wdprod;
-	dcomplex result(0.,0.), tmpcomp1, tmpcomp2, tmpcomp3;
-	threevec<double> w,ghatw,wpar,wperp;
-	qsq=q2;
+dcomplex Zetafunc::term3(const double q2){
+	double tmp,r,theta,phi,wdprod,ghatwnorm;
+	dcomplex result(0.,0.),tmpcomp1,tmpcomp2,tmpcomp3;
+	threevec<double> wvec,ghatw,wpar,wperp;
+	
 	for(int z=-MAXRUN; z<=MAXRUN; z++){
-		w[2]=z;
 		for(int y=-MAXRUN; y<=MAXRUN; y++){
-			w[1]=y;
 			for(int x=-MAXRUN; x<=MAXRUN; x++){
-				w[0]=x;
+				if( (x==0) && (y==0) && (z==0) ) continue; //exclude zero!
+				wvec((double)x,(double)y,(double)z);
 				
 				//compute scalar product and orthogonal projection:
-				wdprod=w*boost;
-				orthogonal_projection(w,boost,wpar,wperp);
-				ghatw=gamma*wpar+wperp;
+				if(!is_zeroboost){
+					orthogonal_projection(wvec,boost,wpar,wperp);
+					ghatw=gamma*wpar+wperp;
+				}
+				else{
+					ghatw=wvec;
+				}
 				ghatwnorm=ghatw.norm();
 				
 				//solve the integral:
-				tmp=qromb(integrand2,0.,lambda);
-				tmp*=pow(ghatwnorm,l);
+				integrand2.set(q2,ghatwnorm,l);
+				Midpnt<TFunctor> int2(integrand2,0.,lambda);
+				tmp=qromo(int2);
+				if(l!=0) tmp*=pow(ghatwnorm,l);
 				
 				//compute the complex parts:
 				ghatw.get_spherical_coordinates(r,theta,phi);
-				tmpcomp1=spherical_harmonicsy(l,m,theta,phi);
-				tmpcomp2(cos(pimath*wdprod),-sin(pimath*wdprod));
+				tmpcomp1=spherical_harmonicy(l,m,theta,phi);
+				//exip(-ipi w*d)-term
+				if(!is_zeroboost){
+					wdprod=wvec*boost;
+					tmpcomp2(cos(pimath*wdprod),-sin(pimath*wdprod));
+				}
+				else tmpcomp2(1.,0.);
 				tmpcomp3=tmpcomp1*tmpcomp2*tmp;
 				result+=tmpcomp3;
 			}
 		}
 	}
 	result*=gamma*pow(pimath,(double)(1.5+l));
+	
+	return result;
+}
+
+double Zetafunc::term3improved(const double q2){
+	double result=0.,integral;
+	threevec<double> wvec;
+	
+	//double wrapper since lower integration boundary is a singularity:
+	integrand2.set(q2,0.,0,is_improved);
+	Midpnt<TFunctor> int2(integrand2,0.,lambda);
+	integral=qromo(int2);
+	
+	//multiply integral with stuff:	
+	result=pimath*integral/2.;
 	
 	return result;
 }
