@@ -320,7 +320,7 @@ void Zetafunc::set_numterms_sum(const int maxrun){
 void Zetafunc::set_boost(const threevec<double> boostvec, const double gammaa){
 	boost=boostvec;
 	gamma=gammaa;
-	if(boost.norm()<1.e-9){
+	if(boost.norm()<1.e-5){
 		is_zeroboost=true;
 		gamma=1.;
 	}
