@@ -330,7 +330,7 @@ void Zetafunc::set_boost(const threevec<double> boostvec, const double gammaa){
 dcomplex Zetafunc::operator()(const double q2){
 	dcomplex result;
 	//special treatment since sums are real:
-	if(is_improved){
+	if(is_improved && is_zeroboost){
 		double dresult=term1improved(q2)+term3improved(q2);
 		result(dresult,0.);
 	}
