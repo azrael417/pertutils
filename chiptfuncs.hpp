@@ -81,6 +81,7 @@ private:
 	threevec<double> boost;
 	bool is_improved, is_zeroboost;
 	double gamma,lambda;
+    dcomplex term1val,term2val,term3val;
 	int l,m;
 	int MAXRUN;
 	Zetafuncint integrand2;
@@ -103,11 +104,16 @@ public:
 			gamma=1.;
 		}
 		else is_zeroboost=false;
+        
+        term1val(0.,0.);
+        term2val(0.,0.);
+        term3val(0.,0.);
 	};
 	dcomplex operator()(const double q2);
 	void set_numterms_sum(const int run);
 	void set_boost(const threevec<double> boostvec, const double gammaa);
-	
+	void print_contributions();
+    
 	friend double qromb(double &func, double a, double b, const double eps);
 };
 //******************************************************************

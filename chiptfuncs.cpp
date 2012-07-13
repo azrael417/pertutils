@@ -331,15 +331,25 @@ dcomplex Zetafunc::operator()(const double q2){
 	dcomplex result;
 	//special treatment since sums are real:
 	if(is_improved && is_zeroboost){
-		double dresult=term1improved(q2)+term3improved(q2);
-		result(dresult,0.);
+        term1val(term1improved(q2),0.);
+        term3val(term3improved(q2),0.);
 	}
 	else{
-		result=term1(q2)+term3(q2);
+        term1val=term1(q2);
+        term3val=term3(q2);
 	}
-	result+=term2(q2);
+    term2val=term2(q2);
+    
+    result=term1val+term2val+term3val;
 	
 	return result;
+}
+
+void Zetafunc::print_contributions(){
+    std::cout << "Printing contributions from individual terms!" << std::endl;
+    std::cout << "term1= " << term1val << std::endl;
+    std::cout << "term2= " << term2val << std::endl;
+    std::cout << "term3= " << term3val << std::endl;
 }
 
 //this is term1, which is the simple sum:
