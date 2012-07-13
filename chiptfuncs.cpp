@@ -341,7 +341,8 @@ dcomplex Zetafunc::operator()(const double q2){
         term1val=term1(q2);
         term3val=term3(q2);
 	}
-    term2val=term2(q2);
+    tmp=term2(q2);
+    term2val(tmp,0.);
     
     result=term1val+term2val+term3val;
 	
