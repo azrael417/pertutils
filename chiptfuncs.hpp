@@ -71,7 +71,7 @@ struct Zetafuncint : TFunctor{
 		improved=imprvd;
 	}
 	double operator()(const double t){
-		if(!improved) return pow(t,-(1.5+(double)l))*exp(t*qsq)*exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
+		if(!improved) return pow(t,-(1.5+static_cast<double>(l)))*exp(t*qsq)*exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
 		else return pow(t,-1.5)*exp(t*qsq)*pow((EllipticTheta(pimath*pimath/t)-1.),3);
 	};
 };

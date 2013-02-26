@@ -8,13 +8,13 @@
 //******************************************************************
 //******************************************************************
 Xifunc::Xifunc(double MLSQMIN, double MLSQMAX, int MLCOUNT, double ss) : MLsqmin(MLSQMIN), MLsqmax(MLSQMAX), MLcount(MLCOUNT), s(ss) {
-    MLstep=(MLsqmax-MLsqmin)/((double)MLcount);
+    MLstep=(MLsqmax-MLsqmin)/(static_cast<double>(MLcount));
     
     xvec.clear();
     yvec.clear();
     double MLsq, dummy;
     for(int i=0; i<=MLcount; i++){
-        MLsq=MLsqmin+(double)i*MLstep;
+        MLsq=MLsqmin+static_cast<double>(i)*MLstep;
         xvec.push_back(MLsq);
         dummy=Xifuncnorm(MLsq,s);
         yvec.push_back(dummy);
@@ -138,12 +138,12 @@ double Xifuncnorm(double MLsq, double s, int flag){
 //Stephan Dürrs functions:
 double Ikfunc2(int n, double mpiL){
     Bessik bessel;
-    return -1.5*bessel.k1(sqrt((double)n)*mpiL);
+    return -1.5*bessel.k1(sqrt(static_cast<double>(n))*mpiL);
 }
 
 double Ipifunc2(int n, double mpiL){
     Bessik bessel;
-    return -4.*bessel.k1(sqrt((double)n)*mpiL);
+    return -4.*bessel.k1(sqrt(static_cast<double>(n))*mpiL);
 }
 
 double mpiLovermpi(double mpi, double fpi, double L){
@@ -155,7 +155,7 @@ double mpiLovermpi(double mpi, double fpi, double L){
     
     double sn=1.;
     for(int n=1; n<=nup; n++){
-        sn+=(-1.)*(double)multiplicities[n]*mpi/(32.*fpi*fpi*pimath*pimath*sqrt((double)n)*L)*Ipifunc2(n,mpi*L);
+        sn+=(-1.)*static_cast<double>(multiplicities[n])*mpi/(32.*fpi*fpi*pimath*pimath*sqrt(static_cast<double>(n))*L)*Ipifunc2(n,mpi*L);
     }
     
     //Levin u transformation:
@@ -167,9 +167,9 @@ double mpiLovermpi(double mpi, double fpi, double L){
             continue;
         }
         else{
-            an=(-1.)*(double)multiplicities[nrun]*mpi/(32.*fpi*fpi*pimath*pimath*sqrt((double)nrun)*L)*Ipifunc2(nrun,mpi*L);
+            an=(-1.)*static_cast<double>(multiplicities[nrun])*mpi/(32.*fpi*fpi*pimath*pimath*sqrt(static_cast<double>(nrun))*L)*Ipifunc2(nrun,mpi*L);
             sn+=an;
-            omegan=(beta+(double)nrun)*an;
+            omegan=(beta+static_cast<double>(nrun))*an;
             result=acc.next(sn,omegan);
             nrun++;
         }
@@ -179,7 +179,7 @@ double mpiLovermpi(double mpi, double fpi, double L){
     if(isnan(result)){
         result=1.;
         for(int n=1; n<=nmax; n++){
-            result+=(-1.)*(double)multiplicities[n]*mpi/(32.*fpi*fpi*pimath*pimath*sqrt((double)n)*L)*Ipifunc2(n,mpi*L);
+            result+=(-1.)*static_cast<double>(multiplicities[n])*mpi/(32.*fpi*fpi*pimath*pimath*sqrt(static_cast<double>(n))*L)*Ipifunc2(n,mpi*L);
         }
     }
     return result;
@@ -194,7 +194,7 @@ double mkLovermk(double mpi, double mk, double fpi, double L){
     
     double sn=1.;
     for(int n=1; n<=nup; n++){
-        sn+=(-1.)*(double)multiplicities[n]*mpi*mpi/(32.*mk*fpi*fpi*pimath*pimath*sqrt((double)n)*L)*Ikfunc2(n,mpi*L);
+        sn+=(-1.)*static_cast<double>(multiplicities[n])*mpi*mpi/(32.*mk*fpi*fpi*pimath*pimath*sqrt(static_cast<double>(n))*L)*Ikfunc2(n,mpi*L);
     }
     
     //Levin u transformation:
@@ -206,9 +206,9 @@ double mkLovermk(double mpi, double mk, double fpi, double L){
             continue;
         }
         else{
-            an=(-1.)*(double)multiplicities[nrun]*mpi*mpi/(32.*mk*fpi*fpi*pimath*pimath*sqrt((double)nrun)*L)*Ikfunc2(nrun,mpi*L);
+            an=(-1.)*static_cast<double>(multiplicities[nrun])*mpi*mpi/(32.*mk*fpi*fpi*pimath*pimath*sqrt(static_cast<double>(nrun))*L)*Ikfunc2(nrun,mpi*L);
             sn+=an;
-            omegan=(beta+(double)nrun)*an;
+            omegan=(beta+static_cast<double>(nrun))*an;
             result=acc.next(sn,omegan);
             nrun++;
         }
@@ -218,7 +218,7 @@ double mkLovermk(double mpi, double mk, double fpi, double L){
     if(isnan(result)){
         result=1.;
         for(int n=1; n<=nmax; n++){
-            result+=(-1.)*(double)multiplicities[n]*mpi*mpi/(32.*mk*fpi*fpi*pimath*pimath*sqrt((double)n)*L)*Ikfunc2(n,mpi*L);
+            result+=(-1.)*static_cast<double>(multiplicities[n])*mpi*mpi/(32.*mk*fpi*fpi*pimath*pimath*sqrt(static_cast<double>(n))*L)*Ikfunc2(n,mpi*L);
         }
     }
     return result;
@@ -233,7 +233,7 @@ double fkLoverfk(double mpi, double fpi, double fk, double L){
     
     double sn=1.;
     for(int n=1; n<=nup; n++){
-        sn+=(double)multiplicities[n]*mpi/(16*pimath*pimath*fk*fpi*sqrt((double)n)*L)*Ikfunc2(n,mpi*L);
+        sn+=static_cast<double>(multiplicities[n])*mpi/(16*pimath*pimath*fk*fpi*sqrt(static_cast<double>(n))*L)*Ikfunc2(n,mpi*L);
     }
     
     //Levin u transformation:                                                                                                                                                        
@@ -245,9 +245,9 @@ double fkLoverfk(double mpi, double fpi, double fk, double L){
             continue;
         }
         else{
-            an=(double)multiplicities[nrun]*mpi/(16*pimath*pimath*fk*fpi*sqrt((double)nrun)*L)*Ikfunc2(nrun,mpi*L);
+            an=static_cast<double>(multiplicities[nrun])*mpi/(16*pimath*pimath*fk*fpi*sqrt(static_cast<double>(nrun))*L)*Ikfunc2(nrun,mpi*L);
             sn+=an;
-            omegan=(beta+(double)nrun)*an;
+            omegan=(beta+static_cast<double>(nrun))*an;
             result=acc.next(sn,omegan);
             nrun++;
         }
@@ -257,7 +257,7 @@ double fkLoverfk(double mpi, double fpi, double fk, double L){
     if(isnan(result)){
         result=1.;
         for(int n=1; n<=nmax; n++){
-            result+=(double)multiplicities[n]*mpi/(16*pimath*pimath*fk*fpi*sqrt((double)n)*L)*Ikfunc2(n,mpi*L);
+            result+=static_cast<double>(multiplicities[n])*mpi/(16*pimath*pimath*fk*fpi*sqrt(static_cast<double>(n))*L)*Ikfunc2(n,mpi*L);
         }
     }
     return result;
@@ -272,7 +272,7 @@ double fpiLoverfpi(double mpi, double fpi, double L){
     
     double sn=1.;
     for(int n=1; n<=nup; n++){
-        sn+=(double)multiplicities[n]*mpi/(16*pimath*pimath*fpi*fpi*sqrt((double)n)*L)*Ipifunc2(n,mpi*L);
+        sn+=static_cast<double>(multiplicities[n])*mpi/(16*pimath*pimath*fpi*fpi*sqrt(static_cast<double>(n))*L)*Ipifunc2(n,mpi*L);
     }
     
     //Levin u transformation:
@@ -284,9 +284,9 @@ double fpiLoverfpi(double mpi, double fpi, double L){
             continue;
         }
         else{
-            an=(double)multiplicities[nrun]*mpi/(16*pimath*pimath*fpi*fpi*sqrt((double)nrun)*L)*Ipifunc2(nrun,mpi*L);
+            an=static_cast<double>(multiplicities[nrun])*mpi/(16*pimath*pimath*fpi*fpi*sqrt(static_cast<double>(nrun))*L)*Ipifunc2(nrun,mpi*L);
             sn+=an;
-            omegan=(beta+(double)nrun)*an;
+            omegan=(beta+static_cast<double>(nrun))*an;
             result=acc.next(sn,omegan);
             nrun++;
         }
@@ -296,7 +296,7 @@ double fpiLoverfpi(double mpi, double fpi, double L){
     if(isnan(result)){
         result=1.;
         for(int n=1; n<=nmax; n++){
-            result+=(double)multiplicities[n]*mpi/(16*pimath*pimath*fpi*fpi*sqrt((double)n)*L)*Ipifunc2(n,mpi*L);
+            result+=static_cast<double>(multiplicities[n])*mpi/(16*pimath*pimath*fpi*fpi*sqrt(static_cast<double>(n))*L)*Ipifunc2(n,mpi*L);
         }
     }
     return result;
@@ -365,7 +365,7 @@ dcomplex Zetafunc::term1(const double q2){
 	for(int z=-MAXRUN; z<=MAXRUN; z++){
 		for(int y=-MAXRUN; y<=MAXRUN; y++){
 			for(int x=-MAXRUN; x<=MAXRUN; x++){
-				nvec((double)x,(double)y,(double)z);
+				nvec(static_cast<double>(x),static_cast<double>(y),static_cast<double>(z));
 				
 				//compute r:
 				if(!is_zeroboost){
@@ -448,7 +448,7 @@ dcomplex Zetafunc::term3(const double q2){
 		for(int y=-MAXRUN; y<=MAXRUN; y++){
 			for(int x=-MAXRUN; x<=MAXRUN; x++){
 				if( (x==0) && (y==0) && (z==0) ) continue; //exclude zero!
-				wvec((double)x,(double)y,(double)z);
+				wvec(static_cast<double>(x),static_cast<double>(y),static_cast<double>(z));
 				
 				//compute scalar product and orthogonal projection:
 				if(!is_zeroboost){
@@ -480,7 +480,7 @@ dcomplex Zetafunc::term3(const double q2){
 			}
 		}
 	}
-	result*=gamma*pow(pimath,(double)(1.5+l));
+	result*=gamma*pow(pimath,static_cast<double>(1.5+l));
 	
 	return result;
 }

@@ -110,7 +110,7 @@ alpha::alpha(double MUMIN, double MUMAX, int MUCOUNT, int NF, int LO, int id) : 
 
 void alpha::perform_integration(double astart, double rmin, double rmax, int stepcount){
     std::vector<double> avector(1);
-    double rstep=(rmax-rmin)/((double)stepcount);
+    double rstep=(rmax-rmin)/(static_cast<double>(stepcount));
     avector[0]=astart;
     Output out(stepcount);
     
@@ -353,7 +353,7 @@ double alpha::alpha_step_from_mz(double rmin){
         set_betavec();
         
         //integrate:
-        nsteps=(int)lround(fabs(rup-rdown)*1.e2);
+        nsteps=static_cast<int>(lround(fabs(rup-rdown)*1.e2));
         perform_integration(astart,rup,rdown,nsteps);
         
         //update starting values:
@@ -371,19 +371,23 @@ double alpha::alpha_step_from_mz(double rmin){
 
 //QCD Beta-function at 4-loop (hep-ph/9910332,p.20, 72):
 double alpha::betazero(){
-	return (11.-2.*(double)numflavours/3.)/4.;
+    double nf=static_cast<double>(numflavours);
+	return (11.-2.*nf/3.)/4.;
 }
 
 double alpha::betaone(){
-	return (102.-38.*(double)numflavours/3.)/16.;
+    double nf=static_cast<double>(numflavours);
+	return (102.-38.*nf/3.)/16.;
 }
 
 double alpha::betatwo(){
-	return (2857./2.-5033.*(double)numflavours/18.+325.*(double)numflavours*(double)numflavours/54.)/64.;
+    double nf=static_cast<double>(numflavours);
+	return (2857./2.-5033.*nf/18.+325.*nf*nf/54.)/64.;
 }
 
 double alpha::betathree(){
-	return (149753./6.+3564.*zeta3-(1078361./162.+6508.*zeta3/27.)*(double)numflavours+(50065./162.+6472.*zeta3/81.)*(double)numflavours*(double)numflavours+1093./729.*(double)numflavours*(double)numflavours*(double)numflavours)/256.;
+    double nf=static_cast<double>(numflavours);
+	return (149753./6.+3564.*zeta3-(1078361./162.+6508.*zeta3/27.)*nf+(50065./162.+6472.*zeta3/81.)*nf*nf+1093./729.*nf*nf*nf)/256.;
 }
 
 double alpha::betafunc(double a){
@@ -397,7 +401,7 @@ double alpha::betafunc(double a){
 double alpha::pdbetafunc(double a){
 	double result=0.0;
 	for(unsigned int i=0; i<betavec.size(); i++){
-		result-=(double)(i+2)*betavec[i]*pow(a,(i+1));
+		result-=static_cast<double>(i+2)*betavec[i]*pow(a,(i+1));
 	}
 	return result;
 }
@@ -410,7 +414,7 @@ double alpha::dbetafunc(double a){
 double alpha::pd2betafunc(double a){
 	double result=0.0;
 	for(unsigned int i=0; i<betavec.size(); i++){
-		result-=(double)(i+2)*(i+1)*betavec[i]*pow(a,i);
+		result-=static_cast<double>((i+2)*(i+1))*betavec[i]*pow(a,i);
 	}
 	return result;
 }
