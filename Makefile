@@ -94,6 +94,7 @@ endif
 CFLAGS = ${DEFINES} ${MYINCLUDEDIR} ${FLAGS} ${OPT}
 
 all::
+	${CC} ${CFLAGS} -c gamma.cpp -o gamma.o ${LIBADD}
 	${CC} ${CFLAGS} -c runnings.cpp -o runnings.o ${LIBADD}
 	${CC} ${CFLAGS} -c chiptfuncs.cpp -o chiptfuncs.o ${LIBADD}
 	${LD} ${LINK}
