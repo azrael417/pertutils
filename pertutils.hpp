@@ -10,6 +10,7 @@
 #ifndef _PERTUTILS
 #define _PERTUTILS
 
+#include "gamma.hpp"
 #include "runnings.hpp"
 #include "chiptfuncs.hpp"
 #endif
