@@ -47,7 +47,7 @@ endif
 
 #Compiler Optimization Level:
 ifeq ($(ARCH),INTEL)
-OPT              = -O2 -xCORE-AVX2 -ipo
+OPT              = -O2 -march=corei7-avx -ipo
 FLAGS            = -fPIC -Wall -debug
 LD               = icpc
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
