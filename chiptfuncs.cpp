@@ -159,7 +159,7 @@ double mpiLovermpi(double mpi, double fpi, double L){
     }
     
     //Levin u transformation:
-    double result, omegan, an;
+    double result=0., omegan, an;
     int nrun=nup+1;
     while( (!acc.cnvgd) && ((nrun-(nup+1))<nmax) ){
         if(multiplicities[nrun]==0){
@@ -198,7 +198,7 @@ double mkLovermk(double mpi, double mk, double fpi, double L){
     }
     
     //Levin u transformation:
-    double result, omegan, an;
+    double result=0., omegan, an;
     int nrun=nup+1;
     while( (!acc.cnvgd) && ((nrun-(nup+1))<nmax) ){
         if(multiplicities[nrun]==0){
@@ -237,7 +237,7 @@ double fkLoverfk(double mpi, double fpi, double fk, double L){
     }
     
     //Levin u transformation:                                                                                                                                                        
-    double result, omegan, an;
+    double result=0., omegan, an;
     int nrun=nup+1;
     while( (!acc.cnvgd) && ((nrun-(nup+1))<nmax) ){
         if(multiplicities[nrun]==0){

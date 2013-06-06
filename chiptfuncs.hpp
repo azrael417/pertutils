@@ -34,7 +34,7 @@ class Xifuncintegrandtransformed : public TFunctor{
   double operator()(const double t);
 };
 
-double Xifuncintegrand(double tau, double MLsq,  double s);
+double Xifuncintegrand(double tau, double MLsq, double s);
 double Xifuncnorm(double,double,int flag=0);
 
 //Colangelo+Stephan
