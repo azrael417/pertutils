@@ -23,6 +23,7 @@ enum flavour{
 
 //struct which identifies a quark inside the baryon:
 typedef struct{
+    bool isextern;
     flavour flavourid;
     unsigned int spinid;
     unsigned int colorid;
