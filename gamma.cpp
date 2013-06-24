@@ -91,3 +91,37 @@ NRmatrix<dcomplex> get_gamma(const gamma_id gid){
     }
     return result;
 }
+
+NRmatrix<dcomplex> get_polarization(const polarization_id pid){
+    NRmatrix<dcomplex> result(4,4,0.);
+    
+    switch(pid){
+        case UPDOWNAV:
+            result[0][0]=0.5;
+            result[1][1]=0.5;
+            result[2][2]=0.5;
+            result[3][3]=0.5;
+            break;
+        case SING0:
+            result[0][1]=1./(2.*sqrt2);
+            result[1][0]=(-1.)/(2.*sqrt2);
+            result[2][3]=1./(2.*sqrt2);
+            result[3][2]=(-1.)/(2.*sqrt2);
+            break;
+        case TRIP0:
+            result[0][1]=1./(2.*sqrt2);
+            result[1][0]=1./(2.*sqrt2);
+            result[2][3]=1./(2.*sqrt2);
+            result[3][2]=1./(2.*sqrt2);
+            break;
+        case TRIPP1:
+            result[0][0]=0.5;
+            result[2][2]=0.5;
+            break;
+        case TRIPM1:
+            result[1][1]=0.5;
+            result[3][3]=0.5;
+            break;
+    }
+    return result;
+}

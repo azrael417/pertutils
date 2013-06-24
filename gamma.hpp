@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Bergische Universität Wuppertal. All rights reserved.
 //
 
+//this files contains 4D spinor matrix generation:
+
 #ifndef _GAMMA
 #define _GAMMA
 enum gamma_id {
@@ -22,6 +24,15 @@ enum gamma_id {
     PARMINUS
 };
 
+enum polarization_id{
+    UPDOWNAV,
+    SING0,
+    TRIP0,
+    TRIPP1,
+    TRIPM1
+};
+
 NRmatrix<dcomplex> get_gamma(const gamma_id gid);
+NRmatrix<dcomplex> get_polarization(const polarization_id gid);
 
 #endif
