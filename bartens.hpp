@@ -27,61 +27,107 @@ typedef struct{
     bool isexternal;
     unsigned int spinid;
     unsigned int colorid;
+    unsigned int sourceid;
 }quark;
+
+
+static bool find(const std::vector<std::string>& ordering, const unsigned int& count, const std::string searchstring){
+    bool found=true,tmpfound,fail=false;
+    for(unsigned int b=0; b<count; b++){
+        tmpfound=false;
+        for(unsigned int i=0; i<static_cast<unsigned int>(ordering.size()); i++){
+            std::stringstream srch;
+            srch << searchstring << b << "\0";
+            if(ordering[i].compare(srch.str())==0){
+                tmpfound=true;
+                continue;
+            }
+        }
+        found*=tmpfound;
+    }
+    if(!found){
+        std::cerr << "BBTensor::BBtensor: error, you did not specify all " << searchstring << " indices correctly!" << std::endl;
+        fail=true;
+    }
+    return fail;
+}
 
 
 //baryon tensor class
 class BBTensor{
     
 private:
-    std::vector<TTTensor> data;
+    TTTensor data;
     std::vector<quark> quarks;
-    unsigned int nt;
+    unsigned int numsources;
     unsigned int numquarksperflavour[6];
     
 public:
     
     //constructors:
-    BBTensor(const std::vector<TTTensor>& ddata, const std::vector<quark>& qquarks) : data(ddata), quarks(qquarks), nt(static_cast<unsigned int>(data.size())){
-        for(unsigned int t=0; t<nt; t++){
-            if(data[t].get_dim()!=7){
-                std::cerr << "BBTensor: warning, dimensions for t=" << t << " not equal to 7!" << std::endl;
+    BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering) : numsources(nsources){
+        unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
+        bool fail=false;
+        
+        std::vector<unsigned int> modesizes;
+        for(unsigned int i=0; i<static_cast<unsigned int>(ordering.size()); i++){
+            if(ordering[i].compare("baryon")==0){
+                barcount++;
+                modesizes.push_back(4);
             }
-            else{
-                for(unsigned int d=0; d<7; d++){
-                    if(bartens_modesizes[d]!=data[t].get_nk(d)){
-                        std::cerr << "BBTensor: warning, the mode sizes for t=" << t << " of mode " << d << " is not equal to " << bartens_modesizes[d] << "!" << std::endl;
+            else if(ordering[i].compare("color")==0){
+                colcount++;
+                modesizes.push_back(3);
+            }
+            else if(ordering[i].compare("spin")==0){
+                spincount++;
+                modesizes.push_back(4);
+            }
+            else if(ordering[i].compare("source")==0){
+                sourcecount++;
+                modesizes.push_back(numsources);
+            }
+        }
+        if( (colcount!=spincount) || (colcount!=sourcecount) ){
+            std::cerr << "BBTensor::BBtensor: error, you did not specify all the spin/color/source combinations for the quark sources!" << std::endl;
+            fail=true;
+        }
+        if(barcount!=colcount*3){
+            std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
+            fail=true;
+        }
+        
+        //search whether all indices appear:
+        fail*=!find(ordering,barcount,"baryon");
+        fail*=!find(ordering,colcount,"color");
+        fail*=!find(ordering,spincount,"spin");
+        fail*=!find(ordering,sourcecount,"source");
+        
+        //setup:
+        if(!fail){
+            TTTensor tmp(array,modesizes);
+            
+            //group indices in order to obtain form: B(bar1,...,barn|A_1,A_2,...A_n) with A_i=(s_i,c_i,src_i):
+            for(unsigned int b=0; b<barcount; b++){
+                std::stringstream searchstring;
+                for(unsigned int i=0; i<static_cast<unsigned int>(ordering.size()); i++){
+                    searchstring.clear();
+                    searchstring.str("");
+                    searchstring << "baryon" << b << "\0";
+                    if(ordering[i].compare(searchstring.str())==0){
+                        tmp=move_block(tmp,i,b);
+                        //move element of ordering also:
+                        continue;
                     }
                 }
             }
         }
-        if(quarks.size()!=4){
-            std::cerr << "BBTensor: error, you did not fully specify which index corresponds to which quark flavour!" << std::endl;
-        }
-        for(unsigned int f=0; f<6; f++) numquarksperflavour[f]=0.;
-        unsigned int numexternal=0;
-        for(unsigned int i=0; i<quarks.size(); i++){
-            numquarksperflavour[quarks[i].flavourid]++;
-            if(quarks[i].isexternal) numexternal++;
-        }
-        
-        std::cout << "The Baryon block contains: " << std::endl;
-        std::cout << numquarksperflavour[UP] << " u-quarks" << std::endl;
-        std::cout << numquarksperflavour[DOWN] << " d-quarks" << std::endl;
-        std::cout << numquarksperflavour[STRANGE] << " s-quarks" << std::endl;
-        std::cout << numquarksperflavour[CHARM] << " c-quarks" << std::endl;
-        std::cout << numquarksperflavour[BOTTOM] << " bottom-quarks" << std::endl;
-        std::cout << numquarksperflavour[TOP] << " top-quarks" << std::endl;
-        std::cout << " and " << numexternal << "external quarks." << std::endl;
     };
     
-    BBTensor(){
-        nt=0;
-        for(unsigned int f=0; f<6; f++) numquarksperflavour[f]=0.;
-    }
+    
+   
     
     ~BBTensor(){
-        data.clear();
         quarks.clear();
     }
     
@@ -91,7 +137,7 @@ public:
     //friend functions: this dot product exclusively acts on internal indices:
     friend BBTensor dot(const BBTensor& t1, const BBTensor& t2);
     //friend functions: this dot product exclusively acts on external indices:
-    friend BBTensor dot(const BBTensor& t1, const TTTensor& proj);
+    friend std::vector<dcomplex> project(const BBTensor& t1, const TTTensor& proj);
 };
 
 #endif

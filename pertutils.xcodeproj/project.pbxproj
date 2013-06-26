@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		18562BAD177876CC009D87D6 /* bartens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18562BAB177876CC009D87D6 /* bartens.cpp */; };
 		18562BAE177876CC009D87D6 /* bartens.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 18562BAC177876CC009D87D6 /* bartens.hpp */; };
 		18C64BF6141F7A890001F398 /* chiptfuncs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435B141E28A700E1F771 /* chiptfuncs.cpp */; };
 		18C64BF7141F7A890001F398 /* runnings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435F141E28A700E1F771 /* runnings.cpp */; };
 		18D1B00A1726D3A600F0C0CE /* gamma.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 18D1B0091726D3A600F0C0CE /* gamma.hpp */; };
 		18D1B0201726E8DC00F0C0CE /* gamma.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D1B01E1726E8DC00F0C0CE /* gamma.cpp */; };
+		18E0E7DB177B501C00E992E0 /* bartens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18562BAB177876CC009D87D6 /* bartens.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -137,10 +137,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18D1B0201726E8DC00F0C0CE /* gamma.cpp in Sources */,
+				18E0E7DB177B501C00E992E0 /* bartens.cpp in Sources */,
 				18C64BF6141F7A890001F398 /* chiptfuncs.cpp in Sources */,
 				18C64BF7141F7A890001F398 /* runnings.cpp in Sources */,
-				18D1B0201726E8DC00F0C0CE /* gamma.cpp in Sources */,
-				18562BAD177876CC009D87D6 /* bartens.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
