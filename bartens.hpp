@@ -24,6 +24,7 @@ enum flavour{
 //struct which identifies a quark inside the baryon:
 typedef struct{
     flavour flavourid;
+    bool isextern;
     unsigned int spinid;
     unsigned int colorid;
 }quark;
@@ -52,6 +53,8 @@ public:
             std::cerr << "BBTensor: error, you did not fully specify which index corresponds to which quark flavour!" << std::endl;
         }
     };
+    
+    void join(const BBTensor& rhs, const bool& asym=true);
     
     ~BBTensor(){
         data.clear();
