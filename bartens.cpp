@@ -9,6 +9,114 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
+BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering) : numsources(nsources){
+    unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
+    bool fail=false;
+    
+    std::vector<unsigned int> modesizes;
+    for(unsigned int i=0; i<static_cast<unsigned int>(ordering.size()); i++){
+        if(ordering[i].find("baryon")==0){
+            barcount++;
+            modesizes.push_back(4);
+        }
+        else if(ordering[i].find("color")==0){
+            colcount++;
+            modesizes.push_back(3);
+        }
+        else if(ordering[i].find("spin")==0){
+            spincount++;
+            modesizes.push_back(4);
+        }
+        else if(ordering[i].find("source")==0){
+            sourcecount++;
+            modesizes.push_back(numsources);
+        }
+    }
+    if( (colcount!=spincount) || (colcount!=sourcecount) ){
+        std::cerr << "BBTensor::BBtensor: error, you did not specify all the spin/color/source combinations for the quark sources!" << std::endl;
+        fail=true;
+    }
+    if(3*barcount!=colcount){
+        std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
+        fail=true;
+    }
+    
+    //search whether all indices appear:
+    fail*=!find(ordering,barcount,"baryon");
+    fail*=!find(ordering,colcount,"color");
+    fail*=!find(ordering,spincount,"spin");
+    fail*=!find(ordering,sourcecount,"source");
+    
+    //setup:
+    if(!fail){
+        TTTensor tmp(array,modesizes);
+        
+        //group indices in order to obtain form: B(B_1,...,B_n|A_1,A_2,...A_n) with A_i=(spin_i,color_i,src_i):
+        std::vector<std::string> order(ordering);
+        for(unsigned int b=0; b<barcount; b++){
+            std::stringstream searchstring;
+            for(unsigned int i=b; i<static_cast<unsigned int>(order.size()); i++){
+                searchstring.clear();
+                searchstring.str("");
+                searchstring << "baryon" << b << "\0";
+                if(order[i].compare(searchstring.str())==0){
+                    tmp=move_block(tmp,i,b);
+                    //move element of order also:
+                    order.insert(order.begin()+b,order[i]);
+                    order.erase(order.begin()+i+1);
+                    continue;
+                }
+            }
+        }
+        for(unsigned int b=0; b<spincount; b++){
+            std::stringstream searchstring;
+            for(unsigned int i=(barcount+3*b+0); i<static_cast<unsigned int>(order.size()); i++){
+                searchstring.clear();
+                searchstring.str("");
+                searchstring << "spin" << b << "\0";
+                if(order[i].compare(searchstring.str())==0){
+                    tmp=move_block(tmp,i,barcount+3*b+0);
+                    //move element of order also:
+                    order.insert(order.begin()+barcount+3*b+0,order[i]);
+                    order.erase(order.begin()+i+1);
+                    continue;
+                }
+            }
+            for(unsigned int i=(barcount+3*b+1); i<static_cast<unsigned int>(order.size()); i++){
+                searchstring.clear();
+                searchstring.str("");
+                searchstring << "color" << b << "\0";
+                if(order[i].compare(searchstring.str())==0){
+                    tmp=move_block(tmp,i,barcount+3*b+1);
+                    //move element of order also:
+                    order.insert(order.begin()+barcount+3*b+1,order[i]);
+                    order.erase(order.begin()+i+1);
+                    continue;
+                }
+            }
+            for(unsigned int i=(barcount+3*b+2); i<static_cast<unsigned int>(order.size()); i++){
+                searchstring.clear();
+                searchstring.str("");
+                searchstring << "source" << b << "\0";
+                if(order[i].compare(searchstring.str())==0){
+                    tmp=move_block(tmp,i,barcount+3*b+2);
+                    //move element of order also:
+                    order.insert(order.begin()+barcount+3*b+2,order[i]);
+                    order.erase(order.begin()+i+1);
+                    continue;
+                }
+            }
+        }
+        
+        for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
+            std::cout << order[i] << std::endl;
+        }
+        for(unsigned int d=0; d<tmp.get_dim(); d++){
+            std::cout << tmp.get_nk(d) << std::endl;
+        }
+    }
+};
+
 //void BBTensor::join(const BBTensor& rhs, const bool& asym){
 //    //Compute Kronecker Product of tensors:
 //    std::vector<TTTensor> newdata;
@@ -19,7 +127,7 @@
 //    }
 //    data=newdata;
 //    newdata.clear();
-//    
+//
 //    //anti-symmetrize in all old and new quark indices:
 //    if(asym){
 //        unsigned int index1, index2;
