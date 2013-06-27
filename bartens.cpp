@@ -49,7 +49,12 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsour
     
     //setup:
     if(!fail){
+        std::cout << "VOR BLOCK" << std::endl;
         TTTensor tmp(array,modesizes);
+        std::cout << "NACH BLOCK" << std::endl;
+        std::cout << "VOR MOVE" << std::endl;
+        tmp=move_block(tmp,5,2);
+        std::cout << "NACH MOVE" << std::endl;
         
         //group indices in order to obtain form: B(B_1,...,B_n|A_1,A_2,...A_n) with A_i=(spin_i,color_i,src_i):
         std::vector<std::string> order(ordering);
