@@ -75,19 +75,21 @@ class BBTensor{
 private:
     TTTensor data;
     std::vector<quark> quarks;
+    std::vector< fourvec<int> > spos;
     unsigned int numsources;
     unsigned int numquarksperflavour[6];
     
 public:
     
     //constructors:
-    BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
+    BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepos, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
     
     ~BBTensor(){
         quarks.clear();
     }
     
     //operations:
+    TTTensor extract_data()const;
     void join(const BBTensor& rhs, const bool& asym=false);
     
     //friend functions: this dot product exclusively acts on internal indices:

@@ -9,7 +9,7 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : numsources(nsources){
+BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
     unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
     bool fail=false;
     
@@ -155,6 +155,11 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsour
         }
     }
 };
+
+
+TTTensor BBTensor::extract_data()const{
+    return data;
+}
 
 //void BBTensor::join(const BBTensor& rhs, const bool& asym){
 //    //Compute Kronecker Product of tensors:
