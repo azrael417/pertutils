@@ -30,6 +30,22 @@ typedef struct{
     unsigned int sourceid;
 }quark;
 
+static std::string return_flavour(const quark& qrk){
+    switch(qrk.flavourid){
+        case UP:
+            return "u";
+        case DOWN:
+            return "d";
+        case STRANGE:
+            return "s";
+        case CHARM:
+            return "c";
+        case BOTTOM:
+            return "b";
+        case TOP:
+            return "t";
+    }
+}
 
 static bool find(const std::vector<std::string>& ordering, const unsigned int& count, const std::string searchstring){
     bool found=true,tmpfound,fail=false;
@@ -65,7 +81,7 @@ private:
 public:
     
     //constructors:
-    BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering);
+    BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
     
     ~BBTensor(){
         quarks.clear();

@@ -9,25 +9,26 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering) : numsources(nsources){
+BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsources, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : numsources(nsources){
     unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
     bool fail=false;
     
+    std::vector<std::string> order(ordering);
     std::vector<unsigned int> modesizes;
-    for(unsigned int i=0; i<static_cast<unsigned int>(ordering.size()); i++){
-        if(ordering[i].find("baryon")==0){
+    for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
+        if(order[i].find("baryon")==0){
             barcount++;
             modesizes.push_back(4);
         }
-        else if(ordering[i].find("color")==0){
+        else if(order[i].find("color")==0){
             colcount++;
             modesizes.push_back(3);
         }
-        else if(ordering[i].find("spin")==0){
+        else if(order[i].find("spin")==0){
             spincount++;
             modesizes.push_back(4);
         }
-        else if(ordering[i].find("source")==0){
+        else if(order[i].find("source")==0){
             sourcecount++;
             modesizes.push_back(numsources);
         }
@@ -40,24 +41,29 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsour
         std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
         fail=true;
     }
+    if(barcount!=bartypes.size()){
+        std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << std::endl;
+    }
+    if(order.size()!=barcount+spincount+colcount+sourcecount){
+        std::cerr << "BBTensor::BBtensor: warning, your string list also contains other unsupported entries! These will be removed now!" << std::endl;
+        for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
+            if( (order[i].find("baryon")!=0) && (order[i].find("spin")!=0) && (order[i].find("color")!=0) && (order[i].find("source")!=0) ){
+                order.erase(order.begin()+i);
+            }
+        }
+    }
     
     //search whether all indices appear:
-    fail*=!find(ordering,barcount,"baryon");
-    fail*=!find(ordering,colcount,"color");
-    fail*=!find(ordering,spincount,"spin");
-    fail*=!find(ordering,sourcecount,"source");
+    fail*=!find(order,barcount,"baryon");
+    fail*=!find(order,colcount,"color");
+    fail*=!find(order,spincount,"spin");
+    fail*=!find(order,sourcecount,"source");
     
     //setup:
     if(!fail){
-        std::cout << "VOR BLOCK" << std::endl;
         TTTensor tmp(array,modesizes);
-        std::cout << "NACH BLOCK" << std::endl;
-        std::cout << "VOR MOVE" << std::endl;
-        tmp=move_block(tmp,5,2);
-        std::cout << "NACH MOVE" << std::endl;
         
         //group indices in order to obtain form: B(B_1,...,B_n|A_1,A_2,...A_n) with A_i=(spin_i,color_i,src_i):
-        std::vector<std::string> order(ordering);
         for(unsigned int b=0; b<barcount; b++){
             std::stringstream searchstring;
             for(unsigned int i=b; i<static_cast<unsigned int>(order.size()); i++){
@@ -112,12 +118,40 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const unsigned int& nsour
                 }
             }
         }
+        data=tmp;
         
-        for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
-            std::cout << order[i] << std::endl;
+        //set quark-id vector:
+        quark qrk;
+        for(unsigned int b=barcount; b<(9*barcount); b+=3){
+            qrk.spinid=b+0;
+            qrk.colorid=b+1;
+            qrk.sourceid=b+2;
+            quarks.push_back(qrk);
         }
-        for(unsigned int d=0; d<tmp.get_dim(); d++){
-            std::cout << tmp.get_nk(d) << std::endl;
+        for(unsigned int b=0; b<barcount; b++){
+            if(bartypes[b].compare("neutron")==0){
+                quarks[0+3*b].flavourid=DOWN;
+                quarks[1+3*b].flavourid=DOWN;
+                quarks[2+3*b].flavourid=UP;
+            }
+            if(bartypes[b].compare("proton")==0){
+                quarks[0+3*b].flavourid=UP;
+                quarks[1+3*b].flavourid=UP;
+                quarks[2+3*b].flavourid=DOWN;
+            }
+        }
+        
+        if(!silent){
+            std::cout << "The following quark content has been specified:" << std::endl;
+            for(unsigned int b=0; b<barcount; b++){
+                std::cout << bartypes[b] << b << ":" << std::endl;
+                for(unsigned int i=0; i<3; i++){
+                    std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
+                    std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
+                    std::cout << "\t\t color: " << quarks[i+3*b].colorid << std::endl;
+                    std::cout << "\t\t source: " << quarks[i+3*b].sourceid << std::endl;
+                }
+            }
         }
     }
 };
