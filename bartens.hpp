@@ -44,6 +44,8 @@ static std::string return_flavour(const quark& qrk){
             return "b";
         case TOP:
             return "t";
+        default:
+            return "none";
     }
 }
 
