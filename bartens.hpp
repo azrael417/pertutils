@@ -85,6 +85,7 @@ public:
     
     //constructors:
     BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepos, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
+    BBTensor(const TTTensor& array, const std::vector< fourvec<int> >& sourcepos, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
     
     ~BBTensor(){
         quarks.clear();
