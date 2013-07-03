@@ -9,7 +9,7 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
+BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
     unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
     bool fail=false;
     
@@ -41,7 +41,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
         fail=true;
     }
-    if(barcount!=bartypes.size()){
+    if(barcount!=baryons.size()){
         std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << std::endl;
     }
     if(order.size()!=barcount+spincount+colcount+sourcecount){
@@ -129,12 +129,12 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
             quarks.push_back(qrk);
         }
         for(unsigned int b=0; b<barcount; b++){
-            if(bartypes[b].compare("neutron")==0){
+            if(baryons[b].compare("neutron")==0){
                 quarks[0+3*b].flavourid=DOWN;
                 quarks[1+3*b].flavourid=DOWN;
                 quarks[2+3*b].flavourid=UP;
             }
-            if(bartypes[b].compare("proton")==0){
+            if(baryons[b].compare("proton")==0){
                 quarks[0+3*b].flavourid=UP;
                 quarks[1+3*b].flavourid=UP;
                 quarks[2+3*b].flavourid=DOWN;
@@ -144,7 +144,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         if(!silent){
             std::cout << "The following quark content has been specified:" << std::endl;
             for(unsigned int b=0; b<barcount; b++){
-                std::cout << bartypes[b] << b << ":" << std::endl;
+                std::cout << baryons[b] << b << ":" << std::endl;
                 for(unsigned int i=0; i<3; i++){
                     std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
                     std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
@@ -157,7 +157,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
 };
 
 
-BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
+BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
     unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
     bool fail=false;
     
@@ -189,7 +189,7 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
         fail=true;
     }
-    if(barcount!=bartypes.size()){
+    if(barcount!=baryons.size()){
         std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << std::endl;
     }
     if(order.size()!=barcount+spincount+colcount+sourcecount){
@@ -277,12 +277,12 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
             quarks.push_back(qrk);
         }
         for(unsigned int b=0; b<barcount; b++){
-            if(bartypes[b].compare("neutron")==0){
+            if(baryons[b].compare("neutron")==0){
                 quarks[0+3*b].flavourid=DOWN;
                 quarks[1+3*b].flavourid=DOWN;
                 quarks[2+3*b].flavourid=UP;
             }
-            if(bartypes[b].compare("proton")==0){
+            if(baryons[b].compare("proton")==0){
                 quarks[0+3*b].flavourid=UP;
                 quarks[1+3*b].flavourid=UP;
                 quarks[2+3*b].flavourid=DOWN;
@@ -292,7 +292,7 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         if(!silent){
             std::cout << "The following quark content has been specified:" << std::endl;
             for(unsigned int b=0; b<barcount; b++){
-                std::cout << bartypes[b] << b << ":" << std::endl;
+                std::cout << baryons[b] << b << ":" << std::endl;
                 for(unsigned int i=0; i<3; i++){
                     std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
                     std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
@@ -309,6 +309,81 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
 TTTensor BBTensor::extract_data()const{
     return data;
 }
+
+
+TTTensor dot(const BBTensor& t1, const BBTensor& t2){
+    TTTensor result;
+    
+    //determine whether the number of internal quarks is the same:
+    if(t1.baryons.size()!=t2.baryons.size()){
+        std::cerr << "BBTensor::dot: error, partial contractions not yet implemented!" << std::endl;
+        return result;
+    }
+    if(t1.numsources!=t2.numsources){
+        std::cerr << "BBTensor:dot: error, the number of sources used should be the same for both tensors!" << std::endl;
+        return result;
+    }
+    unsigned int nbary=static_cast<unsigned int>(t1.baryons.size());
+    for(unsigned int b=0; b<nbary; b++){
+        if(t1.baryons[b].compare(t2.baryons[b])!=0){
+            std::cerr << "Warning, the order of baryons is not the same!" << std::endl;
+        }
+    }
+
+    //determine the quark flavours which will be contracted
+    std::vector<unsigned int> intquarks1,intquarks2;
+    unsigned int nqfcont1[6], nqfcont2[6];
+    for(unsigned int f=0; f<6; f++){
+        nqfcont1[f]=0;
+        nqfcont2[f]=0;
+    }
+    for(unsigned int i=0; i<static_cast<unsigned int>(t1.quarks.size()); i++){
+        nqfcont1[t1.quarks[i].flavourid]++;
+        intquarks1.push_back(i);
+    }
+    for(unsigned int i=0; i<static_cast<unsigned int>(t2.quarks.size()); i++){
+        intquarks2.push_back(i);
+        nqfcont2[t2.quarks[i].flavourid]++;
+    }
+    if(intquarks1.size()!=intquarks2.size()){
+        std::cerr << "BBTensor::dot: integrity error, the number of quarks which are to be contracted does not match!" << std::endl;
+        return result;
+    }
+    for(unsigned int f=0; f<6; f++){
+        if(nqfcont1[f]!=nqfcont2[f]){
+            std::cerr << "BBTensor::dot: integrity error, the number of quarks with the same flavour and which will be contracted do not match!" << std::endl;
+            return result;
+        }
+    }
+    
+    //if the number of baryons is less than the number of sources, then we should restrict the tensor accoordingly: if e.g. we want do compute 2 baryon correlation functions and the tensor contains 3 source positions, then we can select two different contractions, where all quarks come from either pos1 and pos2, pos2 and pos3, or pos1 and pos3:
+    
+    //set up array of indices which will be contracted:
+    std::vector<unsigned int> idt1, idt2;
+    for(unsigned int f=0; f<6; f++){
+        for(unsigned int i=0; i<static_cast<unsigned int>(intquarks1.size()); i++){
+            if(t1.quarks[intquarks1[i]].flavourid==f){
+                idt1.push_back(t1.quarks[intquarks1[i]].spinid);
+                idt1.push_back(t1.quarks[intquarks1[i]].colorid);
+                idt1.push_back(t1.quarks[intquarks1[i]].sourceid);
+                continue;
+            }
+        }
+        for(unsigned int i=0; i<static_cast<unsigned int>(intquarks2.size()); i++){
+            if(t2.quarks[intquarks2[i]].flavourid==f){
+                idt2.push_back(t2.quarks[intquarks2[i]].spinid);
+                idt2.push_back(t2.quarks[intquarks2[i]].colorid);
+                idt2.push_back(t2.quarks[intquarks2[i]].sourceid);
+                continue;
+            }
+        }
+    }
+    
+    //perform actual contraction:
+    result=dot(t1.data,idt1,t2.data,idt2);
+    return result;
+}
+
 
 //void BBTensor::join(const BBTensor& rhs, const bool& asym){
 //    //Compute Kronecker Product of tensors:
@@ -365,90 +440,6 @@ TTTensor BBTensor::extract_data()const{
 //}
 //
 ////contract all internal quarks:
-//BBTensor dot(const BBTensor& t1, const BBTensor& t2){
-//    if( (t1.nt!=t2.nt) && (t2.nt!=1) ){
-//        std::cout << "BBTensor::contract_internal: error, the number of time slices is different!" << std::endl;
-//        return BBTensor();
-//    }
-//    unsigned int nt=t1.nt;
-//    
-//    //collect indices which will not be contracted:
-//    std::vector<unsigned int> extquarks1,intquarks1,extquarks2,intquarks2;
-//    unsigned int nqfcont1[6], nqfcont2[6];
-//    for(unsigned int f=0; f<6; f++){
-//        nqfcont1[f]=0;
-//        nqfcont2[f]=0;
-//    }
-//    for(unsigned int i=0; i<static_cast<unsigned int>(t1.quarks.size()); i++){
-//        if(t1.quarks[i].isexternal) extquarks1.push_back(i);
-//        else{
-//            nqfcont1[t1.quarks[i].flavourid]++;
-//            intquarks1.push_back(i);
-//        }
-//    }
-//    for(unsigned int i=0; i<static_cast<unsigned int>(t2.quarks.size()); i++){
-//        if(t2.quarks[i].isexternal) extquarks2.push_back(i);
-//        else{
-//            intquarks2.push_back(i);
-//            nqfcont2[t2.quarks[i].flavourid]++;
-//        }
-//    }
-//    if(intquarks1.size()!=intquarks2.size()){
-//        std::cerr << "BBTensor::contract_internal: error, the number of quarks which are to be contracted does not match!" << std::endl;
-//        return BBTensor();
-//    }
-//    for(unsigned int f=0; f<6; f++){
-//        if(nqfcont1[f]!=nqfcont2[f]){
-//            std::cerr << "BBTensor::contract_internal: error, the number of quarks with the same flavour and which will be contracted do not match!" << std::endl;
-//            return BBTensor();
-//        }
-//    }
-//    
-//    //set up array of indices which will be contracted:
-//    std::vector<unsigned int> idt1, idt2;
-//    for(unsigned int f=0; f<6; f++){
-//        for(unsigned int i=0; i<static_cast<unsigned int>(intquarks1.size()); i++){
-//            if(t1.quarks[intquarks1[i]].flavourid==f){
-//                idt1.push_back(t1.quarks[intquarks1[i]].spinid);
-//                idt1.push_back(t1.quarks[intquarks1[i]].colorid);
-//                continue;
-//            }
-//        }
-//        for(unsigned int i=0; i<static_cast<unsigned int>(intquarks2.size()); i++){
-//            if(t2.quarks[intquarks2[i]].flavourid==f){
-//                idt2.push_back(t2.quarks[intquarks2[i]].spinid);
-//                idt2.push_back(t2.quarks[intquarks2[i]].colorid);
-//                continue;
-//            }
-//        }
-//    }
-//    
-//    //perform actual contraction:
-//    std::vector<TTTensor> resvec;
-//    std::vector<quark> resquarks;
-//    if(nt==t2.nt){
-//        for(unsigned int t=0; t<nt; t++){
-//            TTTensor res(dot(t1.data[t],idt1,t2.data[t],idt2));
-//            resvec.push_back(res);
-//        }
-//    }
-//    else{
-//        for(unsigned int t=0; t<nt; t++){
-//            TTTensor res(dot(t1.data[t],idt1,t2.data[0],idt2));
-//            resvec.push_back(res);
-//        }
-//    }
-//    for(unsigned int i=0; i<static_cast<unsigned int>(extquarks2.size()); i++){
-//        resquarks.push_back(t1.quarks[extquarks1[i]]);
-//        resquarks[i].spinid=i;
-//    }
-//    for(unsigned int i=0; i<static_cast<unsigned int>(extquarks2.size()); i++){
-//        resquarks.push_back(t2.quarks[extquarks2[i]]);
-//        resquarks[i].spinid=i+static_cast<unsigned int>(extquarks1.size());
-//    }
-//    
-//    return BBTensor(resvec,resquarks);
-//}
 //
 ////contract all external quarks. internal quarks have to be contracted before:
 //std::vector<dcomplex> project(const BBTensor& t1, const TTTensor& proj){

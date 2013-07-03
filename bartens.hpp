@@ -78,6 +78,7 @@ private:
     TTTensor data;
     std::vector<quark> quarks;
     std::vector< fourvec<int> > spos;
+    std::vector<std::string> baryons;
     unsigned int numsources;
     unsigned int numquarksperflavour[6];
     
@@ -93,12 +94,12 @@ public:
     
     //operations:
     TTTensor extract_data()const;
-    void join(const BBTensor& rhs, const bool& asym=false);
+    //void join(const BBTensor& rhs, const bool& asym=false);
     
     //friend functions: this dot product exclusively acts on internal indices:
-    friend BBTensor dot(const BBTensor& t1, const BBTensor& t2);
+    friend TTTensor dot(const BBTensor& t1, const BBTensor& t2);
     //friend functions: this dot product exclusively acts on external indices:
-    friend std::vector<dcomplex> project(const BBTensor& t1, const TTTensor& proj);
+    //friend std::vector<dcomplex> project(const BBTensor& t1, const TTTensor& proj);
 };
 
 #endif

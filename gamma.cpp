@@ -122,6 +122,16 @@ NRmatrix<dcomplex> get_polarization(const polarization_id pid){
             result[1][1]=0.5;
             result[3][3]=0.5;
             break;
+        case TRIPAV:
+            result[0][0]=1./6.;
+            result[1][1]=1./6.;
+            result[2][2]=1./6.;
+            result[3][3]=1./6.;
+            result[0][1]=1./(6.*sqrt2);
+            result[1][0]=1./(6.*sqrt2);
+            result[2][3]=1./(6.*sqrt2);
+            result[3][2]=1./(6.*sqrt2);
+            break;
     }
     return result;
 }

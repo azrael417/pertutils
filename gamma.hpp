@@ -29,7 +29,8 @@ enum polarization_id{
     SING0,
     TRIP0,
     TRIPP1,
-    TRIPM1
+    TRIPM1,
+    TRIPAV
 };
 
 NRmatrix<dcomplex> get_gamma(const gamma_id gid);
