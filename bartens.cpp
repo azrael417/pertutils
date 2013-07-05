@@ -305,7 +305,6 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
 };
 
 
-
 TTTensor BBTensor::extract_data()const{
     return data;
 }
