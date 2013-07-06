@@ -359,7 +359,7 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     
     //set up array of indices which will be contracted:
     std::vector<unsigned int> idt1, idt2;
-    for(unsigned int f=0; f<6; f++){
+    for(int f=0; f<6; f++){
         for(unsigned int i=0; i<static_cast<unsigned int>(intquarks1.size()); i++){
             if(t1.quarks[intquarks1[i]].flavourid==f){
                 idt1.push_back(t1.quarks[intquarks1[i]].spinid);
