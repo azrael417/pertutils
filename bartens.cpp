@@ -355,8 +355,6 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
         }
     }
     
-    //if the number of baryons is less than the number of sources, then we should restrict the tensor accoordingly: if e.g. we want do compute 2 baryon correlation functions and the tensor contains 3 source positions, then we can select two different contractions, where all quarks come from either pos1 and pos2, pos2 and pos3, or pos1 and pos3:
-    
     //set up array of indices which will be contracted:
     std::vector<unsigned int> idt1, idt2;
     for(int f=0; f<6; f++){
