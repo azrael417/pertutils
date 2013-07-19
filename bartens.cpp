@@ -450,13 +450,20 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
 //I/O:
 int write_barblock(const std::string filename, const BBTensor& tens){
     std::ofstream output;
-
+    
     output.open(filename.c_str(),std::ios_base::binary);
     if(!output.good()){
         std::cerr << "write_barblock: error while trying to open file " << filename << "!" << std::endl;
         return EXIT_FAILURE;
     }
     
+    int result=write_barblock(output,tens);
+    output.close();
+    
+    return result;
+}
+
+int write_barblock(std::ofstream& output, const BBTensor& tens){
     double* head;
     //baryon header:
     head=new double[1+tens.baryons.size()];
@@ -493,10 +500,7 @@ int write_barblock(const std::string filename, const BBTensor& tens){
     
     //data content:
     write_tensor(output,tens.data);
-    
-    //close file:
-    output.close();
-    
+        
     return EXIT_SUCCESS;
 }
 
@@ -508,6 +512,13 @@ int read_barblock(const std::string filename, BBTensor& tens){
         return EXIT_FAILURE;
     }
     
+    int result=read_barblock(input,tens);
+    input.close();
+    
+    return result;
+}
+
+int read_barblock(std::ifstream& input, BBTensor& tens){
     double dummy, *head;
     input.read(reinterpret_cast<char*>(&dummy),sizeof(double));
     std::vector<std::string> baryons(static_cast<unsigned int>(dummy));
@@ -554,9 +565,6 @@ int read_barblock(const std::string filename, BBTensor& tens){
     
     //read data:
     read_tensor(input,tens.data);
-    
-    //close file:
-    input.close();
     
     return EXIT_SUCCESS;
 }

@@ -104,8 +104,10 @@ public:
     friend BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym);
     //this prints a baryon block:
     friend int write_barblock(const std::string filename, const BBTensor& tens);
+    friend int write_barblock(std::ofstream& output, const BBTensor& tens);
     //this reads the same thing in:
     friend int read_barblock(const std::string filename, BBTensor& tens);
+    friend int read_barblock(std::ifstream& input, BBTensor& tens);
 };
 
 //dot product of internal quarks:
@@ -114,6 +116,8 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2);
 BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym=true);
 //writing a baryon block:
 int write_barblock(const std::string filename, const BBTensor& tens);
+int write_barblock(std::ofstream& output, const BBTensor& tens);
 //reading baryon from block:
 int read_barblock(const std::string filename, BBTensor& tens);
+int read_barblock(std::ifstream& input, BBTensor& tens);
 #endif
