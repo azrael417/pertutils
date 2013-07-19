@@ -85,6 +85,7 @@ private:
 public:
     
     //constructors:
+    BBTensor(){};
     BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepos, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
     BBTensor(const TTTensor& array, const std::vector< fourvec<int> >& sourcepos, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent=true);
     
@@ -96,10 +97,23 @@ public:
     TTTensor extract_data()const;
     //void join(const BBTensor& rhs, const bool& asym=false);
     
-    //friend functions: this dot product exclusively acts on internal indices:
+    //friend functions:
+    //this dot product exclusively acts on internal indices:
     friend TTTensor dot(const BBTensor& t1, const BBTensor& t2);
-    //friend functions: this dot product exclusively acts on external indices:
-    //friend std::vector<dcomplex> project(const BBTensor& t1, const TTTensor& proj);
+    //this routine joins two baryon blocks:
+    friend BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym);
+    //this prints a baryon block:
+    friend int write_barblock(const std::string filename, const BBTensor& tens);
+    //this reads the same thing in:
+    friend int read_barblock(const std::string filename, BBTensor& tens);
 };
 
+//dot product of internal quarks:
+TTTensor dot(const BBTensor& t1, const BBTensor& t2);
+//kronecker product of two baryon blocks:
+BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym=true);
+//writing a baryon block:
+int write_barblock(const std::string filename, const BBTensor& tens);
+//reading baryon from block:
+int read_barblock(const std::string filename, BBTensor& tens);
 #endif

@@ -309,7 +309,7 @@ TTTensor BBTensor::extract_data()const{
     return data;
 }
 
-
+//friend functions:
 TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     TTTensor result;
     
@@ -382,59 +382,185 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
 }
 
 
-//void BBTensor::join(const BBTensor& rhs, const bool& asym){
-//    //Compute Kronecker Product of tensors:
-//    std::vector<TTTensor> newdata;
-//    unsigned int oldsize=data[0].get_dim();
-//    for(unsigned int t=0; t<nt; t++){
-//        TTTensor ltr(kron(data[t],rhs.data[t]));
-//        newdata.push_back(ltr);
-//    }
-//    data=newdata;
-//    newdata.clear();
-//
-//    //anti-symmetrize in all old and new quark indices:
-//    if(asym){
-//        unsigned int index1, index2;
-//        for(unsigned int t=0; t<nt; t++){
-//            for(unsigned int f=0; f<6; f++){
-//                for(unsigned int i1=0; i1<numquarksperflavour[f]; i1++){
-//                    if( (quarks[i1].isexternal) || (quarks[i1].flavourid!=f)) continue;
-//                    for(unsigned int i2=0; i2<rhs.numquarksperflavour[f]; i2++){
-//                        if( !(rhs.quarks[i2].isexternal) && (rhs.quarks[i2].flavourid==f) ){
-//                            index1=quarks[i1].spinid;
-//                            index2=rhs.quarks[i2].spinid+oldsize;
-//                            TTTensor tmp(swap(data[t],index1,index2));
-//                            index1=quarks[i1].colorid;
-//                            index2=rhs.quarks[i2].colorid+oldsize;
-//                            tmp=swap(tmp,index1,index2);
-//                            tmp*=-1.;
-//                            TTTensor tmp2(data[t]+tmp);
-//                            data.erase(data.begin()+t);
-//                            data.insert(data.begin()+t,tmp2);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    
-//    //Join vectors of source positions:
-//    std::vector<quark> newquarks;
-//    newquarks.reserve(quarks.size()+rhs.quarks.size());
-//    newquarks.insert(newquarks.end(),quarks.begin(),quarks.end());
-//    newquarks.insert(newquarks.end(),rhs.quarks.begin(),rhs.quarks.end());
-//    //add offset to new quark locations:
-//    unsigned int offset=static_cast<unsigned int>(quarks.size());
-//    for(unsigned int i=0; i<rhs.quarks.size(); i++){
-//        newquarks[offset+i].spinid+=oldsize;
-//        newquarks[offset+i].colorid+=oldsize;
-//    }
-//    quarks=newquarks;
-//    for(unsigned int i=0; i<rhs.quarks.size(); i++){
-//        numquarksperflavour[rhs.quarks[i].flavourid]++;
-//    }
-//}
+//computes the kronecker product of two baryon blocks and performs an anti-symmetrization on demand:
+BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym){
+    if(lhs.numsources!=rhs.numsources){
+        std::cerr << "join_barblocks: error, the number of sources has to be the same!" << std::endl;
+        return lhs;
+    }
+    
+    std::vector<std::string> baryonslhs(lhs.baryons), baryonsrhs(rhs.baryons);
+    std::vector<std::string> resbaryons(baryonslhs);
+    resbaryons.insert(resbaryons.end(),baryonsrhs.begin(),baryonsrhs.end());
+    unsigned int bclhs=static_cast<unsigned int>(baryonslhs.size());
+    unsigned int bcrhs=static_cast<unsigned int>(baryonsrhs.size());
+    
+    //join quark vector and shift coordinates of second quark:
+    std::vector<quark> quarkslhs(lhs.quarks), quarksrhs(rhs.quarks);
+    unsigned int qclhs=static_cast<unsigned int>(quarkslhs.size());
+    unsigned int qcrhs=static_cast<unsigned int>(quarksrhs.size());
+    
+    for(unsigned int q=0; q<quarkslhs.size(); q++){
+        quarkslhs[q].spinid+=bcrhs;
+        quarkslhs[q].colorid+=bcrhs;
+        quarkslhs[q].sourceid+=bcrhs;
+    }
+    for(unsigned int q=0; q<quarksrhs.size(); q++){
+        quarksrhs[q].spinid+=(bclhs+3*qclhs);
+        quarksrhs[q].colorid+=(bclhs+3*qclhs);
+        quarksrhs[q].sourceid+=(bclhs+3*qclhs);
+    }
+    std::vector<quark> resquarks(quarkslhs);
+    resquarks.insert(resquarks.end(),quarksrhs.begin(),quarksrhs.end());
+    
+    //resulting tensor:
+    TTTensor lhstens(lhs.data), rhstens(rhs.data);
+    TTTensor restens=kron(lhstens,rhstens);
+    //move external indices to the beginning of new tensor:
+    for(unsigned int b=0; b<bcrhs; b++){
+        restens=move_block(restens, b+bclhs+3*qclhs, bclhs+b);
+    }
+    
+    //if antisymmetrization is required, perform anti-symmetrization:
+    if(antisym){
+        TTTensor tmptens;
+        for(unsigned int ql=0; ql<qclhs; ql++){
+            for(unsigned int qr=0; qr<qcrhs; qr++){
+                if(quarkslhs[qr].flavourid==quarksrhs[qr].flavourid){
+                    tmptens=swap(restens,quarkslhs[ql].spinid, quarksrhs[qr].spinid);
+                    tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
+                    tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
+                    restens-=tmptens;
+                }
+            }
+        }
+    }
+
+    //construct output tensor:
+    BBTensor result;
+    result.data=restens;
+    result.quarks=resquarks;
+    result.spos=lhs.spos;
+    result.baryons=resbaryons;
+    for(unsigned int f=0; f<6; f++) result.numquarksperflavour[f]=lhs.numquarksperflavour[f]+rhs.numquarksperflavour[f];
+    
+    return result;
+}
+
+//I/O:
+int write_barblock(const std::string filename, const BBTensor& tens){
+    std::ofstream output;
+
+    output.open(filename.c_str(),std::ios_base::binary);
+    if(!output.good()){
+        std::cerr << "write_barblock: error while trying to open file " << filename << "!" << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    double* head;
+    //baryon header:
+    head=new double[1+tens.baryons.size()];
+    head[0]=static_cast<double>(tens.baryons.size());
+    for(unsigned int b=0; b<static_cast<unsigned int>(tens.baryons.size()); b++){
+        if(tens.baryons[b].compare("neutron")==0) head[1+b]=0.;
+        else if(tens.baryons[b].compare("proton")==0) head[1+b]=1.;
+    }
+    output.write(reinterpret_cast<char*>(head), (1+tens.baryons.size())*sizeof(double));
+    delete [] head;
+    
+    //source header:
+    head=new double[1+4*tens.numsources];
+    head[0]=static_cast<double>(tens.numsources);
+    for(unsigned int i=0; i<tens.numsources; i++){
+        for(unsigned int l=0; l<4; l++){
+            head[1+l+4*i]=static_cast<double>(tens.spos[i][l]);
+        }
+    }
+    output.write(reinterpret_cast<char*>(head), (1+4*tens.numsources)*sizeof(double));
+    delete [] head;
+    
+    //quarks header:
+    head=new double[1+4*tens.quarks.size()];
+    head[0]=static_cast<double>(tens.quarks.size());
+    for(unsigned int i=0; i<tens.quarks.size(); i++){
+        head[1+0+4*i]=static_cast<double>(tens.quarks[i].flavourid);
+        head[1+1+4*i]=static_cast<double>(tens.quarks[i].spinid);
+        head[1+2+4*i]=static_cast<double>(tens.quarks[i].colorid);
+        head[1+3+4*i]=static_cast<double>(tens.quarks[i].sourceid);
+    }
+    output.write(reinterpret_cast<char*>(head), (1+4*tens.quarks.size())*sizeof(double));
+    delete [] head;
+    
+    //data content:
+    write_tensor(output,tens.data);
+    
+    //close file:
+    output.close();
+    
+    return EXIT_SUCCESS;
+}
+
+int read_barblock(const std::string filename, BBTensor& tens){
+    std::ifstream input;
+    input.open(filename.c_str(),std::ios_base::binary);
+    if(!input.good()){
+        std::cerr << "read_barblock: error while trying to open file " << filename << "!" << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    double dummy, *head;
+    input.read(reinterpret_cast<char*>(&dummy),sizeof(double));
+    std::vector<std::string> baryons(static_cast<unsigned int>(dummy));
+    head=new double[baryons.size()];
+    input.read(reinterpret_cast<char*>(head),baryons.size()*sizeof(double));
+    for(unsigned int b=0; b<baryons.size(); b++){
+        if(fabs(head[b])<1.e-9) baryons[b]="neutron";
+        else if(fabs(head[b]-1.)<1.e-9) baryons[b]="proton";
+    }
+    delete [] head;
+    tens.baryons=baryons;
+    
+    //source header:
+    input.read(reinterpret_cast<char*>(&dummy),sizeof(double));
+    tens.numsources=static_cast<unsigned int>(dummy);
+    tens.spos.resize(tens.numsources);
+    head=new double[4*tens.numsources];
+    input.read(reinterpret_cast<char*>(head), (4*tens.numsources)*sizeof(double));
+    for(unsigned int i=0; i<tens.numsources; i++){
+        for(unsigned int l=0; l<4; l++){
+            tens.spos[i][l]=static_cast<int>(head[l+4*i]);
+        }
+    }
+    delete [] head;
+    
+    //quarks header:
+    input.read(reinterpret_cast<char*>(&dummy),sizeof(double));
+    tens.quarks.resize(static_cast<unsigned int>(dummy));
+    head=new double[4*tens.quarks.size()];
+    input.read(reinterpret_cast<char*>(head), (4*tens.quarks.size())*sizeof(double));
+    for(unsigned int i=0; i<tens.quarks.size(); i++){
+        tens.quarks[i].flavourid=static_cast<flavour>(head[0+4*i]);
+        tens.quarks[i].spinid=static_cast<flavour>(head[1+4*i]);
+        tens.quarks[i].colorid=static_cast<flavour>(head[2+4*i]);
+        tens.quarks[i].sourceid=static_cast<flavour>(head[3+4*i]);
+    }
+    delete [] head;
+    
+    //set the numbers of quarks per flavour:
+    for(unsigned int f=0; f<6; f++) tens.numquarksperflavour[f]=0;
+    for(unsigned int q=0; q<tens.quarks.size(); q++){
+        tens.numquarksperflavour[tens.quarks[q].flavourid]++;
+    }
+    
+    //read data:
+    read_tensor(input,tens.data);
+    
+    //close file:
+    input.close();
+    
+    return EXIT_SUCCESS;
+}
+
 //
 ////contract all internal quarks:
 //
