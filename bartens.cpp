@@ -325,8 +325,12 @@ BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec){
     }
     
     unsigned int numsnew=0;
+    std::vector< fourvec<int> > srcspos;
     for(unsigned int s=0; s<a.numsources; s++){
-        if(idvec[s]) numsnew++;
+        if(idvec[s]){
+            numsnew++;
+            srcspos.push_back(a.spos[s]);
+        }
     }
     
     if(numsnew==0){
@@ -341,6 +345,7 @@ BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec){
     }
     result.numsources=numsnew;
     result.data=tmp;
+    result.spos=srcspos;
     
     return result;
 }
@@ -410,7 +415,7 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     if(t1.numsources==t2.numsources){
         result=dot(t1.data,idt1,t2.data,idt2);
     }
-    else if(t1.numsources>t2.numsources){
+    else if(t1.numsources!=t2.numsources){
         //reduction necessary:
         unsigned int nsmin=min(t1.numsources,t2.numsources);
         unsigned int nsmax=max(t1.numsources,t2.numsources);
@@ -419,17 +424,31 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
         unsigned int combcount=static_cast<unsigned int>(bico(nsmax, nsmin));
         combination comb(nsmax,nsmin);
         std::vector<bool> combi(comb.return_combination());
-        BBTensor tmpbb(extract_sources(t1,combi));
-        result=dot(tmpbb.data,idt1,t2.data,idt2);
         
-        for(unsigned int i=1; i<combcount; i++){
-            combi=comb.return_combination();
-            tmpbb=extract_sources(t1,combi);
-            result+=dot(tmpbb.data,idt1,t2.data,idt2);
+        if(t1.numsources>t2.numsources){
+            BBTensor tmpbb(extract_sources(t1,combi));
+            result=dot(tmpbb.data,idt1,t2.data,idt2);
+        
+            for(unsigned int i=1; i<combcount; i++){
+                combi=comb.return_combination();
+                tmpbb=extract_sources(t1,combi);
+                result+=dot(tmpbb.data,idt1,t2.data,idt2);
+            }
+            result/=static_cast<double>(combcount);
         }
-        result/=static_cast<double>(combcount);
+        else{
+            BBTensor tmpbb(extract_sources(t2,combi));
+            result=dot(t1.data,idt1,tmpbb.data,idt2);
+            
+            for(unsigned int i=1; i<combcount; i++){
+                combi=comb.return_combination();
+                tmpbb=extract_sources(t2,combi);
+                result+=dot(t1.data,idt1,tmpbb.data,idt2);
+            }
+            result/=static_cast<double>(combcount);
+        }
     }
-
+    
     return result;
 }
 
