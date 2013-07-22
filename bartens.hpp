@@ -99,6 +99,8 @@ public:
     fourvec<int> get_spos(unsigned int sourceid)const;
     
     //friend functions:
+    //extract sub-tensor by dropping sources:
+    friend BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec);
     //this dot product exclusively acts on internal indices:
     friend TTTensor dot(const BBTensor& t1, const BBTensor& t2);
     //this routine joins two baryon blocks:
@@ -111,6 +113,8 @@ public:
     friend int read_barblock(std::ifstream& input, BBTensor& tens);
 };
 
+//extract sub-tensor by dropping sources:
+BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec);
 //dot product of internal quarks:
 TTTensor dot(const BBTensor& t1, const BBTensor& t2);
 //kronecker product of two baryon blocks:

@@ -317,16 +317,41 @@ fourvec<int> BBTensor::get_spos(unsigned int sourceid)const{
 }
 
 //friend functions:
+BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec){
+    BBTensor result(a);
+    
+    if(idvec.size()!=a.numsources){
+        return a;
+    }
+    
+    unsigned int numsnew=0;
+    for(unsigned int s=0; s<a.numsources; s++){
+        if(idvec[s]) numsnew++;
+    }
+    
+    if(numsnew==0){
+        std::cerr << "extract_sources: error, you cannot drop all sources!" << std::endl;
+        return a;
+    }
+    else if(numsnew==a.numsources) return a;
+    
+    TTTensor tmp(a.data);
+    for(unsigned int q=0; q<static_cast<unsigned int>(a.quarks.size()); q++){
+        tmp=extract(tmp,a.quarks[q].sourceid,idvec);
+    }
+    result.numsources=numsnew;
+    result.data=tmp;
+    
+    return result;
+}
+
+//dot product:
 TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     TTTensor result;
     
     //determine whether the number of internal quarks is the same:
     if(t1.baryons.size()!=t2.baryons.size()){
         std::cerr << "BBTensor::dot: error, partial contractions not yet implemented!" << std::endl;
-        return result;
-    }
-    if(t1.numsources!=t2.numsources){
-        std::cerr << "BBTensor:dot: error, the number of sources used should be the same for both tensors!" << std::endl;
         return result;
     }
     unsigned int nbary=static_cast<unsigned int>(t1.baryons.size());
@@ -372,8 +397,6 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
                 idt1.push_back(t1.quarks[intquarks1[i]].sourceid);
                 continue;
             }
-        }
-        for(unsigned int i=0; i<static_cast<unsigned int>(intquarks2.size()); i++){
             if(t2.quarks[intquarks2[i]].flavourid==f){
                 idt2.push_back(t2.quarks[intquarks2[i]].spinid);
                 idt2.push_back(t2.quarks[intquarks2[i]].colorid);
@@ -384,7 +407,18 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     }
     
     //perform actual contraction:
-    result=dot(t1.data,idt1,t2.data,idt2);
+    if(t1.numsources==t2.numsources){
+        result=dot(t1.data,idt1,t2.data,idt2);
+    }
+    else if(t1.numsources!=t2.numsources){
+        //reduction necessary:
+        unsigned int nsmin=min(t1.numsources,t2.numsources);
+        unsigned int nsmax=max(t1.numsources,t2.numsources);
+        
+        //draw all possible combinations of nsmin sources from nsmax samples:
+        
+    }
+
     return result;
 }
 
