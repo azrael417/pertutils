@@ -79,7 +79,7 @@ private:
     std::vector<quark> quarks;
     std::vector< fourvec<int> > spos;
     std::vector<std::string> baryons;
-    unsigned int numsources;
+    unsigned int numsources, numbaryons;
     unsigned int numquarksperflavour[6];
     
 public:
@@ -97,6 +97,8 @@ public:
     TTTensor get_data()const;
     //void join(const BBTensor& rhs, const bool& asym=false);
     fourvec<int> get_spos(unsigned int sourceid)const;
+    std::vector<std::string> get_baryons()const;
+    unsigned int get_numbaryons()const;
     
     //friend functions:
     //extract sub-tensor by dropping sources:

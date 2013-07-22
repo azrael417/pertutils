@@ -9,15 +9,15 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
-    unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
+BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons((0)){
+    unsigned int colcount=0,spincount=0,sourcecount=0;
     bool fail=false;
     
     std::vector<std::string> order(ordering);
     std::vector<unsigned int> modesizes;
     for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
         if(order[i].find("baryon")==0){
-            barcount++;
+            numbaryons++;
             modesizes.push_back(4);
         }
         else if(order[i].find("color")==0){
@@ -37,14 +37,14 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         std::cerr << "BBTensor::BBtensor: error, you did not specify all the spin/color/source combinations for the quark sources!" << std::endl;
         fail=true;
     }
-    if(3*barcount!=colcount){
+    if(3*numbaryons!=colcount){
         std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
         fail=true;
     }
-    if(barcount!=baryons.size()){
+    if(numbaryons!=baryons.size()){
         std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << std::endl;
     }
-    if(order.size()!=barcount+spincount+colcount+sourcecount){
+    if(order.size()!=numbaryons+spincount+colcount+sourcecount){
         std::cerr << "BBTensor::BBtensor: warning, your string list also contains other unsupported entries! These will be removed now!" << std::endl;
         for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
             if( (order[i].find("baryon")!=0) && (order[i].find("spin")!=0) && (order[i].find("color")!=0) && (order[i].find("source")!=0) ){
@@ -54,7 +54,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
     }
     
     //search whether all indices appear:
-    fail*=!find(order,barcount,"baryon");
+    fail*=!find(order,numbaryons,"baryon");
     fail*=!find(order,colcount,"color");
     fail*=!find(order,spincount,"spin");
     fail*=!find(order,sourcecount,"source");
@@ -64,7 +64,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         TTTensor tmp(array,modesizes);
         
         //group indices in order to obtain form: B(B_1,...,B_n|A_1,A_2,...A_n) with A_i=(spin_i,color_i,src_i):
-        for(unsigned int b=0; b<barcount; b++){
+        for(unsigned int b=0; b<numbaryons; b++){
             std::stringstream searchstring;
             for(unsigned int i=b; i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
@@ -81,38 +81,38 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         }
         for(unsigned int b=0; b<spincount; b++){
             std::stringstream searchstring;
-            for(unsigned int i=(barcount+3*b+0); i<static_cast<unsigned int>(order.size()); i++){
+            for(unsigned int i=(numbaryons+3*b+0); i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
                 searchstring.str("");
                 searchstring << "spin" << b << "\0";
                 if(order[i].compare(searchstring.str())==0){
-                    tmp=move_block(tmp,i,barcount+3*b+0);
+                    tmp=move_block(tmp,i,numbaryons+3*b+0);
                     //move element of order also:
-                    order.insert(order.begin()+barcount+3*b+0,order[i]);
+                    order.insert(order.begin()+numbaryons+3*b+0,order[i]);
                     order.erase(order.begin()+i+1);
                     continue;
                 }
             }
-            for(unsigned int i=(barcount+3*b+1); i<static_cast<unsigned int>(order.size()); i++){
+            for(unsigned int i=(numbaryons+3*b+1); i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
                 searchstring.str("");
                 searchstring << "color" << b << "\0";
                 if(order[i].compare(searchstring.str())==0){
-                    tmp=move_block(tmp,i,barcount+3*b+1);
+                    tmp=move_block(tmp,i,numbaryons+3*b+1);
                     //move element of order also:
-                    order.insert(order.begin()+barcount+3*b+1,order[i]);
+                    order.insert(order.begin()+numbaryons+3*b+1,order[i]);
                     order.erase(order.begin()+i+1);
                     continue;
                 }
             }
-            for(unsigned int i=(barcount+3*b+2); i<static_cast<unsigned int>(order.size()); i++){
+            for(unsigned int i=(numbaryons+3*b+2); i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
                 searchstring.str("");
                 searchstring << "source" << b << "\0";
                 if(order[i].compare(searchstring.str())==0){
-                    tmp=move_block(tmp,i,barcount+3*b+2);
+                    tmp=move_block(tmp,i,numbaryons+3*b+2);
                     //move element of order also:
-                    order.insert(order.begin()+barcount+3*b+2,order[i]);
+                    order.insert(order.begin()+numbaryons+3*b+2,order[i]);
                     order.erase(order.begin()+i+1);
                     continue;
                 }
@@ -122,13 +122,13 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         
         //set quark-id vector:
         quark qrk;
-        for(unsigned int b=barcount; b<(9*barcount); b+=3){
+        for(unsigned int b=numbaryons; b<(9*numbaryons); b+=3){
             qrk.spinid=b+0;
             qrk.colorid=b+1;
             qrk.sourceid=b+2;
             quarks.push_back(qrk);
         }
-        for(unsigned int b=0; b<barcount; b++){
+        for(unsigned int b=0; b<numbaryons; b++){
             if(baryons[b].compare("neutron")==0){
                 quarks[0+3*b].flavourid=DOWN;
                 quarks[1+3*b].flavourid=DOWN;
@@ -143,7 +143,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
         
         if(!silent){
             std::cout << "The following quark content has been specified:" << std::endl;
-            for(unsigned int b=0; b<barcount; b++){
+            for(unsigned int b=0; b<numbaryons; b++){
                 std::cout << baryons[b] << b << ":" << std::endl;
                 for(unsigned int i=0; i<3; i++){
                     std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
@@ -157,15 +157,15 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
 };
 
 
-BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())){
-    unsigned int colcount=0,spincount=0,barcount=0,sourcecount=0;
+BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons(0){
+    unsigned int colcount=0,spincount=0,sourcecount=0;
     bool fail=false;
     
     std::vector<std::string> order(ordering);
     std::vector<unsigned int> modesizes;
     for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
         if(order[i].find("baryon")==0){
-            barcount++;
+            numbaryons++;
             modesizes.push_back(4);
         }
         else if(order[i].find("color")==0){
@@ -185,14 +185,14 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         std::cerr << "BBTensor::BBtensor: error, you did not specify all the spin/color/source combinations for the quark sources!" << std::endl;
         fail=true;
     }
-    if(3*barcount!=colcount){
+    if(3*numbaryons!=colcount){
         std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
         fail=true;
     }
-    if(barcount!=baryons.size()){
+    if(numbaryons!=baryons.size()){
         std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << std::endl;
     }
-    if(order.size()!=barcount+spincount+colcount+sourcecount){
+    if(order.size()!=numbaryons+spincount+colcount+sourcecount){
         std::cerr << "BBTensor::BBtensor: warning, your string list also contains other unsupported entries! These will be removed now!" << std::endl;
         for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
             if( (order[i].find("baryon")!=0) && (order[i].find("spin")!=0) && (order[i].find("color")!=0) && (order[i].find("source")!=0) ){
@@ -202,7 +202,7 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
     }
     
     //search whether all indices appear:
-    fail*=!find(order,barcount,"baryon");
+    fail*=!find(order,numbaryons,"baryon");
     fail*=!find(order,colcount,"color");
     fail*=!find(order,spincount,"spin");
     fail*=!find(order,sourcecount,"source");
@@ -212,7 +212,7 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         TTTensor tmp(atens);
         
         //group indices in order to obtain form: B(B_1,...,B_n|A_1,A_2,...A_n) with A_i=(spin_i,color_i,src_i):
-        for(unsigned int b=0; b<barcount; b++){
+        for(unsigned int b=0; b<numbaryons; b++){
             std::stringstream searchstring;
             for(unsigned int i=b; i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
@@ -229,38 +229,38 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         }
         for(unsigned int b=0; b<spincount; b++){
             std::stringstream searchstring;
-            for(unsigned int i=(barcount+3*b+0); i<static_cast<unsigned int>(order.size()); i++){
+            for(unsigned int i=(numbaryons+3*b+0); i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
                 searchstring.str("");
                 searchstring << "spin" << b << "\0";
                 if(order[i].compare(searchstring.str())==0){
-                    tmp=move_block(tmp,i,barcount+3*b+0);
+                    tmp=move_block(tmp,i,numbaryons+3*b+0);
                     //move element of order also:
-                    order.insert(order.begin()+barcount+3*b+0,order[i]);
+                    order.insert(order.begin()+numbaryons+3*b+0,order[i]);
                     order.erase(order.begin()+i+1);
                     continue;
                 }
             }
-            for(unsigned int i=(barcount+3*b+1); i<static_cast<unsigned int>(order.size()); i++){
+            for(unsigned int i=(numbaryons+3*b+1); i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
                 searchstring.str("");
                 searchstring << "color" << b << "\0";
                 if(order[i].compare(searchstring.str())==0){
-                    tmp=move_block(tmp,i,barcount+3*b+1);
+                    tmp=move_block(tmp,i,numbaryons+3*b+1);
                     //move element of order also:
-                    order.insert(order.begin()+barcount+3*b+1,order[i]);
+                    order.insert(order.begin()+numbaryons+3*b+1,order[i]);
                     order.erase(order.begin()+i+1);
                     continue;
                 }
             }
-            for(unsigned int i=(barcount+3*b+2); i<static_cast<unsigned int>(order.size()); i++){
+            for(unsigned int i=(numbaryons+3*b+2); i<static_cast<unsigned int>(order.size()); i++){
                 searchstring.clear();
                 searchstring.str("");
                 searchstring << "source" << b << "\0";
                 if(order[i].compare(searchstring.str())==0){
-                    tmp=move_block(tmp,i,barcount+3*b+2);
+                    tmp=move_block(tmp,i,numbaryons+3*b+2);
                     //move element of order also:
-                    order.insert(order.begin()+barcount+3*b+2,order[i]);
+                    order.insert(order.begin()+numbaryons+3*b+2,order[i]);
                     order.erase(order.begin()+i+1);
                     continue;
                 }
@@ -270,13 +270,13 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         
         //set quark-id vector:
         quark qrk;
-        for(unsigned int b=barcount; b<(9*barcount); b+=3){
+        for(unsigned int b=numbaryons; b<(9*numbaryons); b+=3){
             qrk.spinid=b+0;
             qrk.colorid=b+1;
             qrk.sourceid=b+2;
             quarks.push_back(qrk);
         }
-        for(unsigned int b=0; b<barcount; b++){
+        for(unsigned int b=0; b<numbaryons; b++){
             if(baryons[b].compare("neutron")==0){
                 quarks[0+3*b].flavourid=DOWN;
                 quarks[1+3*b].flavourid=DOWN;
@@ -291,7 +291,7 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
         
         if(!silent){
             std::cout << "The following quark content has been specified:" << std::endl;
-            for(unsigned int b=0; b<barcount; b++){
+            for(unsigned int b=0; b<numbaryons; b++){
                 std::cout << baryons[b] << b << ":" << std::endl;
                 for(unsigned int i=0; i<3; i++){
                     std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
@@ -314,6 +314,14 @@ fourvec<int> BBTensor::get_spos(unsigned int sourceid)const{
         return spos[sourceid];
     }
     else return fourvec<int>(-1,-1,-1,-1);
+}
+
+std::vector<std::string> BBTensor::get_baryons()const{
+    return baryons;
+}
+
+unsigned int BBTensor::get_numbaryons()const{
+    return numbaryons;
 }
 
 //friend functions:
@@ -355,7 +363,7 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     TTTensor result;
     
     //determine whether the number of internal quarks is the same:
-    if(t1.baryons.size()!=t2.baryons.size()){
+    if(t1.numbaryons!=t2.numbaryons){
         std::cerr << "BBTensor::dot: error, partial contractions not yet implemented!" << std::endl;
         return result;
     }
@@ -513,6 +521,7 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
     result.quarks=resquarks;
     result.spos=lhs.spos;
     result.baryons=resbaryons;
+    result.numbaryons=static_cast<unsigned int>(resbaryons.size());
     for(unsigned int f=0; f<6; f++) result.numquarksperflavour[f]=lhs.numquarksperflavour[f]+rhs.numquarksperflavour[f];
     
     return result;
@@ -601,6 +610,7 @@ int read_barblock(std::ifstream& input, BBTensor& tens){
     }
     delete [] head;
     tens.baryons=baryons;
+    tens.numbaryons=static_cast<unsigned int>(baryons.size());
     
     //source header:
     input.read(reinterpret_cast<char*>(&dummy),sizeof(double));
