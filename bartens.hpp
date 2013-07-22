@@ -94,8 +94,9 @@ public:
     }
     
     //operations:
-    TTTensor extract_data()const;
+    TTTensor get_data()const;
     //void join(const BBTensor& rhs, const bool& asym=false);
+    fourvec<int> get_spos(unsigned int sourceid)const;
     
     //friend functions:
     //this dot product exclusively acts on internal indices:

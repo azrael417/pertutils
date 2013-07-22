@@ -304,9 +304,16 @@ BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sou
     }
 };
 
-
-TTTensor BBTensor::extract_data()const{
+//API functions:
+TTTensor BBTensor::get_data()const{
     return data;
+}
+
+fourvec<int> BBTensor::get_spos(unsigned int sourceid)const{
+    if(sourceid<numsources){
+        return spos[sourceid];
+    }
+    else return fourvec<int>(-1,-1,-1,-1);
 }
 
 //friend functions:
