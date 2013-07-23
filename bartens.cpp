@@ -450,12 +450,6 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     
     //perform actual contraction:
     if(t1.numsources==t2.numsources){
-        
-        std::cout << "EQUAL" << std::endl;
-        t1.print_info(true);
-        t2.print_info(true);
-        exit(1);
-        
         result=dot(t1.data,idt1,t2.data,idt2);
     }
     else if(t1.numsources!=t2.numsources){
@@ -471,9 +465,14 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
         if(t1.numsources>t2.numsources){
             BBTensor tmpbb(extract_sources(t1,combi));
             
-            std::cout << "NOT EQUAL" << std::endl;
-            tmpbb.print_info(true);
-            t2.print_info(true);
+            std::cout << "idt1" << std::endl;
+            for(unsigned int i=0; i<idt1.size(); i++){
+                std::cout << idt1[i] << std::endl;
+            }
+            std::cout << "idt2" << std::endl;
+            for(unsigned int i=0; i<idt2.size(); i++){
+                std::cout << idt2[i] << std::endl;
+            }
             exit(1);
             
             result=dot(tmpbb.data,idt1,t2.data,idt2);
