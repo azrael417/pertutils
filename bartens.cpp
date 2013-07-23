@@ -464,6 +464,11 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
         
         if(t1.numsources>t2.numsources){
             BBTensor tmpbb(extract_sources(t1,combi));
+            
+            tmpbb.print_info(true);
+            t2.print_info(true);
+            exit(1);
+            
             result=dot(tmpbb.data,idt1,t2.data,idt2);
         
             for(unsigned int i=1; i<combcount; i++){
