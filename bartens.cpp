@@ -467,18 +467,7 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
         if(t1.numsources>t2.numsources){
             BBTensor tmpbb(extract_sources(t1,combi));
             
-            std::cout << "idt1" << std::endl;
-            for(unsigned int i=0; i<idt1.size(); i++){
-                std::cout << idt1[i] << std::endl;
-            }
-            std::cout << "idt2" << std::endl;
-            for(unsigned int i=0; i<idt2.size(); i++){
-                std::cout << idt2[i] << std::endl;
-            }
-            exit(1);
-            
             result=dot(tmpbb.data,idt1,t2.data,idt2);
-        
             for(unsigned int i=1; i<combcount; i++){
                 combi=comb.return_combination();
                 tmpbb=extract_sources(t1,combi);
@@ -498,6 +487,8 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
             result/=static_cast<double>(combcount);
         }
     }
+    
+    exit(1);
     
     return result;
 }
