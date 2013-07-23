@@ -540,6 +540,7 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
     TTTensor restens(kron(lhstens,rhstens));
     
     std::cout << "NACH KRON" << std::endl;
+    exit(1);
     
     //move external indices to the beginning of new tensor:
     for(unsigned int b=0; b<bcrhs; b++){
