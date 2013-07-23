@@ -486,11 +486,17 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
             }
             result/=static_cast<double>(combcount);
         }
-    }
-    
-    exit(1);
-    
+    }    
     return result;
+}
+
+//contract all in- and external quarks:
+dcomplex projectdot(const BBTensor& t1, const BBTensor& t2, const TTTensor& poltens){
+    TTTensor contraction(dot(t1,t2));
+    TTTensor restens(dot(contraction,poltens));
+    std::vector<unsigned int> index(1);
+    index[0]=0;
+    return restens(index);
 }
 
 
@@ -682,47 +688,4 @@ int read_barblock(std::ifstream& input, BBTensor& tens){
     
     return EXIT_SUCCESS;
 }
-
-//
-////contract all internal quarks:
-//
-////contract all external quarks. internal quarks have to be contracted before:
-//std::vector<dcomplex> project(const BBTensor& t1, const TTTensor& proj){
-//    std::vector<dcomplex> result;
-//    
-//    //collect external quarks:
-//    std::vector<unsigned int> extquarks,intquarks;
-//    unsigned int nqfcont[6];
-//    for(unsigned int f=0; f<6; f++) nqfcont[f]=0;
-//    for(unsigned int i=0; i<static_cast<unsigned int>(t1.quarks.size()); i++){
-//        if(t1.quarks[i].isexternal) extquarks.push_back(i);
-//        else{
-//            nqfcont[t1.quarks[i].flavourid]++;
-//            intquarks.push_back(i);
-//        }
-//    }
-//    if(intquarks.size()!=0){
-//        std::cerr << "BBTensor::dot: please contract the internal quarks first!" << std::endl;
-//        return result;
-//    }
-//    if( extquarks.size()!=proj.get_dim() ){
-//        std::cerr << "BBTensor::dot: error, the number of external quarks does not match or the dimension of your projection tensor!" << std::endl;
-//        return result;
-//    }
-//    
-//    //set up contraction indices:
-//    std::vector<unsigned int> ind;
-//    for(unsigned int i=0; i<static_cast<unsigned int>(extquarks.size()); i++){
-//        ind.push_back(i);
-//    }
-//    
-//    //perform contractions:
-//    std::vector<unsigned int> dum(1);
-//    dum[0]=0;
-//    for(unsigned int t=0; t<t1.nt; t++){
-//        TTTensor res(dot(t1.data[t],ind,proj,ind));
-//        result.push_back(res(dum));
-//    }
-//    return result;
-//}
 

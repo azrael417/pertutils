@@ -120,6 +120,8 @@ public:
 BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec);
 //dot product of internal quarks:
 TTTensor dot(const BBTensor& t1, const BBTensor& t2);
+//this routine computes the dot product and performs the spin projection:
+dcomplex projectdot(const BBTensor& t1, const BBTensor& t2, const TTTensor& poltens);
 //kronecker product of two baryon blocks:
 BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym=true);
 //writing a baryon block:
