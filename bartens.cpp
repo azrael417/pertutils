@@ -547,7 +547,7 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
                     std::cout << "COLSWAP " << quarkslhs[ql].colorid << " <-> " << quarksrhs[qr].colorid << std::endl;
                     tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
                     tmptens.print_info();
-                    std::cout << "SRCSWAP" << quarkslhs[ql].sourceid << " <-> " << quarksrhs[qr].sourceid << std::endl;
+                    std::cout << "SRCSWAP " << quarkslhs[ql].sourceid << " <-> " << quarksrhs[qr].sourceid << std::endl;
                     tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
                     tmptens.print_info();
                     std::cout << "DIFF " << std::endl;
