@@ -324,7 +324,7 @@ unsigned int BBTensor::get_numbaryons()const{
     return numbaryons;
 }
 
-void BBTensor::print_info()const{
+void BBTensor::print_info(const bool verbose)const{
     std::cout << "The following quark content has been specified:" << std::endl;
     for(unsigned int b=0; b<numbaryons; b++){
         std::cout << baryons[b] << b << ":" << std::endl;
@@ -333,6 +333,22 @@ void BBTensor::print_info()const{
             std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
             std::cout << "\t\t color: " << quarks[i+3*b].colorid << std::endl;
             std::cout << "\t\t source: " << quarks[i+3*b].sourceid << std::endl;
+        }
+    }
+    std::cout << "The source positions are:" << std::endl;
+    for(unsigned int s=0; s<numsources; s++){
+        std::cout << "\t\t" << spos[s] << std::endl;
+    }
+    if(verbose){
+        std::cout << "The Data Layout is:" << std::endl;
+        std::cout << "\t\t tensor dimensions: " << data.get_dim() << std::endl;
+        std::cout << "\t\t mode sizes: " << std::endl;
+        for(unsigned int d=0; d<data.get_dim(); d++){
+            std::cout << "\t\t\t n" << d << " " << data.get_nk(d) << std::endl;
+        }
+        std::cout << "\t\t ranks: " << std::endl;
+        for(unsigned int d=0; d<=data.get_dim(); d++){
+            std::cout << "\t\t\t r" << d << " " << data.get_rk(d) << std::endl;
         }
     }
 }
