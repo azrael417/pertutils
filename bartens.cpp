@@ -543,12 +543,16 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
                     std::cout << "ANTISYM " << ql << " " << qr << std::endl;
                     std::cout << "SPINSWAP " << quarkslhs[ql].spinid << " <-> " << quarksrhs[qr].spinid << std::endl;
                     tmptens=swap(restens,quarkslhs[ql].spinid, quarksrhs[qr].spinid);
+                    tmptens.print_info();
                     std::cout << "COLSWAP " << quarkslhs[ql].colorid << " <-> " << quarksrhs[qr].colorid << std::endl;
                     tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
+                    tmptens.print_info();
                     std::cout << "SRCSWAP" << quarkslhs[ql].sourceid << " <-> " << quarksrhs[qr].sourceid << std::endl;
                     tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
+                    tmptens.print_info();
                     std::cout << "DIFF " << std::endl;
                     restens-=tmptens;
+                    restens.print_info();
                 }
             }
         }
