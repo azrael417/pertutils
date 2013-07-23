@@ -451,6 +451,7 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     //perform actual contraction:
     if(t1.numsources==t2.numsources){
         
+        std::cout << "EQUAL" << std::endl;
         t1.print_info(true);
         t2.print_info(true);
         exit(1);
@@ -470,6 +471,7 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
         if(t1.numsources>t2.numsources){
             BBTensor tmpbb(extract_sources(t1,combi));
             
+            std::cout << "NOT EQUAL" << std::endl;
             tmpbb.print_info(true);
             t2.print_info(true);
             exit(1);
