@@ -550,6 +550,8 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
                     tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
                     tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
                     restens-=tmptens;
+                    
+                    std::cout << "ANTISYM " << ql << " " << qr << std::endl;
                 }
             }
         }
