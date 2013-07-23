@@ -547,14 +547,14 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
             for(unsigned int qr=0; qr<qcrhs; qr++){
                 if(quarkslhs[qr].flavourid==quarksrhs[qr].flavourid){
                     std::cout << "ANTISYM " << ql << " " << qr << std::endl;
-                    tmptens=swap(restens,quarkslhs[ql].spinid, quarksrhs[qr].spinid);
                     std::cout << "SPINSWAP " << quarkslhs[ql].spinid << " <-> " << quarksrhs[qr].spinid << std::endl;
-                    tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
+                    tmptens=swap(restens,quarkslhs[ql].spinid, quarksrhs[qr].spinid);
                     std::cout << "COLSWAP " << quarkslhs[ql].colorid << " <-> " << quarksrhs[qr].colorid << std::endl;
-                    tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
+                    tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
                     std::cout << "SRCSWAP" << quarkslhs[ql].sourceid << " <-> " << quarksrhs[qr].sourceid << std::endl;
-                    restens-=tmptens;
+                    tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
                     std::cout << "DIFF " << std::endl;
+                    restens-=tmptens;
                 }
             }
         }
