@@ -437,13 +437,11 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
                 idt1.push_back(t1.quarks[intquarks1[i]].spinid);
                 idt1.push_back(t1.quarks[intquarks1[i]].colorid);
                 idt1.push_back(t1.quarks[intquarks1[i]].sourceid);
-                continue;
             }
             if(t2.quarks[intquarks2[i]].flavourid==f){
                 idt2.push_back(t2.quarks[intquarks2[i]].spinid);
                 idt2.push_back(t2.quarks[intquarks2[i]].colorid);
                 idt2.push_back(t2.quarks[intquarks2[i]].sourceid);
-                continue;
             }
         }
     }
