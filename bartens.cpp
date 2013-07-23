@@ -450,6 +450,11 @@ TTTensor dot(const BBTensor& t1, const BBTensor& t2){
     
     //perform actual contraction:
     if(t1.numsources==t2.numsources){
+        
+        t1.print_info(true);
+        t2.print_info(true);
+        exit(1);
+        
         result=dot(t1.data,idt1,t2.data,idt2);
     }
     else if(t1.numsources!=t2.numsources){
