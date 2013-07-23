@@ -531,16 +531,9 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
     std::vector<quark> resquarks(quarkslhs);
     resquarks.insert(resquarks.end(),quarksrhs.begin(),quarksrhs.end());
     
-    std::cout << "MAL SEHEN" << std::endl;
-    
     //resulting tensor:
     TTTensor lhstens(lhs.data), rhstens(rhs.data);
-    
-    std::cout << "VOR KRON" << std::endl;
     TTTensor restens(kron(lhstens,rhstens));
-    
-    std::cout << "NACH KRON" << std::endl;
-    exit(1);
     
     //move external indices to the beginning of new tensor:
     for(unsigned int b=0; b<bcrhs; b++){
@@ -548,6 +541,7 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
     }
     
     std::cout << "NACH MOVE" << std::endl;
+    exit(1);
     
     //if antisymmetrization is required, perform anti-symmetrization:
     if(antisym){
