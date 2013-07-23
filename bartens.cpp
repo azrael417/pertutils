@@ -341,15 +341,7 @@ void BBTensor::print_info(const bool verbose)const{
     }
     if(verbose){
         std::cout << "The Data Layout is:" << std::endl;
-        std::cout << "\t\t tensor dimensions: " << data.get_dim() << std::endl;
-        std::cout << "\t\t mode sizes: " << std::endl;
-        for(unsigned int d=0; d<data.get_dim(); d++){
-            std::cout << "\t\t\t n" << d << " " << data.get_nk(d) << std::endl;
-        }
-        std::cout << "\t\t ranks: " << std::endl;
-        for(unsigned int d=0; d<=data.get_dim(); d++){
-            std::cout << "\t\t\t r" << d << " " << data.get_rk(d) << std::endl;
-        }
+        data.print_info();
     }
 }
 
@@ -539,6 +531,8 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
     for(unsigned int b=0; b<bcrhs; b++){
         restens=move_block(restens, b+bclhs+3*qclhs, bclhs+b);
     }
+    
+    restens.print_info();
     
     //if antisymmetrization is required, perform anti-symmetrization:
     if(antisym){
