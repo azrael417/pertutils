@@ -535,6 +535,8 @@ BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool ant
     
     //resulting tensor:
     TTTensor lhstens(lhs.data), rhstens(rhs.data);
+    
+    std::cout << "VOR KRON" << std::endl;
     TTTensor restens(kron(lhstens,rhstens));
     
     std::cout << "NACH KRON" << std::endl;
