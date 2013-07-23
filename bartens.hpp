@@ -99,6 +99,7 @@ public:
     fourvec<int> get_spos(unsigned int sourceid)const;
     std::vector<std::string> get_baryons()const;
     unsigned int get_numbaryons()const;
+    void print_info()const;
     
     //friend functions:
     //extract sub-tensor by dropping sources:

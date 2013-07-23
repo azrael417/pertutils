@@ -324,6 +324,19 @@ unsigned int BBTensor::get_numbaryons()const{
     return numbaryons;
 }
 
+void BBTensor::print_info()const{
+    std::cout << "The following quark content has been specified:" << std::endl;
+    for(unsigned int b=0; b<numbaryons; b++){
+        std::cout << baryons[b] << b << ":" << std::endl;
+        for(unsigned int i=0; i<3; i++){
+            std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
+            std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
+            std::cout << "\t\t color: " << quarks[i+3*b].colorid << std::endl;
+            std::cout << "\t\t source: " << quarks[i+3*b].sourceid << std::endl;
+        }
+    }
+}
+
 //friend functions:
 BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec){
     BBTensor result(a);
