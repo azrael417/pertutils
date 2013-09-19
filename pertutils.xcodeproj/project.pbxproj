@@ -111,7 +111,7 @@
 		18C7933C141A6EA600680CE1 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Bergische Universität Wuppertal";
 			};
 			buildConfigurationList = 18C7933F141A6EA600680CE1 /* Build configuration list for PBXProject "pertutils" */;
@@ -161,9 +161,7 @@
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
-				HEADER_SEARCH_PATHS = (
-					"/Users/thorstenkurth/Documents/Universität/Physik/Arbeitsgruppe\\ Fodor/Code/**",
-				);
+				HEADER_SEARCH_PATHS = "/Users/thorstenkurth/Documents/Universität/Physik/Arbeitsgruppe\\ Fodor/Code/**";
 				INSTALL_PATH = /Users/thorstenkurth/lib;
 				LD_DYLIB_INSTALL_NAME = "/Users/thorstenkurth/lib/$(EXECUTABLE_PATH)";
 				OTHER_LDFLAGS = (
@@ -179,8 +177,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -189,11 +188,13 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				"GCC_C_LANGUAGE_STANDARD[sdk=macosx10.7][arch=x86_64]" = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
