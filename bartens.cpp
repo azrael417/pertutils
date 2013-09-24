@@ -9,6 +9,46 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
+std::string return_flavour(const quark& qrk){
+    switch(qrk.flavourid){
+        case UP:
+            return "u";
+        case DOWN:
+            return "d";
+        case STRANGE:
+            return "s";
+        case CHARM:
+            return "c";
+        case BOTTOM:
+            return "b";
+        case TOP:
+            return "t";
+        default:
+            return "none";
+    }
+}
+
+bool find(const std::vector<std::string>& ordering, const unsigned int& count, const std::string searchstring){
+    bool found=true,tmpfound,fail=false;
+    for(unsigned int b=0; b<count; b++){
+        tmpfound=false;
+        for(unsigned int i=0; i<static_cast<unsigned int>(ordering.size()); i++){
+            std::stringstream srch;
+            srch << searchstring << b << "\0";
+            if(ordering[i].compare(srch.str())==0){
+                tmpfound=true;
+                continue;
+            }
+        }
+        found*=tmpfound;
+    }
+    if(!found){
+        std::cerr << "BBTensor::BBtensor: error, you did not specify all " << searchstring << " indices correctly!" << std::endl;
+        fail=true;
+    }
+    return fail;
+}
+
 BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : spos(sourcepositions), baryons(bartypes), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons((0)){
     unsigned int colcount=0,spincount=0,sourcecount=0;
     bool fail=false;

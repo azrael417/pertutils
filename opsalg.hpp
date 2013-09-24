@@ -23,6 +23,8 @@ public:
     
     //usual members:
     void clear();
+    baryon_op& apply(const std::string&);
+    baryon_op& bar();
     
     //operators:
     baryon_op& operator=(const baryon_op& rhs);
