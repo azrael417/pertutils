@@ -27,13 +27,18 @@ public:
     //operators:
     baryon_op& operator=(const baryon_op& rhs);
     baryon_op& operator+=(const baryon_op& rhs);
+    baryon_op& operator-=(const baryon_op& rhs);
+    baryon_op& operator*=(const double& rhs);
     baryon_op& operator*=(const baryon_op& rhs);
+    friend baryon_op operator+(const baryon_op& lhs, const baryon_op& rhs);
+    friend baryon_op operator-(const baryon_op& lhs, const baryon_op& rhs);
+    friend baryon_op operator*(const baryon_op& lhs, const double& rhs);
+    friend baryon_op operator*(const double& lhs, const baryon_op& rhs);
     friend baryon_op operator*(const baryon_op& lhs, const baryon_op& rhs);
     friend std::ostream& operator<<(std::ostream &os,const baryon_op &obj);
     
     //destructors:
     ~baryon_op();
 };
-
 
 #endif

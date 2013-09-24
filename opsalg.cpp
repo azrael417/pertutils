@@ -49,6 +49,20 @@ baryon_op& baryon_op::operator+=(const baryon_op& rhs){
     return *this;
 }
 
+baryon_op& baryon_op::operator-=(const baryon_op& rhs){
+    std::vector<double> tmpcoeffs(rhs.coefficients);
+    for(unsigned int n=0; n<tmpcoeffs.size(); n++) tmpcoeffs[n]*=-1.;
+    opnames.insert( opnames.end(), rhs.opnames.begin(), rhs.opnames.end() );
+    coefficients.insert( coefficients.end(), tmpcoeffs.begin(), tmpcoeffs.end() );
+    spinids.insert( spinids.end(), rhs.spinids.begin(), rhs.spinids.end() );
+    return *this;
+}
+
+baryon_op& baryon_op::operator*=(const double& rhs){
+    for(unsigned int n=0; n<coefficients.size(); n++) coefficients[n]*=rhs;
+    return *this;
+}
+
 baryon_op& baryon_op::operator*=(const baryon_op& rhs){
     unsigned int nn=static_cast<unsigned int>(opnames.size());
     unsigned int mm=static_cast<unsigned int>(rhs.opnames.size());
@@ -67,8 +81,32 @@ baryon_op& baryon_op::operator*=(const baryon_op& rhs){
 }
 
 //binary:
+baryon_op operator+(const baryon_op& lhs, const baryon_op& rhs){
+    baryon_op result(lhs);
+    result+=rhs;
+    return result;
+}
+
+baryon_op operator-(const baryon_op& lhs, const baryon_op& rhs){
+    baryon_op result(lhs);
+    result-=rhs;
+    return result;
+}
+
+baryon_op operator*(const baryon_op& lhs, const double& rhs){
+    baryon_op result(lhs);
+    result*=rhs;
+    return result;
+}
+
+baryon_op operator*(const double& lhs, const baryon_op& rhs){
+    baryon_op result(rhs);
+    result*=lhs;
+    return result;
+}
+
 baryon_op operator*(const baryon_op& lhs, const baryon_op& rhs){
-    baryon_op result=lhs;
+    baryon_op result(lhs);
     result*=rhs;
     return result;
 }
