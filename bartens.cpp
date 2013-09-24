@@ -9,7 +9,7 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons((0)){
+BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : spos(sourcepositions), baryons(bartypes), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons((0)){
     unsigned int colcount=0,spincount=0,sourcecount=0;
     bool fail=false;
     
@@ -157,7 +157,7 @@ BBTensor::BBTensor(const std::vector<dcomplex>& array, const std::vector< fourve
 };
 
 
-BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : baryons(bartypes), spos(sourcepositions), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons(0){
+BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const std::vector<std::string>& ordering, const std::vector<std::string>& bartypes, const bool silent) : spos(sourcepositions), baryons(bartypes), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons(0){
     unsigned int colcount=0,spincount=0,sourcecount=0;
     bool fail=false;
     

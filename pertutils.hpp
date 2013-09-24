@@ -14,4 +14,5 @@
 #include "bartens.hpp"
 #include "runnings.hpp"
 #include "chiptfuncs.hpp"
+#include "opsalg.hpp"
 #endif
