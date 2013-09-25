@@ -61,8 +61,14 @@ public:
     quark_cont(const baryon_op&);
     ~quark_cont(){ this->clear(); };
     
+    //operators:
+    quark_cont& operator+=(const quark_cont& rhs);
+    quark_cont& operator*=(const quark_cont& rhs);
+    friend std::ostream& operator<<(std::ostream &os,const quark_cont &obj);
+    
     //member functions:
     void clear();
 };
 
+quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<unsigned int>& spins, const double& coeff);
 #endif

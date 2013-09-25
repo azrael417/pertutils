@@ -43,29 +43,29 @@ baryon_op& baryon_op::bar(){
     for(unsigned int n=0; n<opnames.size(); n++){
         std::string tmpstring=opnames[n];
         double sign=1.;
-        size_t pos=0;
+        size_t pos=-1;
         while((pos=tmpstring.find("Dp",pos+1))!=std::string::npos){
             sign*=-1.;
             tmpstring.replace(pos, 2, "DM");
         }
-        pos=0;
+        pos=-1;
         while((pos=tmpstring.find("Dm",pos+1))!=std::string::npos){
             sign*=-1.;
             tmpstring.replace(pos, 2, "Dp");
         }
-        pos=0;
+        pos=-1;
         while((pos=tmpstring.find("DM",pos+1))!=std::string::npos){
             tmpstring.replace(pos, 2, "Dm");
         }
-        pos=0;
+        pos=-1;
         while((pos=tmpstring.find("Nb",pos+1))!=std::string::npos){
             tmpstring.replace(pos, 2, "nb");
         }
-        pos=0;
+        pos=-1;
         while((pos=tmpstring.find("N",pos+1))!=std::string::npos){
             tmpstring.insert(pos+1, "b");
         }
-        pos=0;
+        pos=-1;
         while((pos=tmpstring.find("nb",pos+1))!=std::string::npos){
             tmpstring.replace(pos, 2, "N");
             //tmpstring.erase(pos+1);
@@ -193,7 +193,7 @@ quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const
     }
 }
 
-quark_cont insert_op(const unsigned int& opnumber, const std::string& opname, const NRvector<unsigned int>& spins, const double& coeff){
+quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<unsigned int>& spins, const double& coeff){
     std::vector<NRvector<std::string> > quarks;
     std::vector<NRvector<std::string> > attributess;
     std::vector<NRvector<std::string> > idcs;
@@ -219,8 +219,9 @@ quark_cont insert_op(const unsigned int& opnumber, const std::string& opname, co
     avec[2]="loc";
     
     //prefactor eps_abc for every single term:
-    std::string tmp="eps_";
-    for(unsigned int s=0; s<3; s++) tmp+=col[s]+std::to_string(opnumber);
+    std::string tmp="eps_(";
+    for(unsigned int s=0; s<2; s++) tmp+=col[s]+std::to_string(opnumber)+";";
+    tmp+=col[2]+std::to_string(opnumber)+")";
     sym_coeff.push_back(tmp);
     sym_coeff.push_back(tmp);
     
@@ -288,14 +289,80 @@ quark_cont insert_op(const unsigned int& opnumber, const std::string& opname, co
 quark_cont::quark_cont(const baryon_op& barop){
     std::vector<std::string> token;
     for(unsigned int n=0; n<barop.opnames.size(); n++){
+        token.clear();
         tokenize(barop.opnames[n], token);
-        std::string tmp("");
-        for(unsigned int s=0; s<token.size(); s++){
-            
-            std::cout << token[s] << std::endl;
+        quark_cont qcont(get_op(0,token[0],barop.spinids[n],barop.coefficients[n]));
+        for(unsigned int s=1; s<token.size(); s++){
+            qcont*=get_op(s,token[s],barop.spinids[n],barop.coefficients[n]);
         }
-        exit(1);
+        (*this)+=qcont;
     }
+}
+
+quark_cont& quark_cont::operator+=(const quark_cont& rhs){
+    quarks.insert( quarks.end(), rhs.quarks.begin(), rhs.quarks.end() );
+    attributes.insert( attributes.end(), rhs.attributes.begin(), rhs.attributes.end() );
+    idcs.insert( idcs.end(), rhs.idcs.begin(), rhs.idcs.end() );
+    sym_coeff.insert( sym_coeff.end(), rhs.sym_coeff.begin(), rhs.sym_coeff.end() );
+    num_coeff.insert( num_coeff.end(), rhs.num_coeff.begin(), rhs.num_coeff.end() );
+    return *this;
+}
+
+quark_cont& quark_cont::operator*=(const quark_cont& rhs){
+    unsigned int nn=static_cast<unsigned int>(quarks.size());
+    unsigned int mm=static_cast<unsigned int>(rhs.quarks.size());
+    std::vector<NRvector<std::string> > tmpquarks;
+    std::vector<NRvector<std::string> > tmpattributes;
+    std::vector<NRvector<std::string> > tmpidcs;
+    std::vector<std::string> tmpsym_coeff;
+    std::vector<double> tmpnum_coeff;
+    
+    for(unsigned int n=0; n<nn; n++) for(unsigned int m=0; m<mm; m++){
+        //quarks:
+        NRvector<std::string> tmpvec(quarks[n]);
+        tmpvec.append(rhs.quarks[m]);
+        tmpquarks.push_back(tmpvec);
+        
+        //attributes:
+        tmpvec.assign(attributes[n]);
+        tmpvec.append(rhs.attributes[m]);
+        tmpattributes.push_back(tmpvec);
+        
+        //indices:
+        tmpvec.assign(idcs[n]);
+        tmpvec.append(rhs.idcs[m]);
+        tmpidcs.push_back(tmpvec);
+        
+        std::string tmp=sym_coeff[n]+" "+rhs.sym_coeff[m];
+        tmpsym_coeff.push_back(tmp);
+        tmpnum_coeff.push_back(num_coeff[n]*rhs.num_coeff[m]);
+    }
+    quarks=tmpquarks;
+    attributes=tmpattributes;
+    idcs=tmpidcs;
+    sym_coeff=tmpsym_coeff;
+    num_coeff=tmpnum_coeff;
+    
+    return *this;
+}
+
+std::ostream& operator<<(std::ostream &os,const quark_cont &obj){
+    os.precision(10);
+    std::string tmp;
+    for(unsigned int n=0; n<obj.quarks.size(); n++){
+        if(obj.num_coeff[n]>=0) tmp=" + ";
+        else tmp=" - ";
+        tmp+=obj.sym_coeff[n]+" *";
+        
+        //check for coeff=0 and coeff=+/-1:
+        if(fabs(obj.num_coeff[n])<1.e-8) continue;
+        os << tmp;
+        if(fabs(fabs(obj.num_coeff[n])-1.)>1.e-8) os << " " << fabs(obj.num_coeff[n]) << " *";
+        for(unsigned int s=0; s<obj.quarks[n].dim(); s++){
+            os << " " << obj.quarks[n][s] << "_(" << obj.idcs[n][s] << ")";
+        }
+    }
+    return os;
 }
 
 void quark_cont::clear(){
