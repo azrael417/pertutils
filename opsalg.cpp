@@ -9,6 +9,11 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
+//******************************************************************
+//******************************************************************
+//START baryon_op
+//******************************************************************
+//******************************************************************
 //constructors
 baryon_op::baryon_op(const std::vector<std::string>& names, const std::vector<double>& coeffs, const std::vector<NRvector<unsigned int> >& spins): spinids(spins), opnames(names), coefficients(coeffs){
     //check sanity:
@@ -19,11 +24,6 @@ baryon_op::baryon_op(const std::vector<std::string>& names, const std::vector<do
 };
 
 baryon_op::baryon_op(const baryon_op& rhs): spinids(rhs.spinids), opnames(rhs.opnames), coefficients(rhs.coefficients){};
-
-//destructors:
-baryon_op::~baryon_op(){
-    this->clear();
-}
 
 //member functions:
 void baryon_op::clear(){
@@ -43,17 +43,32 @@ baryon_op& baryon_op::bar(){
     for(unsigned int n=0; n<opnames.size(); n++){
         std::string tmpstring=opnames[n];
         double sign=1.;
-        size_t pos;
-        while((pos=tmpstring.find("Dp"))!=std::string::npos){
+        size_t pos=0;
+        while((pos=tmpstring.find("Dp",pos+1))!=std::string::npos){
             sign*=-1.;
             tmpstring.replace(pos, 2, "DM");
         }
-        while((pos=tmpstring.find("Dm"))!=std::string::npos){
+        pos=0;
+        while((pos=tmpstring.find("Dm",pos+1))!=std::string::npos){
             sign*=-1.;
             tmpstring.replace(pos, 2, "Dp");
         }
-        while((pos=tmpstring.find("DM"))!=std::string::npos){
+        pos=0;
+        while((pos=tmpstring.find("DM",pos+1))!=std::string::npos){
             tmpstring.replace(pos, 2, "Dm");
+        }
+        pos=0;
+        while((pos=tmpstring.find("Nb",pos+1))!=std::string::npos){
+            tmpstring.replace(pos, 2, "nb");
+        }
+        pos=0;
+        while((pos=tmpstring.find("N",pos+1))!=std::string::npos){
+            tmpstring.insert(pos+1, "b");
+        }
+        pos=0;
+        while((pos=tmpstring.find("nb",pos+1))!=std::string::npos){
+            tmpstring.replace(pos, 2, "N");
+            //tmpstring.erase(pos+1);
         }
         opnames[n]=tmpstring;
         coefficients[n]*=sign;
@@ -158,3 +173,140 @@ std::ostream& operator<<(std::ostream &os,const baryon_op &obj){
     }
     return os;
 }
+
+//******************************************************************
+//******************************************************************
+//END baryon_op
+//******************************************************************
+//******************************************************************
+
+//******************************************************************
+//******************************************************************
+//START quark_cont
+//******************************************************************
+//******************************************************************
+quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff){
+    //check for consistency:
+    if(quarks.size()!=attributes.size() || quarks.size()!=idcs.size() || quarks.size()!=sym_coeff.size() || quarks.size()!=num_coeff.size()){
+        std::cerr << "quark_cont::quark_cont: internal structure error!" << std::endl;
+        this->clear();
+    }
+}
+
+quark_cont insert_op(const unsigned int& opnumber, const std::string& opname, const NRvector<unsigned int>& spins, const double& coeff){
+    std::vector<NRvector<std::string> > quarks;
+    std::vector<NRvector<std::string> > attributess;
+    std::vector<NRvector<std::string> > idcs;
+    std::vector<std::string> sym_coeff;
+    std::vector<double> num_coeff;
+    
+    NRvector<std::string> qvec(3);
+    NRvector<std::string> avec(3);
+    NRvector<std::string> ivec(3);
+    
+    //indices:
+    std::string col[3];
+    col[0]="a";
+    col[1]="b";
+    col[2]="c";
+    for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+std::to_string(opnumber)+";"+std::to_string(spins[s+opnumber]);
+    idcs.push_back(ivec);
+    idcs.push_back(ivec);
+    
+    //attributes:
+    avec[0]="loc";
+    avec[1]="loc";
+    avec[2]="loc";
+    
+    //prefactor eps_abc for every single term:
+    std::string tmp="eps_";
+    for(unsigned int s=0; s<3; s++) tmp+=col[s]+std::to_string(opnumber);
+    sym_coeff.push_back(tmp);
+    sym_coeff.push_back(tmp);
+    
+    size_t pos;
+    bool bar=false;
+    std::string tmpstring=opname;
+    if((pos=tmpstring.find("P"))!=std::string::npos){
+        if(tmpstring.find("b")==(pos+1)) bar=true;
+        
+        qvec[0]="u";
+        qvec[1]="d";
+        qvec[2]="u";
+        if(bar){
+            for(unsigned int s=0; s<3; s++) qvec[s]+="b";
+        }
+        quarks.push_back(qvec);
+        num_coeff.push_back(sqrt(1./2.)*coeff);
+        
+        qvec[0]="d";
+        qvec[1]="u";
+        qvec[2]="u";
+        if(bar){
+            for(unsigned int s=0; s<3; s++) qvec[s]+="b";
+        }
+        quarks.push_back(qvec);
+        num_coeff.push_back(-sqrt(1./2.)*coeff);
+        
+        if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
+        else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
+    }
+    else if((pos=tmpstring.find("N"))!=std::string::npos){
+        if(tmpstring.find("b")==(pos+1)) bar=true;
+        
+        qvec[0]="d";
+        qvec[1]="u";
+        qvec[2]="d";
+        if(bar){
+            for(unsigned int s=0; s<3; s++) qvec[s]+="b";
+        }
+        quarks.push_back(qvec);
+        num_coeff.push_back(sqrt(1./2.)*coeff);
+        
+        qvec[0]="u";
+        qvec[1]="d";
+        qvec[2]="d";
+        if(bar){
+            for(unsigned int s=0; s<3; s++) qvec[s]+="b";
+        }
+        quarks.push_back(qvec);
+        num_coeff.push_back(-sqrt(1./2.)*coeff);
+        
+        if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
+        else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
+    }
+    
+    if(tmpstring.compare("")!=0){
+        avec[2]=tmpstring;
+    }
+    attributess.push_back(avec);
+    attributess.push_back(avec);
+    
+    return quark_cont(quarks, attributess, idcs, sym_coeff, num_coeff);
+}
+
+quark_cont::quark_cont(const baryon_op& barop){
+    std::vector<std::string> token;
+    for(unsigned int n=0; n<barop.opnames.size(); n++){
+        tokenize(barop.opnames[n], token);
+        std::string tmp("");
+        for(unsigned int s=0; s<token.size(); s++){
+            
+            std::cout << token[s] << std::endl;
+        }
+        exit(1);
+    }
+}
+
+void quark_cont::clear(){
+    quarks.clear();
+    attributes.clear();
+    idcs.clear();
+    sym_coeff.clear();
+    num_coeff.clear();
+}
+//******************************************************************
+//******************************************************************
+//END quark_op
+//******************************************************************
+//******************************************************************
