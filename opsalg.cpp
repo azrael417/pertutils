@@ -209,7 +209,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
     col[0]="a";
     col[1]="b";
     col[2]="c";
-    for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+std::to_string(opnumber)+";"+spins[s+opnumber];
+    for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+std::to_string(opnumber)+","+spins[s+3*opnumber];
     idcs.push_back(ivec);
     idcs.push_back(ivec);
     
@@ -220,7 +220,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
     
     //prefactor eps_abc for every single term:
     std::string tmp="eps_(";
-    for(unsigned int s=0; s<2; s++) tmp+=col[s]+std::to_string(opnumber)+";";
+    for(unsigned int s=0; s<2; s++) tmp+=col[s]+std::to_string(opnumber)+",";
     tmp+=col[2]+std::to_string(opnumber)+")";
     sym_coeff.push_back(tmp);
     sym_coeff.push_back(tmp);
@@ -375,31 +375,28 @@ void quark_cont::clear(){
     num_coeff.clear();
 }
 
-static int contract_helper(const NRvector<std::string>& quarks, const NRvector<std::string>& attributes, const NRvector<std::string>& idcs){
-    //copy vectors:
-    NRvector<std::string> tmpquarks(quarks), tmpattributes(attributes), tmpidcs(idcs);
-    
+static int contract_helper(const NRvector<std::string>& quarks, const NRvector<std::string>& attributes, const NRvector<std::string>& idcs, std::vector<NRvector<std::string> >& resprops, std::vector<NRvector<std::string> >& residcs, std::vector<double>& signs){
     //count quarks and barred-quarks first and compare;
     unsigned int nu=0, nubar=0, nd=0, ndbar=0, ns=0, nsbar=0;
-    for(unsigned int s=0; s<tmpquarks.dim(); s++){
-        if(tmpquarks[s].find("ub")==0){
+    for(unsigned int s=0; s<quarks.dim(); s++){
+        if(quarks[s].find("ub")==0){
             nubar++;
         }
-        else if(tmpquarks[s].find("u")==0){
+        else if(quarks[s].find("u")==0){
             nu++;
         }
         
-        if(tmpquarks[s].find("db")==0){
+        if(quarks[s].find("db")==0){
             ndbar++;
         }
-        else if(tmpquarks[s].find("d")==0){
+        else if(quarks[s].find("d")==0){
             nd++;
         }
         
-        if(tmpquarks[s].find("sb")==0){
+        if(quarks[s].find("sb")==0){
             nsbar++;
         }
-        else if(tmpquarks[s].find("s")==0){
+        else if(quarks[s].find("s")==0){
             ns++;
         }
     }
@@ -410,45 +407,135 @@ static int contract_helper(const NRvector<std::string>& quarks, const NRvector<s
     }
     
     //sort vector: innermost: u, outermost s:
-    std::vector<unsigned int> table(tmpquarks.dim());
+    std::vector<unsigned int> table(quarks.dim());
     unsigned int runs=0,rund=ns,runu=ns+nd,runubar=ns+nd+nu,rundbar=ns+nd+nu+nubar,runsbar=ns+nd+nu+nubar+ndbar;
-    for(unsigned int s=0; s<tmpquarks.dim(); s++){
-        if(tmpquarks[s].find("s")==0 && tmpquarks[s].find("sb")!=0){
+    for(unsigned int s=0; s<quarks.dim(); s++){
+        if(quarks[s].find("s")==0 && quarks[s].find("sb")!=0){
             table[s]=runs;
             runs++;
         }
-        else if(tmpquarks[s].find("d")==0 && tmpquarks[s].find("db")!=0){
+        else if(quarks[s].find("d")==0 && quarks[s].find("db")!=0){
             table[s]=rund;
             rund++;
         }
-        else if(tmpquarks[s].find("u")==0 && tmpquarks[s].find("ub")!=0){
+        else if(quarks[s].find("u")==0 && quarks[s].find("ub")!=0){
             table[s]=runu;
             runu++;
         }
-        else if(tmpquarks[s].find("ub")==0){
+        else if(quarks[s].find("ub")==0){
             table[s]=runubar;
             runubar++;
         }
-        else if(tmpquarks[s].find("db")==0){
+        else if(quarks[s].find("db")==0){
             table[s]=rundbar;
             rundbar++;
         }
-        else if(tmpquarks[s].find("sb")==0){
+        else if(quarks[s].find("sb")==0){
             table[s]=runsbar;
             runsbar++;
         }
     }
-    for(unsigned int i=0; i<table.size(); i++) std::cout << table[i] << std::endl;
-    exit(1);
+    
+    //sort vectors;
+    NRvector<std::string> tmpquarks(quarks.dim()), tmpattributes(quarks.dim()), tmpidcs(quarks.dim());
+    for(unsigned int s=0; s<tmpquarks.dim(); s++){
+        tmpquarks[table[s]]=quarks[s];
+        tmpattributes[table[s]]=attributes[s];
+        tmpidcs[table[s]]=idcs[s];
+    }
+    int globpar=sort(table);
+    
+    //compute number of contractions:
+    unsigned int nscont=static_cast<unsigned int>(factrl(static_cast<int>(ns)));
+    unsigned int ndcont=static_cast<unsigned int>(factrl(static_cast<int>(nd)));
+    unsigned int nucont=static_cast<unsigned int>(factrl(static_cast<int>(nu)));
+    unsigned int ncont=nscont*ndcont*nucont;
+    
+    //initialize vectors:
+    signs.resize(ncont);
+    resprops.resize(ncont);
+    residcs.resize(ncont);
+    
+    //go through contractions:
+    std::vector<unsigned int> svec(ns),svectmp(ns);
+    std::vector<unsigned int> dvec(nd),dvectmp(nd);
+    std::vector<unsigned int> uvec(nu),uvectmp(nu);
+    for(unsigned int s=0; s<ns; s++) svec[s]=s;
+    for(unsigned int s=0; s<nd; s++) dvec[s]=s;
+    for(unsigned int s=0; s<nu; s++) uvec[s]=s;
+    int spar,dpar,upar;
+    
+    NRvector<std::string> props(ns+nd+nu);
+    NRvector<std::string> indices(ns+nd+nu);
+    for(unsigned int nsc=0; nsc<nscont; nsc++){
+        reverse_copy(svec.begin(),svec.end(),svectmp.begin());
+        
+        for(unsigned int s=0; s<ns; s++){
+            unsigned int offs=ns+nd+nu+nubar+ndbar+svectmp[s];
+            props[s]="Ss("+tmpattributes[s]+";"+tmpattributes[offs]+")";
+            indices[s]="("+tmpidcs[s]+";"+tmpidcs[offs]+")";
+        }
+        spar=sort(svectmp);
+        
+        for(unsigned int ndc=0; ndc<ndcont; ndc++){
+            reverse_copy(dvec.begin(),dvec.end(),dvectmp.begin());
+            
+            for(unsigned int d=0; d<nd; d++){
+                unsigned int offd=ns+nd+nu+nubar+dvectmp[d];
+                props[ns+d]="Sd("+tmpattributes[ns+d]+";"+tmpattributes[offd]+")";
+                indices[ns+d]="("+tmpidcs[ns+d]+";"+tmpidcs[offd]+")";
+            }
+            dpar=sort(dvectmp);
+            for(unsigned int nuc=0; nuc<nucont; nuc++){
+                reverse_copy(uvec.begin(),uvec.end(),uvectmp.begin());
+                for(unsigned int u=0; u<nu; u++){
+                    unsigned int offu=ns+nd+nu+uvectmp[u];
+                    props[ns+nd+u]="Su("+tmpattributes[ns+nd+u]+";"+tmpattributes[offu]+")";
+                    indices[ns+nd+u]="("+tmpidcs[ns+nd+u]+";"+tmpidcs[offu]+")";
+                }
+                upar=sort(uvectmp);
+                
+                unsigned int idx=nuc+nucont*(ndc+ndcont*nsc);
+                signs[idx]=static_cast<double>(globpar*upar*dpar*spar);
+                resprops[idx]=props;
+                residcs[idx]=indices;
+                
+                std::next_permutation(uvec.begin(),uvec.end());
+            }
+            std::next_permutation(dvec.begin(),dvec.end());
+        }
+        std::next_permutation(svec.begin(),svec.end());
+    }
     
     return EXIT_SUCCESS;
 }
 
 void quark_cont::contract(){
+    std::vector<NRvector<std::string> > resprops;
+    std::vector<NRvector<std::string> > residcs;
+    std::vector<double> signs;
     
+    std::string tmp="";
     for(unsigned int n=0; n<quarks.size(); n++){
-        contract_helper(quarks[n],attributes[n],idcs[n]);
+        std::vector<NRvector<std::string> > tmpprops;
+        std::vector<NRvector<std::string> > tmpidcs;
+        std::vector<double> tmpsigns;
+        contract_helper(quarks[n],attributes[n],idcs[n],tmpprops,tmpidcs,tmpsigns);
+        resprops.insert(resprops.end(), tmpprops.begin(), tmpprops.end());
+        residcs.insert(residcs.end(), tmpidcs.begin(), tmpidcs.end());
+        signs.insert(signs.end(), tmpsigns.begin(), tmpsigns.end());
+        
+        tmp+=(num_coeff[n]<0. ? " - " : " + ");
+        tmp+=std::to_string(fabs(num_coeff[n]))+" * "+sym_coeff[n]+" * [ ";
+        for(unsigned int s=0; s<tmpprops.size(); s++){
+            tmp+=(tmpsigns[s]>0. ? "+ " : "- ");
+            for(unsigned int p=0; p<tmpprops[s].dim(); p++){
+                tmp+=tmpprops[s][p]+"_"+tmpidcs[s][p]+" ";
+            }
+        }
+        tmp+="]\n";
     }
+    std::cout << tmp << std::endl;
 }
 //******************************************************************
 //******************************************************************
