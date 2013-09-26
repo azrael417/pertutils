@@ -13,14 +13,14 @@ class quark_cont;
 
 class baryon_op{
 private:
-    std::vector<NRvector<unsigned int> > spinids;
+    std::vector<NRvector<std::string> > spinids;
     std::vector<std::string> opnames;
     std::vector<double> coefficients;
     
 public:
     //constructors:
     baryon_op(){};
-    baryon_op(const std::vector<std::string>&,const std::vector<double>&,const std::vector<NRvector<unsigned int> >&);
+    baryon_op(const std::vector<std::string>&,const std::vector<double>&,const std::vector<NRvector<std::string> >&);
     baryon_op(const baryon_op&);
     
     //usual members:
@@ -68,7 +68,8 @@ public:
     
     //member functions:
     void clear();
+    void contract();
 };
 
-quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<unsigned int>& spins, const double& coeff);
+quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff);
 #endif

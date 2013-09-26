@@ -15,7 +15,7 @@
 //******************************************************************
 //******************************************************************
 //constructors
-baryon_op::baryon_op(const std::vector<std::string>& names, const std::vector<double>& coeffs, const std::vector<NRvector<unsigned int> >& spins): spinids(spins), opnames(names), coefficients(coeffs){
+baryon_op::baryon_op(const std::vector<std::string>& names, const std::vector<double>& coeffs, const std::vector<NRvector<std::string> >& spins): spinids(spins), opnames(names), coefficients(coeffs){
     //check sanity:
     if(opnames.size()!=coefficients.size() || opnames.size()!=spinids.size()){
         std::cerr << "baryon_op::baryon_op: inconsistent sizes!" << std::endl;
@@ -111,13 +111,13 @@ baryon_op& baryon_op::operator*=(const baryon_op& rhs){
     unsigned int nn=static_cast<unsigned int>(opnames.size());
     unsigned int mm=static_cast<unsigned int>(rhs.opnames.size());
     std::vector<std::string> tmpnames;
-    std::vector<NRvector<unsigned int> > tmpspins;
+    std::vector<NRvector<std::string> > tmpspins;
     std::vector<double> tmpcoeffs;
     
     for(unsigned int n=0; n<nn; n++) for(unsigned int m=0; m<mm; m++){
         tmpnames.push_back(opnames[n]+" "+rhs.opnames[m]);
         tmpcoeffs.push_back(coefficients[n]*coefficients[m]);
-        NRvector<unsigned int> tmpvec(spinids[n]);
+        NRvector<std::string> tmpvec(spinids[n]);
         tmpspins.push_back(tmpvec.append(spinids[m]));
     }
     opnames=tmpnames;
@@ -193,7 +193,7 @@ quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const
     }
 }
 
-quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<unsigned int>& spins, const double& coeff){
+quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff){
     std::vector<NRvector<std::string> > quarks;
     std::vector<NRvector<std::string> > attributess;
     std::vector<NRvector<std::string> > idcs;
@@ -209,7 +209,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
     col[0]="a";
     col[1]="b";
     col[2]="c";
-    for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+std::to_string(opnumber)+";"+std::to_string(spins[s+opnumber]);
+    for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+std::to_string(opnumber)+";"+spins[s+opnumber];
     idcs.push_back(ivec);
     idcs.push_back(ivec);
     
@@ -359,18 +359,96 @@ std::ostream& operator<<(std::ostream &os,const quark_cont &obj){
         os << tmp;
         if(fabs(fabs(obj.num_coeff[n])-1.)>1.e-8) os << " " << fabs(obj.num_coeff[n]) << " *";
         for(unsigned int s=0; s<obj.quarks[n].dim(); s++){
-            os << " " << obj.quarks[n][s] << "_(" << obj.idcs[n][s] << ")";
+            if(obj.attributes[n][s].compare("loc")==0) os << " " << obj.quarks[n][s] << "_(" << obj.idcs[n][s] << ")";
+            else os << " " << obj.quarks[n][s] << obj.attributes[n][s] << "_(" << obj.idcs[n][s] << ")";
         }
     }
     return os;
 }
 
+//member functions:
 void quark_cont::clear(){
     quarks.clear();
     attributes.clear();
     idcs.clear();
     sym_coeff.clear();
     num_coeff.clear();
+}
+
+static int contract_helper(const NRvector<std::string>& quarks, const NRvector<std::string>& attributes, const NRvector<std::string>& idcs){
+    //copy vectors:
+    NRvector<std::string> tmpquarks(quarks), tmpattributes(attributes), tmpidcs(idcs);
+    
+    //count quarks and barred-quarks first and compare;
+    unsigned int nu=0, nubar=0, nd=0, ndbar=0, ns=0, nsbar=0;
+    for(unsigned int s=0; s<tmpquarks.dim(); s++){
+        if(tmpquarks[s].find("ub")==0){
+            nubar++;
+        }
+        else if(tmpquarks[s].find("u")==0){
+            nu++;
+        }
+        
+        if(tmpquarks[s].find("db")==0){
+            ndbar++;
+        }
+        else if(tmpquarks[s].find("d")==0){
+            nd++;
+        }
+        
+        if(tmpquarks[s].find("sb")==0){
+            nsbar++;
+        }
+        else if(tmpquarks[s].find("s")==0){
+            ns++;
+        }
+    }
+    
+    if(nu!=nubar || nd!=ndbar || ns!=nsbar){
+        std::cerr << "contract_helper: error, quark content does not allow for contraction!" << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    //sort vector: innermost: u, outermost s:
+    std::vector<unsigned int> table(tmpquarks.dim());
+    unsigned int runs=0,rund=ns,runu=ns+nd,runubar=ns+nd+nu,rundbar=ns+nd+nu+nubar,runsbar=ns+nd+nu+nubar+ndbar;
+    for(unsigned int s=0; s<tmpquarks.dim(); s++){
+        if(tmpquarks[s].find("s")==0 && tmpquarks[s].find("sb")!=0){
+            table[s]=runs;
+            runs++;
+        }
+        else if(tmpquarks[s].find("d")==0 && tmpquarks[s].find("db")!=0){
+            table[s]=rund;
+            rund++;
+        }
+        else if(tmpquarks[s].find("u")==0 && tmpquarks[s].find("ub")!=0){
+            table[s]=runu;
+            runu++;
+        }
+        else if(tmpquarks[s].find("ub")==0){
+            table[s]=runubar;
+            runubar++;
+        }
+        else if(tmpquarks[s].find("db")==0){
+            table[s]=rundbar;
+            rundbar++;
+        }
+        else if(tmpquarks[s].find("sb")==0){
+            table[s]=runsbar;
+            runsbar++;
+        }
+    }
+    for(unsigned int i=0; i<table.size(); i++) std::cout << table[i] << std::endl;
+    exit(1);
+    
+    return EXIT_SUCCESS;
+}
+
+void quark_cont::contract(){
+    
+    for(unsigned int n=0; n<quarks.size(); n++){
+        contract_helper(quarks[n],attributes[n],idcs[n]);
+    }
 }
 //******************************************************************
 //******************************************************************
