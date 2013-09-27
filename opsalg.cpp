@@ -469,23 +469,24 @@ static int contract_helper(const NRvector<std::string>& quarks, const NRvector<s
     NRvector<std::string> indices(ns+nd+nu);
     for(unsigned int nsc=0; nsc<nscont; nsc++){
         reverse_copy(svec.begin(),svec.end(),svectmp.begin());
-        
         for(unsigned int s=0; s<ns; s++){
             unsigned int offs=ns+nd+nu+nubar+ndbar+svectmp[s];
             props[s]="Ss("+tmpattributes[s]+";"+tmpattributes[offs]+")";
             indices[s]="("+tmpidcs[s]+";"+tmpidcs[offs]+")";
         }
+        svectmp=svec;
         spar=sort(svectmp);
         
         for(unsigned int ndc=0; ndc<ndcont; ndc++){
             reverse_copy(dvec.begin(),dvec.end(),dvectmp.begin());
-            
             for(unsigned int d=0; d<nd; d++){
                 unsigned int offd=ns+nd+nu+nubar+dvectmp[d];
                 props[ns+d]="Sd("+tmpattributes[ns+d]+";"+tmpattributes[offd]+")";
                 indices[ns+d]="("+tmpidcs[ns+d]+";"+tmpidcs[offd]+")";
             }
+            dvectmp=dvec;
             dpar=sort(dvectmp);
+            
             for(unsigned int nuc=0; nuc<nucont; nuc++){
                 reverse_copy(uvec.begin(),uvec.end(),uvectmp.begin());
                 for(unsigned int u=0; u<nu; u++){
@@ -493,6 +494,7 @@ static int contract_helper(const NRvector<std::string>& quarks, const NRvector<s
                     props[ns+nd+u]="Su("+tmpattributes[ns+nd+u]+";"+tmpattributes[offu]+")";
                     indices[ns+nd+u]="("+tmpidcs[ns+nd+u]+";"+tmpidcs[offu]+")";
                 }
+                uvectmp=uvec;
                 upar=sort(uvectmp);
                 
                 unsigned int idx=nuc+nucont*(ndc+ndcont*nsc);
