@@ -116,9 +116,9 @@ baryon_op& baryon_op::operator*=(const baryon_op& rhs){
     
     for(unsigned int n=0; n<nn; n++) for(unsigned int m=0; m<mm; m++){
         tmpnames.push_back(opnames[n]+" "+rhs.opnames[m]);
-        tmpcoeffs.push_back(coefficients[n]*coefficients[m]);
+        tmpcoeffs.push_back(coefficients[n]*rhs.coefficients[m]);
         NRvector<std::string> tmpvec(spinids[n]);
-        tmpspins.push_back(tmpvec.append(spinids[m]));
+        tmpspins.push_back(tmpvec.append(rhs.spinids[m]));
     }
     opnames=tmpnames;
     coefficients=tmpcoeffs;
@@ -362,6 +362,7 @@ std::ostream& operator<<(std::ostream &os,const quark_cont &obj){
             if(obj.attributes[n][s].compare("loc")==0) os << " " << obj.quarks[n][s] << "_(" << obj.idcs[n][s] << ")";
             else os << " " << obj.quarks[n][s] << obj.attributes[n][s] << "_(" << obj.idcs[n][s] << ")";
         }
+        os << std::endl;
     }
     return os;
 }
