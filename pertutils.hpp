@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <limits>
+#include <algorithm>
 
 #ifndef _PERTUTILS
 #define _PERTUTILS
