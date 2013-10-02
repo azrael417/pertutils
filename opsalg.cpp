@@ -547,6 +547,7 @@ static void get_indices_laph(const std::string& prop, const std::string& idcs, u
     tmptoken2.clear();
     tokenize(tmptoken1[0],tmptoken2,",");
     spin1id=static_cast<unsigned int>(strtoul(tmptoken2[1].c_str(),NULL,10));
+    spin1id-=1;
     unsigned int count;
     tmptoken2[0].erase(0,1);
     if(tmptoken2[0].find("a")==0) count=0;
@@ -560,6 +561,7 @@ static void get_indices_laph(const std::string& prop, const std::string& idcs, u
     tokenize(tmptoken1[1],tmptoken2,",");
     tmptoken2[1].erase(tmptoken2[1].end()-1);
     spin2id=static_cast<unsigned int>(strtoul(tmptoken2[1].c_str(),NULL,10));
+    spin2id-=1;
     if(tmptoken2[0].find("a")==0) count=0;
     if(tmptoken2[0].find("b")==0) count=1;
     if(tmptoken2[0].find("c")==0) count=2;
