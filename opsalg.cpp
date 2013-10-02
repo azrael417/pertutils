@@ -513,32 +513,141 @@ static int contract_helper(const NRvector<std::string>& quarks, const NRvector<s
     return EXIT_SUCCESS;
 }
 
-void quark_cont::contract(){
-    std::vector<NRvector<std::string> > resprops;
-    std::vector<NRvector<std::string> > residcs;
-    std::vector<double> signs;
+int quark_cont::contract(){
+    props.clear();
+    props_idcs.clear();
+    props_signs.clear();
+    int error;
     
-    std::string tmp="";
     for(unsigned int n=0; n<quarks.size(); n++){
         std::vector<NRvector<std::string> > tmpprops;
         std::vector<NRvector<std::string> > tmpidcs;
         std::vector<double> tmpsigns;
-        contract_helper(quarks[n],attributes[n],idcs[n],tmpprops,tmpidcs,tmpsigns);
-        resprops.insert(resprops.end(), tmpprops.begin(), tmpprops.end());
-        residcs.insert(residcs.end(), tmpidcs.begin(), tmpidcs.end());
-        signs.insert(signs.end(), tmpsigns.begin(), tmpsigns.end());
-        
-        tmp+=(num_coeff[n]<0. ? " - " : " + ");
-        tmp+=std::to_string(fabs(num_coeff[n]))+" * "+sym_coeff[n]+" * [ ";
-        for(unsigned int s=0; s<tmpprops.size(); s++){
-            tmp+=(tmpsigns[s]>0. ? "+ " : "- ");
-            for(unsigned int p=0; p<tmpprops[s].dim(); p++){
-                tmp+=tmpprops[s][p]+"_"+tmpidcs[s][p]+" ";
-            }
+        error=contract_helper(quarks[n],attributes[n],idcs[n],tmpprops,tmpidcs,tmpsigns);
+        if(error==EXIT_FAILURE){
+            std::cerr << "quark_cont::contract: error, contraction could not be performed" << std::endl;
+            return EXIT_FAILURE;
         }
-        tmp+="]\n";
+        props.insert(props.end(), tmpprops.begin(), tmpprops.end());
+        props_idcs.insert(props_idcs.end(), tmpidcs.begin(), tmpidcs.end());
+        props_signs.insert(props_signs.end(), tmpsigns.begin(), tmpsigns.end());
     }
-    std::cout << tmp << std::endl;
+    return EXIT_SUCCESS;
+}
+
+static void get_indices_laph(const std::string& prop, const std::string& idcs, unsigned int& massid, unsigned int& spin1id, unsigned int& spin2id, unsigned int& n1id, unsigned int& n2id){
+    if(prop.find("Su")==0) massid=0;
+    if(prop.find("Sd")==0) massid=1;
+    if(prop.find("Ss")==0) massid=2;
+    std::vector<std::string> tmptoken1, tmptoken2;
+    tokenize(idcs, tmptoken1,";");
+    
+    //examine single parts:
+    //part 1:
+    tmptoken2.clear();
+    tokenize(tmptoken1[0],tmptoken2,",");
+    spin1id=static_cast<unsigned int>(strtoul(tmptoken2[1].c_str(),NULL,10));
+    unsigned int count;
+    tmptoken2[0].erase(0,1);
+    if(tmptoken2[0].find("a")==0) count=0;
+    if(tmptoken2[0].find("b")==0) count=1;
+    if(tmptoken2[0].find("c")==0) count=2;
+    tmptoken2[0].erase(0,1);
+    n1id=static_cast<unsigned int>(strtoul(tmptoken2[0].c_str(),NULL,10)*3+count);
+
+    //part 2:
+    tmptoken2.clear();
+    tokenize(tmptoken1[1],tmptoken2,",");
+    tmptoken2[1].erase(tmptoken2[1].end()-1);
+    spin2id=static_cast<unsigned int>(strtoul(tmptoken2[1].c_str(),NULL,10));
+    if(tmptoken2[0].find("a")==0) count=0;
+    if(tmptoken2[0].find("b")==0) count=1;
+    if(tmptoken2[0].find("c")==0) count=2;
+    tmptoken2[0].erase(0,1);
+    n2id=static_cast<unsigned int>(strtoul(tmptoken2[0].c_str(),NULL,10)*3+count);
+}
+
+int quark_cont::print_contractions(std::ostream& os, const std::string mode){
+    if(props.size()==0 || props_idcs.size()==0 || props_signs.size()==0){
+        std::cerr << "quark_cont::print_contractions: please perform contractions first!" << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
+    
+    if(mode.compare("human-readable")==0){
+        //print contractions in human readable form
+        std::string tmp="";
+        for(unsigned int n=0; n<quarks.size(); n++){
+            tmp+=(num_coeff[n]<0. ? " - " : " + ");
+            tmp+=std::to_string(fabs(num_coeff[n]))+" * "+sym_coeff[n]+" * [ ";
+            for(unsigned int s=0; s<numprops; s++){
+                tmp+=(props_signs[s+n*numprops]>0. ? "+ " : "- ");
+                for(unsigned int p=0; p<props[s+n*numprops].dim(); p++){
+                    tmp+=props[s+n*numprops][p]+"_"+props_idcs[s+n*numprops][p]+" ";
+                }
+            }
+            tmp+="]\n";
+        }
+        os << tmp << std::endl;
+    }
+    else if(mode.compare("laph")==0){
+        //print code based on laph in order to compute contractions
+        unsigned int numfacts=props[0].dim();
+        std::string indent;
+        os << "double complex *prop;\n";
+        os << "MALLOC( prop, nt );\n";
+        os << "memset( prop, 0, nt*sizeof(double complex) );\n";
+        os << "double complex sum;\n";
+        os << "stopper_start( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
+        os << "for (ti=srcstart, src=0; ti<nt; ti+=srcinc, src++) for (tf=0; tf<lt; tf++){";
+        indent+="\t";
+        for(unsigned int i=0; i<(numfacts*2); i++){
+            os << indent << "unsigned int n" << i << ";\n";
+            os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+            indent+="\t";
+        }
+        unsigned int massid,spin1id,spin2id,n1id,n2id;
+        for(unsigned int n=0; n<num_coeff.size(); n++){
+            if(n==0) os << indent << "sum = ";
+            else if(num_coeff[n]>0.) os << std::endl << indent << "sum += ";
+            else os << std::endl << indent << "sum -= ";
+            os << std::to_string(fabs(num_coeff[n])) << " * ";
+            for(unsigned int p=0; p<numfacts; p+=3){
+                os << "(~vvvt[tf][n" << p << "][n" << p+1 << "][n" << p+2 << "])" << " * ";
+            }
+            for(unsigned int p=numfacts; p<(2*numfacts); p+=3){
+                os << "vvv[ti][n" << p << "][n" << p+1 << "][n" << p+2 << "]" << " * ";
+            }
+            os << "(" << std::endl;
+            for(unsigned int p=0; p<numprops; p++){
+                os << indent+"\t";
+                std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
+                os << sign;
+                for(unsigned int s=0; s<numfacts; s++){
+                    get_indices_laph(props[p+numprops*n][s],props_idcs[p+numprops*n][s],massid,spin1id,spin2id,n1id,n2id);
+                    std::string tmp="vMvpt[m"+std::to_string(massid)+"][src][n"+std::to_string(n2id)+"]["+std::to_string(spin2id)+"][tf][n"+std::to_string(n1id)+"]["+std::to_string(spin1id)+"]";
+                    if(s==0) os << tmp;
+                    else os << " * " << tmp;
+                }
+                os << std::endl;
+            }
+            os << indent << ");" << std::endl;
+        }
+        os << std::endl;
+        for(unsigned int i=0; i<(numfacts*2); i++){
+            indent.erase((numfacts*2-i-1),1);
+            os << indent << "} //end loop n" << (numfacts*2-i-1) << "\n";
+        }
+        os << std::endl;
+        os << indent << "int tf1= lt*mynode_dir[TUP]+tf;\n";
+        os << indent << "int tdiff= (tf1-ti+nt)%nt;\n";
+        os << indent << "prop[tdiff]+= sum;\n";
+        os << indent << "stopper_stop( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
+        os << "} //end loop ti, tf\n";
+    }
+    
+    return EXIT_SUCCESS;
 }
 //******************************************************************
 //******************************************************************

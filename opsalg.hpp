@@ -55,6 +55,11 @@ private:
     std::vector<NRvector<std::string> > idcs;
     std::vector<std::string> sym_coeff;
     std::vector<double> num_coeff;
+    
+    std::vector<NRvector<std::string> > props;
+    std::vector<NRvector<std::string> > props_idcs;
+    std::vector<double> props_signs;
+    
 public:
     quark_cont(){};
     quark_cont(const std::vector<NRvector<std::string> >&, const std::vector<NRvector<std::string> >&, const std::vector<NRvector<std::string> >&, const std::vector<std::string>&, const std::vector<double>&);
@@ -68,7 +73,8 @@ public:
     
     //member functions:
     void clear();
-    void contract();
+    int contract();
+    int print_contractions(std::ostream& os, const std::string mode="human-readable");
 };
 
 quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff);
