@@ -74,6 +74,7 @@ public:
     //member functions:
     void clear();
     int contract();
+    int reorder();
     int print_contractions(std::ostream& os, const std::string mode="human-readable");
 };
 
