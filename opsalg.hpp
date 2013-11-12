@@ -50,15 +50,21 @@ public:
 
 class quark_cont{
 private:
+    //stuff at quark level:
     std::vector<NRvector<std::string> > quarks;
     std::vector<NRvector<std::string> > attributes;
     std::vector<NRvector<std::string> > idcs;
     std::vector<std::string> sym_coeff;
     std::vector<double> num_coeff;
     
+    //propagator stuff:
     std::vector<NRvector<std::string> > props;
     std::vector<NRvector<std::string> > props_idcs;
     std::vector<double> props_signs;
+    
+    //laph stuff:
+    std::vector<NRvector<std::string> > laph_sources;
+    std::vector<NRvector<std::string> > laph_sinks;
     
 public:
     quark_cont(){};
@@ -75,6 +81,9 @@ public:
     void clear();
     int contract();
     int reorder();
+    int get_laph_sinks(std::string mode);
+    int print_laph_baryon_source(std::ostream& os, const std::string mode="local");
+    int print_laph_sums(std::ostream& os, const std::string& wwwsummed);
     int print_contractions(std::ostream& os, const std::string mode="human-readable");
 };
 

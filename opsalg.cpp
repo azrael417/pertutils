@@ -603,7 +603,7 @@ static void get_indices_laph(const std::string& prop, const std::string& idcs, u
     if(tmptoken2[0].find("c")==0) count=2;
     tmptoken2[0].erase(0,1);
     n1id=static_cast<unsigned int>(strtoul(tmptoken2[0].c_str(),NULL,10)*3+count);
-
+    
     //part 2:
     tmptoken2.clear();
     tokenize(tmptoken1[1],tmptoken2,",");
@@ -616,6 +616,138 @@ static void get_indices_laph(const std::string& prop, const std::string& idcs, u
     tmptoken2[0].erase(0,1);
     n2id=static_cast<unsigned int>(strtoul(tmptoken2[0].c_str(),NULL,10)*3+count);
 }
+
+int quark_cont::get_laph_sinks(std::string mode){
+    unsigned int numfacts=props[0].dim();
+    unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
+    
+    if(mode.compare("laph2")==0){
+        for(unsigned int n=0; n<num_coeff.size(); n++){
+            for(unsigned int p=0; p<numprops; p++){
+                NRvector<std::string> wwwstrings(numfacts/3);
+                unsigned int count=0;
+                for(unsigned int s=0; s<numfacts; s+=3){
+                    
+                    //get indices:
+                    unsigned int massid[3],spin1id[3],spin2id[3],tmpnid,n1id[3];
+                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],tmpnid,n1id[0]);
+                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],tmpnid,n1id[1]);
+                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],tmpnid,n1id[2]);
+
+                    //get attributes:
+                    std::string tmp="";
+                    for(unsigned int l=0; l<3; l++){
+                        std::string tmpstring=props[p+numprops*n][s+l];
+                        tmpstring.erase(0,3);
+                        tmpstring.erase(tmpstring.length()-1,1);
+                        tmpstring=tmpstring.substr(0,tmpstring.find_first_of(";"));
+                        if(tmpstring.compare("loc")==0) tmp+="w";
+                        else if(tmpstring.compare("A")==0) tmp+="wa";
+                        else if(tmpstring.compare("Dp")==0) tmp+="wdp";
+                        else if(tmpstring.compare("D0")==0) tmp+="wd0";
+                        else if(tmpstring.compare("Dm")==0) tmp+="wdm";
+                        else{
+                            std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << std::endl;
+                            return EXIT_FAILURE;
+                        }
+                    }
+
+                    //correct for indices, since only half of the indices is used, the others are summed first:
+                    for(unsigned int l=0; l<3; l++) n1id[l]-=3*(s+1);
+                    
+                    //check for attributes at prop3:
+                    tmp+="0pt[m"+std::to_string(massid[0])+"][m"+std::to_string(massid[1])+"][m"+std::to_string(massid[2])+"][src][tf]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"][n"+std::to_string(n1id[0])+"]["+std::to_string(spin2id[0])+"][n"+std::to_string(n1id[1])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n1id[2])+"]["+std::to_string(spin2id[2])+"]";
+                    
+                    wwwstrings[count]=tmp;
+                    count++;
+                }
+                laph_sinks.push_back(wwwstrings);
+            }
+        }
+    }
+    return EXIT_SUCCESS;
+}
+
+//int quark_cont::print_laph_baryon_source(std::ostream& os, const std::string mode){
+//    //********************************************************
+//    //********************************************************
+//    //set up source:
+//    //********************************************************
+//    //********************************************************
+//    std::string indent;
+//    unsigned int numfacts=props[0].dim();
+//    
+//    if(mode.compare("local")==0){
+//        os << "//set up source:" << std::endl;
+//        os << "double complex *vvv1;\n";
+//        os << "MALLOC(vvv1, nt*LAPH*LAPH*LAPH)\n";
+//        os << "double complex (*vvv1pt)[LAPH][LAPH][LAPH]= (double complex (*)[LAPH][LAPH][LAPH])vvv1;\n";
+//        for(unsigned int i=0; i<3; i++){
+//            os << indent << "unsigned int n" << i << ";\n";
+//            os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+//            indent+="\t";
+//        }
+//        
+//        os << indent << "unsigned int tf;\n";
+//        os << indent << "for (tf=0; tf<lt; tf++){\n";
+//        indent+="\t";
+//        os << indent << "vvv1pt[tf][n0][n1][n2]= vvv0pt[n0][n1][tf][n2];\n";
+//        indent.erase(0,1);
+//        os << indent << "}\n";
+//        for(unsigned int i=0; i<3; i++){
+//            indent.erase((numfacts-i-1),1);
+//            os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
+//        }
+//        os << "memcpy( vvv0, vvv1, lt*LAPH*LAPH*LAPH*sizeof(double complex) );\n";
+//        os << "comm_collect_char_dir( (char *)vvv1, (char *)vvv0, lt*LAPH*LAPH*LAPH*sizeof(double complex), TUP );\n";
+//    }
+//    return EXIT_SUCCESS;
+//}
+//
+//int quark_cont::print_laph_sums(std::ostream& os, const std::string& wwwsummed){
+//    //********************************************************
+//    //********************************************************
+//    //Laph sums:
+//    //********************************************************
+//    //********************************************************
+//    std::string indent;
+//    unsigned int numfacts=props[0].dim();
+//    
+//    os << std::endl;
+//    os << "/* LAPH sums */\n";
+//    os << "stopper_start( &tmr_laphsum );\n";
+//    os << "int tf, ti, src;\n";
+//    os << "for (ti=srcstart, src=0; ti<nt; ti+=srcinc, src++) for (tf=0; tf<lt; tf++){\n";
+//    indent+="\t";
+//    os << indent << "int tf1= lt*mynode_dir[TUP]+tf;\n";
+//    os << indent << "int tdiff= (tf1-ti+nt)%nt;\n";
+//    os << std::endl << indent << "double complex sum= 0.0;\n";
+//    for(unsigned int i=0; i<numfacts; i++){
+//        os << indent << "unsigned int n" << i << ";\n";
+//        os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+//        indent+="\t";
+//    }
+//    
+//    os << indent << "sum += " << wwwsummed;
+//    for(unsigned int p=0; p<numfacts; p+=3){
+//        os << " * vvv1pt[ti][n" << p << "][n" << p+1 << "][n" << p+2 << "]";
+//    }
+//    os << ";";
+//    
+//    os << std::endl;
+//    for(unsigned int i=0; i<numfacts; i++){
+//        indent.erase((numfacts-i-1),1);
+//        os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
+//    }
+//    
+//    os << indent << "P->bar[0][0][tdiff]+= sum;\n";
+//    indent.erase(0,1);
+//    os << indent << "} //end t-loop\n";
+//    indent.erase(0,1);
+//    os << indent << "stopper_stop( &tmr_laphsum );\n";
+//    
+//    return EXIT_SUCCESS;
+//}
 
 int quark_cont::print_contractions(std::ostream& os, const std::string mode){
     if(props.size()==0 || props_idcs.size()==0 || props_signs.size()==0){
@@ -699,10 +831,18 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         os << "} //end loop ti, tf\n";
     }
     else if(mode.compare("laph2")==0){
+        if(laph_sinks.size()==0) get_laph_sinks(mode);
+        
         unsigned int numfacts=props[0].dim();
         std::string indent;
         
-        os << "for (tf=0; tf<lt; tf++) for (src=0; src<nsrc; src++){" << std::endl;
+        //********************************************************
+        //********************************************************
+        //sink blocks and diagrams:
+        //********************************************************
+        //********************************************************
+        os << std::endl << "//compute sink blocks and diagrams:\n";
+        os << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
         indent+="\t";
         //set up temporary storage:
         std::string wwwsummed("www1pt[src][tf]");
@@ -714,7 +854,6 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
             wwwsummed+="[n"+std::to_string(i)+"]";
         }
         
-        unsigned int massid[3],spin1id[3],spin2id[3],tmpnid,n1id[3];
         for(unsigned int n=0; n<num_coeff.size(); n++){
             if(n==0) os << indent << wwwsummed << " = ";
             else if(num_coeff[n]>0.) os << std::endl << indent << wwwsummed << " += ";
@@ -724,91 +863,24 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
                 os << indent+"\t";
                 std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
                 os << sign;
+                unsigned int count=0;
                 for(unsigned int s=0; s<numfacts; s+=3){
-                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],tmpnid,n1id[0]);
-                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],tmpnid,n1id[1]);
-                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],tmpnid,n1id[2]);
-                    //correct for indices, since only half of the indices is used, the others are summed first:
-                    for(unsigned int l=0; l<3; l++) n1id[l]-=3*(s+1);
                     
-                    std::string tmp="www0pt[m"+std::to_string(massid[0])+"][m"+std::to_string(massid[1])+"][m"+std::to_string(massid[2])+"][src][tf]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"][n"+std::to_string(n1id[0])+"]["+std::to_string(spin2id[0])+"][n"+std::to_string(n1id[1])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n1id[2])+"]["+std::to_string(spin2id[2])+"]";
-                    
-                    if(s==0) os << tmp;
-                    else os << " * " << tmp;
+                    if(s==0) os << laph_sinks[p+n*numprops][count];
+                    else os << " * " << laph_sinks[p+n*numprops][count];
+                    count++;
                 }
                 os << std::endl;
             }
             os << indent << ");" << std::endl;
         }
-        
         os << std::endl;
         for(unsigned int i=0; i<numfacts; i++){
             indent.erase((numfacts-i-1),1);
             os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
         }
-        
-        //finalize:
         os << "} //end loop tf, nsrc\n\n";
         indent.erase(0,1);
-        
-        //set up source:
-        os << "//set up source:" << std::endl;
-        os << "double complex *vvv1;\n";
-        os << "MALLOC(vvv1, nt*LAPH*LAPH*LAPH)\n";
-        os << "double complex (*vvv1pt)[LAPH][LAPH][LAPH]= (double complex (*)[LAPH][LAPH][LAPH])vvv1;\n";
-        for(unsigned int i=0; i<3; i++){
-            os << indent << "unsigned int n" << i << ";\n";
-            os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
-            indent+="\t";
-        }
-        
-        os << indent << "unsigned int tf;\n";
-        os << indent << "for (tf=0; tf<lt; tf++){\n";
-        indent+="\t";
-        os << indent << "vvv1pt[tf][n0][n1][n2]= vvv0pt[n0][n1][tf][n2];\n";
-        indent.erase(0,1);
-        os << indent << "}\n";
-        for(unsigned int i=0; i<3; i++){
-            indent.erase((numfacts-i-1),1);
-            os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
-        }
-        os << std::endl;
-        os << "memcpy( vvv0, vvv1, lt*LAPH*LAPH*LAPH*sizeof(double complex) );\n";
-        os << "comm_collect_char_dir( (char *)vvv1, (char *)vvv0, lt*LAPH*LAPH*LAPH*sizeof(double complex), TUP );\n";
-        
-        //Laph sums:
-        os << std::endl;
-        os << "/* LAPH sums */\n";
-        os << "stopper_start( &tmr_laphsum );\n";
-        os << "int tf, ti, src;\n";
-        os << "for (ti=srcstart, src=0; ti<nt; ti+=srcinc, src++) for (tf=0; tf<lt; tf++){\n";
-        indent+="\t";
-        os << indent << "int tf1= lt*mynode_dir[TUP]+tf;\n";
-        os << indent << "int tdiff= (tf1-ti+nt)%nt;\n";
-        os << std::endl << indent << "double complex sum= 0.0;\n";
-        for(unsigned int i=0; i<numfacts; i++){
-            os << indent << "unsigned int n" << i << ";\n";
-            os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
-            indent+="\t";
-        }
-        
-        os << indent << "sum += " << wwwsummed;
-        for(unsigned int p=0; p<numfacts; p+=3){
-            os << " * vvv1pt[ti][n" << p << "][n" << p+1 << "][n" << p+2 << "]";
-        }
-        os << ";";
-        
-        os << std::endl;
-        for(unsigned int i=0; i<numfacts; i++){
-            indent.erase((numfacts-i-1),1);
-            os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
-        }
-        
-        os << indent << "P->bar[0][0][tdiff]+= sum;\n";
-        indent.erase(0,1);
-        os << indent << "} //end t-loop\n";
-        indent.erase(0,1);
-        os << indent << " stopper_stop( &tmr_laphsum );\n";
     }
     
     return EXIT_SUCCESS;
