@@ -81,6 +81,7 @@ public:
     void clear();
     int contract();
     int reorder();
+    int get_laph_sources(std::string mode);
     int get_laph_sinks(std::string mode);
     int print_laph_baryon_source(std::ostream& os, const std::string mode="local");
     int print_laph_sums(std::ostream& os, const std::string& wwwsummed);

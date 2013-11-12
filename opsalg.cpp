@@ -248,9 +248,6 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
         }
         quarks.push_back(qvec);
         num_coeff.push_back(-sqrt(1./2.)*coeff);
-        
-        if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
-        else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
     }
     else if((pos=tmpstring.find("N"))!=std::string::npos){
         if(tmpstring.find("b")==(pos+1)) bar=true;
@@ -272,10 +269,9 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
         }
         quarks.push_back(qvec);
         num_coeff.push_back(-sqrt(1./2.)*coeff);
-        
-        if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
-        else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
     }
+    if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
+    else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
     
     if(tmpstring.compare("")!=0){
         avec[2]=tmpstring;
@@ -617,6 +613,7 @@ static void get_indices_laph(const std::string& prop, const std::string& idcs, u
     n2id=static_cast<unsigned int>(strtoul(tmptoken2[0].c_str(),NULL,10)*3+count);
 }
 
+
 int quark_cont::get_laph_sinks(std::string mode){
     unsigned int numfacts=props[0].dim();
     unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
@@ -629,23 +626,25 @@ int quark_cont::get_laph_sinks(std::string mode){
                 for(unsigned int s=0; s<numfacts; s+=3){
                     
                     //get indices:
-                    unsigned int massid[3],spin1id[3],spin2id[3],tmpnid,n1id[3];
-                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],tmpnid,n1id[0]);
-                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],tmpnid,n1id[1]);
-                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],tmpnid,n1id[2]);
+                    unsigned int massid[3],spin1id[3],spin2id[3],n1id[3],n2id[3];
+                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],n1id[0],n2id[0]);
+                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],n1id[1],n2id[1]);
+                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],n1id[2],n2id[2]);
 
                     //get attributes:
-                    std::string tmp="";
+                    std::string tmp[3]={"","",""};
+                    std::string attrstring="";
                     for(unsigned int l=0; l<3; l++){
                         std::string tmpstring=props[p+numprops*n][s+l];
                         tmpstring.erase(0,3);
                         tmpstring.erase(tmpstring.length()-1,1);
                         tmpstring=tmpstring.substr(0,tmpstring.find_first_of(";"));
-                        if(tmpstring.compare("loc")==0) tmp+="w";
-                        else if(tmpstring.compare("A")==0) tmp+="wa";
-                        else if(tmpstring.compare("Dp")==0) tmp+="wdp";
-                        else if(tmpstring.compare("D0")==0) tmp+="wd0";
-                        else if(tmpstring.compare("Dm")==0) tmp+="wdm";
+                        unsigned int id=n1id[l]%3;
+                        if(tmpstring.compare("loc")==0) tmp[id]+="w";
+                        else if(tmpstring.compare("A")==0) tmp[id]+="wa";
+                        else if(tmpstring.compare("Dp")==0) tmp[id]+="wdp";
+                        else if(tmpstring.compare("D0")==0) tmp[id]+="wd0";
+                        else if(tmpstring.compare("Dm")==0) tmp[id]+="wdm";
                         else{
                             std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << std::endl;
                             return EXIT_FAILURE;
@@ -653,12 +652,15 @@ int quark_cont::get_laph_sinks(std::string mode){
                     }
 
                     //correct for indices, since only half of the indices is used, the others are summed first:
-                    for(unsigned int l=0; l<3; l++) n1id[l]-=3*(s+1);
+                    for(unsigned int l=0; l<3; l++){
+                        n2id[l]-=3*(s+1);
+                        attrstring+=tmp[l];
+                    }
                     
                     //check for attributes at prop3:
-                    tmp+="0pt[m"+std::to_string(massid[0])+"][m"+std::to_string(massid[1])+"][m"+std::to_string(massid[2])+"][src][tf]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"][n"+std::to_string(n1id[0])+"]["+std::to_string(spin2id[0])+"][n"+std::to_string(n1id[1])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n1id[2])+"]["+std::to_string(spin2id[2])+"]";
+                    attrstring+="0pt[m"+std::to_string(massid[0])+"][m"+std::to_string(massid[1])+"][m"+std::to_string(massid[2])+"][src]["+std::to_string(spin2id[0])+"][n"+std::to_string(n2id[0])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n2id[1])+"][tf]["+std::to_string(spin2id[2])+"][n"+std::to_string(n2id[2])+"]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"]";
                     
-                    wwwstrings[count]=tmp;
+                    wwwstrings[count]=attrstring;
                     count++;
                 }
                 laph_sinks.push_back(wwwstrings);
@@ -667,6 +669,67 @@ int quark_cont::get_laph_sinks(std::string mode){
     }
     return EXIT_SUCCESS;
 }
+
+
+int quark_cont::get_laph_sources(std::string mode){
+    unsigned int numfacts=props[0].dim();
+    unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
+    
+    if(mode.compare("laph2")==0){
+        for(unsigned int n=0; n<num_coeff.size(); n++){
+            for(unsigned int p=0; p<numprops; p++){
+                NRvector<std::string> vvvstrings(numfacts/3);
+                unsigned int count=0;
+                for(unsigned int s=0; s<numfacts; s+=3){
+                    
+                    //get indices:
+                    unsigned int massid[3],spin1id[3],spin2id[3],n1id[3],n2id[3];
+                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],n1id[0],n2id[0]);
+                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],n1id[1],n2id[1]);
+                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],n1id[2],n2id[2]);
+                    
+                    //get attributes:
+                    std::string tmp[3]={"","",""};
+                    std::string attrstring="";
+                    for(unsigned int l=0; l<3; l++){
+                        std::string tmpstring=props[p+numprops*n][s+l];
+                        tmpstring.erase(0,3);
+                        tmpstring.erase(tmpstring.length()-1,1);
+                        tmpstring=tmpstring.substr(tmpstring.find_first_of(";")+1,tmpstring.length());
+                        unsigned int id=n1id[l]%3;
+                        if(tmpstring.compare("loc")==0) tmp[id]+="v";
+                        else if(tmpstring.compare("A")==0) tmp[id]+="va";
+                        else if(tmpstring.compare("Dp")==0) tmp[id]+="vdp";
+                        else if(tmpstring.compare("D0")==0) tmp[id]+="vd0";
+                        else if(tmpstring.compare("Dm")==0) tmp[id]+="vdm";
+                        else{
+                            std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << std::endl;
+                            return EXIT_FAILURE;
+                        }
+                    }
+                    //sort arrays since permutations are already included in the www fields:
+                    sort2(n2id,tmp,3);
+                    
+                    //correct for indices, since only half of the indices is used, the others are summed first:
+                    for(unsigned int l=0; l<3; l++){
+                        n2id[l]-=3*(s+1);
+                        attrstring+=tmp[l];
+                    }
+                    
+                    //check for attributes at prop3:
+                    attrstring+="0pt[n"+std::to_string(n2id[0])+"][n"+std::to_string(n2id[1])+"][ti][n"+std::to_string(n2id[2])+"]";
+                    
+                    vvvstrings[count]=attrstring;
+                    count++;
+                }
+                laph_sources.push_back(vvvstrings);
+            }
+        }
+    }
+    
+    return EXIT_SUCCESS;
+}
+
 
 //int quark_cont::print_laph_baryon_source(std::ostream& os, const std::string mode){
 //    //********************************************************
@@ -832,6 +895,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
     }
     else if(mode.compare("laph2")==0){
         if(laph_sinks.size()==0) get_laph_sinks(mode);
+        if(laph_sources.size()==0) get_laph_sources(mode);
         
         unsigned int numfacts=props[0].dim();
         std::string indent;
