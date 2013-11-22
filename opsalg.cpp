@@ -185,7 +185,7 @@ std::ostream& operator<<(std::ostream &os,const baryon_op &obj){
 //START quark_cont
 //******************************************************************
 //******************************************************************
-quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff){
+quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), operator_id(-1){
     //check for consistency:
     if(quarks.size()!=attributes.size() || quarks.size()!=idcs.size() || quarks.size()!=sym_coeff.size() || quarks.size()!=num_coeff.size()){
         std::cerr << "quark_cont::quark_cont: internal structure error!" << std::endl;
@@ -293,6 +293,8 @@ quark_cont::quark_cont(const baryon_op& barop){
         }
         (*this)+=qcont;
     }
+    isolimit=false;
+    operator_id=-1;
 }
 
 quark_cont& quark_cont::operator+=(const quark_cont& rhs){
@@ -370,6 +372,16 @@ void quark_cont::clear(){
     idcs.clear();
     sym_coeff.clear();
     num_coeff.clear();
+    operator_id=-1;
+    isolimit=false;
+}
+
+void quark_cont::toggle_isospin_limit(){
+    isolimit=!isolimit;
+}
+
+void quark_cont::set_operator_id(const int& id){
+    operator_id=id;
 }
 
 static int contract_helper(const NRvector<std::string>& quarks, const NRvector<std::string>& attributes, const NRvector<std::string>& idcs, std::vector<NRvector<std::string> >& resprops, std::vector<NRvector<std::string> >& residcs, std::vector<double>& signs){
@@ -579,10 +591,13 @@ int quark_cont::reorder(){
     return EXIT_SUCCESS;
 }
 
-static void get_indices_laph(const std::string& prop, const std::string& idcs, unsigned int& massid, unsigned int& spin1id, unsigned int& spin2id, unsigned int& n1id, unsigned int& n2id){
+static void get_indices_laph(const std::string& prop, const std::string& idcs, unsigned int& massid, unsigned int& spin1id, unsigned int& spin2id, unsigned int& n1id, unsigned int& n2id, bool isolimit=false){
+    unsigned int sub=0;
+    if(isolimit) sub=1;
+
     if(prop.find("Su")==0) massid=0;
-    if(prop.find("Sd")==0) massid=1;
-    if(prop.find("Ss")==0) massid=2;
+    if(prop.find("Sd")==0) massid=1-sub;
+    if(prop.find("Ss")==0) massid=2-sub;
     std::vector<std::string> tmptoken1, tmptoken2;
     tokenize(idcs, tmptoken1,";");
     
@@ -627,9 +642,9 @@ int quark_cont::get_laph_sinks(std::string mode){
                     
                     //get indices:
                     unsigned int massid[3],spin1id[3],spin2id[3],n1id[3],n2id[3];
-                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],n1id[0],n2id[0]);
-                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],n1id[1],n2id[1]);
-                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],n1id[2],n2id[2]);
+                    get_indices_laph(props[p+numprops*n][s+0],props_idcs[p+numprops*n][s+0],massid[0],spin1id[0],spin2id[0],n1id[0],n2id[0],isolimit);
+                    get_indices_laph(props[p+numprops*n][s+1],props_idcs[p+numprops*n][s+1],massid[1],spin1id[1],spin2id[1],n1id[1],n2id[1],isolimit);
+                    get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],n1id[2],n2id[2],isolimit);
 
                     //get attributes:
                     std::string tmp[3]={"","",""};
@@ -658,7 +673,7 @@ int quark_cont::get_laph_sinks(std::string mode){
                     }
                     
                     //check for attributes at prop3:
-                    attrstring+="0pt[m"+std::to_string(massid[0])+"][m"+std::to_string(massid[1])+"][m"+std::to_string(massid[2])+"][src]["+std::to_string(spin2id[0])+"][n"+std::to_string(n2id[0])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n2id[1])+"][tf]["+std::to_string(spin2id[2])+"][n"+std::to_string(n2id[2])+"]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"]";
+                    attrstring+="0pt["+std::to_string(massid[0])+"]["+std::to_string(massid[1])+"]["+std::to_string(massid[2])+"][src]["+std::to_string(spin2id[0])+"][n"+std::to_string(n2id[0])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n2id[1])+"][tf]["+std::to_string(spin2id[2])+"][n"+std::to_string(n2id[2])+"]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"]";
                     
                     wwwstrings[count]=attrstring;
                     count++;
@@ -669,7 +684,6 @@ int quark_cont::get_laph_sinks(std::string mode){
     }
     return EXIT_SUCCESS;
 }
-
 
 int quark_cont::get_laph_sources(std::string mode){
     unsigned int numfacts=props[0].dim();
@@ -730,7 +744,6 @@ int quark_cont::get_laph_sources(std::string mode){
     return EXIT_SUCCESS;
 }
 
-
 //int quark_cont::print_laph_baryon_source(std::ostream& os, const std::string mode){
 //    //********************************************************
 //    //********************************************************
@@ -754,6 +767,8 @@ int quark_cont::get_laph_sources(std::string mode){
 //        os << indent << "unsigned int tf;\n";
 //        os << indent << "for (tf=0; tf<lt; tf++){\n";
 //        indent+="\t";
+//        
+//        //compute vvv1pt string from vvv0pt-string:
 //        os << indent << "vvv1pt[tf][n0][n1][n2]= vvv0pt[n0][n1][tf][n2];\n";
 //        indent.erase(0,1);
 //        os << indent << "}\n";
@@ -766,6 +781,7 @@ int quark_cont::get_laph_sources(std::string mode){
 //    }
 //    return EXIT_SUCCESS;
 //}
+
 //
 //int quark_cont::print_laph_sums(std::ostream& os, const std::string& wwwsummed){
 //    //********************************************************
@@ -839,7 +855,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
     else if(mode.compare("laph")==0){
         //print code based on laph in order to compute contractions
         unsigned int numfacts=props[0].dim();
-        std::string indent;
+        indent="";
         os << "double complex *prop;\n";
         os << "MALLOC( prop, nt );\n";
         os << "memset( prop, 0, nt*sizeof(double complex) );\n";
@@ -898,18 +914,23 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         if(laph_sources.size()==0) get_laph_sources(mode);
         
         unsigned int numfacts=props[0].dim();
-        std::string indent;
+        indent="";
         
         //********************************************************
         //********************************************************
         //sink blocks and diagrams:
         //********************************************************
         //********************************************************
-        os << std::endl << "//compute sink blocks and diagrams:\n";
-        os << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
+        os << std::endl << "//compute sink blocks and diagrams:\n{\n";
+        indent+="\t";
+        os << indent+"int tf, src;\n";
+        os << indent << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
         indent+="\t";
         //set up temporary storage:
-        std::string wwwsummed("www1pt[src][tf]");
+        std::string wwwsummed("www1pt[tf][src]");
+        if(operator_id>=0){
+            wwwsummed="www1pt[tf]["+std::to_string(operator_id)+"][src]";
+        }
         for(unsigned int i=0; i<numfacts; i++){
             os << indent << "unsigned int n" << i << ";\n";
             os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
@@ -943,8 +964,10 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
             indent.erase((numfacts-i-1),1);
             os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
         }
-        os << "} //end loop tf, nsrc\n\n";
         indent.erase(0,1);
+        os << indent << "} //end loop tf, nsrc\n";
+        indent.erase(0,1);
+        os << "}\n";
     }
     
     return EXIT_SUCCESS;

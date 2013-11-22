@@ -65,6 +65,9 @@ private:
     //laph stuff:
     std::vector<NRvector<std::string> > laph_sources;
     std::vector<NRvector<std::string> > laph_sinks;
+    std::string indent;
+    bool isolimit;
+    int operator_id;
     
 public:
     quark_cont(){};
@@ -83,9 +86,11 @@ public:
     int reorder();
     int get_laph_sources(std::string mode);
     int get_laph_sinks(std::string mode);
-    int print_laph_baryon_source(std::ostream& os, const std::string mode="local");
-    int print_laph_sums(std::ostream& os, const std::string& wwwsummed);
+    //int print_laph_baryon_source(std::ostream& os, const std::string mode="local");
+    //int print_laph_sums(std::ostream& os, const std::string& wwwsummed);
     int print_contractions(std::ostream& os, const std::string mode="human-readable");
+    void toggle_isospin_limit();
+    void set_operator_id(const int&);
 };
 
 quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff);
