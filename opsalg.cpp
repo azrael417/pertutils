@@ -870,9 +870,9 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         }
         unsigned int massid,spin1id,spin2id,n1id,n2id;
         for(unsigned int n=0; n<num_coeff.size(); n++){
-            if(n==0) os << indent << "sum = ";
-            else if(num_coeff[n]>0.) os << std::endl << indent << "sum += ";
-            else os << std::endl << indent << "sum -= ";
+            if(n!=0) os << std::endl;
+            if(num_coeff[n]>0.) os << indent << "sum += ";
+            else os << indent << "sum -= ";
             os << std::to_string(fabs(num_coeff[n])) << " * ";
             for(unsigned int p=0; p<numfacts; p+=3){
                 os << "(~vvvt[tf][n" << p << "][n" << p+1 << "][n" << p+2 << "])" << " * ";
@@ -940,8 +940,8 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         }
         
         for(unsigned int n=0; n<num_coeff.size(); n++){
-            if(n==0) os << indent << wwwsummed << " = ";
-            else if(num_coeff[n]>0.) os << std::endl << indent << wwwsummed << " += ";
+            if(n!=0) os << std::endl;
+            if(num_coeff[n]>0.) os << indent << wwwsummed << " += ";
             else os << std::endl << indent << wwwsummed << " -= ";
             os << std::to_string(fabs(num_coeff[n])) << " * (" << std::endl;
             for(unsigned int p=0; p<numprops; p++){
