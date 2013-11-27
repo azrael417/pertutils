@@ -929,7 +929,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         //set up temporary storage:
         std::string wwwsummed("www1pt[tf][src]");
         if(operator_id>=0){
-            wwwsummed="www1pt[tf]["+std::to_string(operator_id)+"][src]";
+            wwwsummed="www1pt[tf][src]["+std::to_string(operator_id)+"]";
         }
         for(unsigned int i=0; i<numfacts; i++){
             os << indent << "unsigned int n" << i << ";\n";
