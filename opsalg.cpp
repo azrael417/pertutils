@@ -193,7 +193,7 @@ quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const
     }
 }
 
-quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff){
+quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins){
     std::vector<NRvector<std::string> > quarks;
     std::vector<NRvector<std::string> > attributess;
     std::vector<NRvector<std::string> > idcs;
@@ -238,7 +238,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
             for(unsigned int s=0; s<3; s++) qvec[s]+="b";
         }
         quarks.push_back(qvec);
-        num_coeff.push_back(sqrt(1./2.)*coeff);
+        num_coeff.push_back(sqrt(1./2.));
         
         qvec[0]="d";
         qvec[1]="u";
@@ -247,7 +247,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
             for(unsigned int s=0; s<3; s++) qvec[s]+="b";
         }
         quarks.push_back(qvec);
-        num_coeff.push_back(-sqrt(1./2.)*coeff);
+        num_coeff.push_back(-sqrt(1./2.));
     }
     else if((pos=tmpstring.find("N"))!=std::string::npos){
         if(tmpstring.find("b")==(pos+1)) bar=true;
@@ -259,7 +259,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
             for(unsigned int s=0; s<3; s++) qvec[s]+="b";
         }
         quarks.push_back(qvec);
-        num_coeff.push_back(sqrt(1./2.)*coeff);
+        num_coeff.push_back(sqrt(1./2.));
         
         qvec[0]="u";
         qvec[1]="d";
@@ -268,7 +268,7 @@ quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const
             for(unsigned int s=0; s<3; s++) qvec[s]+="b";
         }
         quarks.push_back(qvec);
-        num_coeff.push_back(-sqrt(1./2.)*coeff);
+        num_coeff.push_back(-sqrt(1./2.));
     }
     if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
     else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
@@ -287,10 +287,15 @@ quark_cont::quark_cont(const baryon_op& barop){
     for(unsigned int n=0; n<barop.opnames.size(); n++){
         token.clear();
         tokenize(barop.opnames[n], token);
-        quark_cont qcont(get_op(0,token[0],barop.spinids[n],barop.coefficients[n]));
+        
+        //start with first operator:
+        quark_cont qcont(get_op(0,token[0],barop.spinids[n]));
         for(unsigned int s=1; s<token.size(); s++){
-            qcont*=get_op(s,token[s],barop.spinids[n],barop.coefficients[n]);
+            qcont*=get_op(s,token[s],barop.spinids[n]);
         }
+        //multiply overall prefactor:
+        qcont*=barop.coefficients[n];
+        
         (*this)+=qcont;
     }
     isolimit=false;
@@ -303,6 +308,12 @@ quark_cont& quark_cont::operator+=(const quark_cont& rhs){
     idcs.insert( idcs.end(), rhs.idcs.begin(), rhs.idcs.end() );
     sym_coeff.insert( sym_coeff.end(), rhs.sym_coeff.begin(), rhs.sym_coeff.end() );
     num_coeff.insert( num_coeff.end(), rhs.num_coeff.begin(), rhs.num_coeff.end() );
+    return *this;
+}
+
+
+quark_cont& quark_cont::operator*=(const double& rhs){
+    for(unsigned int n=0; n<num_coeff.size(); n++) num_coeff[n]*=rhs;
     return *this;
 }
 

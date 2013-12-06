@@ -77,6 +77,7 @@ public:
     
     //operators:
     quark_cont& operator+=(const quark_cont& rhs);
+    quark_cont& operator*=(const double& rhs);
     quark_cont& operator*=(const quark_cont& rhs);
     friend std::ostream& operator<<(std::ostream &os,const quark_cont &obj);
     
