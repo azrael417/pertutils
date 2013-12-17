@@ -884,10 +884,10 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
             else os << indent << "sum -= ";
             os << std::to_string(fabs(num_coeff[n])) << " * ";
             for(unsigned int p=0; p<numfacts; p+=3){
-                os << "(~vvv[tf][n" << p << "][n" << p+1 << "][n" << p+2 << "])" << " * ";
+                os << "(~vvv[n" << p << "][n" << p+1 << "][tf][n" << p+2 << "])" << " * ";
             }
             for(unsigned int p=numfacts; p<(2*numfacts); p+=3){
-                os << "vvv[ti][n" << p << "][n" << p+1 << "][n" << p+2 << "]" << " * ";
+                os << "vvv[n" << p << "][n" << p+1 << "][ti][n" << p+2 << "]" << " * ";
             }
             os << "(" << std::endl;
             for(unsigned int p=0; p<numprops; p++){
