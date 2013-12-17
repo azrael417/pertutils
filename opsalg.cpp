@@ -869,8 +869,8 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         indent="";
         os << std::endl << "//compute sink blocks and diagrams:\n{\n";
         indent+="\t";
-        os << indent+"int tf, src;\n";
-        os << indent+"for (ti=srcstart, src=0; ti<nt; ti+=srcinc, src++) for (tf=0; tf<lt; tf++){" << std::endl;
+        os << indent+"int tf;\n";
+        os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
         indent+="\t";
         for(unsigned int i=0; i<(numfacts*2); i++){
             os << indent << "unsigned int n" << i << ";\n";
@@ -896,7 +896,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
                 os << sign;
                 for(unsigned int s=0; s<numfacts; s++){
                     get_indices_laph(props[p+numprops*n][s],props_idcs[p+numprops*n][s],massid,spin1id,spin2id,n1id,n2id,isolimit);
-                    std::string tmp="vMv["+std::to_string(massid)+"][src][n"+std::to_string(n2id)+"]["+std::to_string(spin2id)+"][tf][n"+std::to_string(n1id)+"]["+std::to_string(spin1id)+"]";
+                    std::string tmp="vMv["+std::to_string(massid)+"][n"+std::to_string(n2id)+"]["+std::to_string(spin2id)+"][tf][n"+std::to_string(n1id)+"]["+std::to_string(spin1id)+"]";
                     if(s==0) os << tmp;
                     else os << " * " << tmp;
                 }
@@ -914,7 +914,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         os << std::endl;
         os << indent+"int tf1= lt*mynode_dir[TUP]+tf;\n";
         os << indent+"int tdiff= (tf1-ti+nt)%nt;\n";
-        os << indent+"prop["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
+        os << indent+"P->bar["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
         os << indent+"stopper_stop( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
         indent.erase(0,1);
         os << indent+"} //end loop ti, tf\n";
