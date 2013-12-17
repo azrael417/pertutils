@@ -897,8 +897,8 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
                 std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
                 os << sign;
                 for(unsigned int s=0; s<numfacts; s++){
-                    get_indices_laph(props[p+numprops*n][s],props_idcs[p+numprops*n][s],massid,spin1id,spin2id,n1id,n2id);
-                    std::string tmp="vMvpt[m"+std::to_string(massid)+"][src][n"+std::to_string(n2id)+"]["+std::to_string(spin2id)+"][tf][n"+std::to_string(n1id)+"]["+std::to_string(spin1id)+"]";
+                    get_indices_laph(props[p+numprops*n][s],props_idcs[p+numprops*n][s],massid,spin1id,spin2id,n1id,n2id,isolimit);
+                    std::string tmp="vMv["+std::to_string(massid)+"][src][n"+std::to_string(n2id)+"]["+std::to_string(spin2id)+"][tf][n"+std::to_string(n1id)+"]["+std::to_string(spin1id)+"]";
                     if(s==0) os << tmp;
                     else os << " * " << tmp;
                 }
