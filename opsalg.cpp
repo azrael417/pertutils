@@ -869,9 +869,10 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         indent="";
         os << std::endl << "//compute sink blocks and diagrams:\n{\n";
         indent+="\t";
-        os << indent+"int tf;\n"+indent+"COMPLEX sum=0.;\n";
+        os << indent+"int tf;\n";
         os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
         indent+="\t";
+        os << indent+"COMPLEX sum=0.;\n";
         for(unsigned int i=0; i<(numfacts*2); i++){
             os << indent << "unsigned int n" << i << ";\n";
             os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
