@@ -193,7 +193,7 @@ quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const
     }
 }
 
-quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins){
+static quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins){
     std::vector<NRvector<std::string> > quarks;
     std::vector<NRvector<std::string> > attributess;
     std::vector<NRvector<std::string> > idcs;
@@ -869,7 +869,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         indent="";
         os << std::endl << "//compute sink blocks and diagrams:\n{\n";
         indent+="\t";
-        os << indent+"int tf;\n";
+        os << indent+"int tf;\n"+indent+"COMPLEX sum=0.";
         os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
         indent+="\t";
         for(unsigned int i=0; i<(numfacts*2); i++){
