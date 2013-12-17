@@ -867,12 +867,10 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         //print code based on laph in order to compute contractions
         unsigned int numfacts=props[0].dim();
         indent="";
-        os << "double complex *prop;\n";
-        os << "MALLOC( prop, nt );\n";
-        os << "memset( prop, 0, nt*sizeof(double complex) );\n";
-        os << "double complex sum;\n";
-        os << "stopper_start( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
-        os << "for (ti=srcstart, src=0; ti<nt; ti+=srcinc, src++) for (tf=0; tf<lt; tf++){" << std::endl;
+        os << std::endl << "//compute sink blocks and diagrams:\n{\n";
+        indent+="\t";
+        os << indent+"int tf, src;\n";
+        os << indent+"for (ti=srcstart, src=0; ti<nt; ti+=srcinc, src++) for (tf=0; tf<lt; tf++){" << std::endl;
         indent+="\t";
         for(unsigned int i=0; i<(numfacts*2); i++){
             os << indent << "unsigned int n" << i << ";\n";
@@ -914,11 +912,14 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         
         //finalize:
         os << std::endl;
-        os << indent << "int tf1= lt*mynode_dir[TUP]+tf;\n";
-        os << indent << "int tdiff= (tf1-ti+nt)%nt;\n";
-        os << indent << "prop[tdiff]+= sum;\n";
-        os << indent << "stopper_stop( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
-        os << "} //end loop ti, tf\n";
+        os << indent+"int tf1= lt*mynode_dir[TUP]+tf;\n";
+        os << indent+"int tdiff= (tf1-ti+nt)%nt;\n";
+        os << indent+"prop["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
+        os << indent+"stopper_stop( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
+        indent.erase(0,1);
+        os << indent+"} //end loop ti, tf\n";
+        indent.erase(0,1);
+        os << indent+"}\n";
     }
     else if(mode.compare("laph2")==0){
         if(laph_sinks.size()==0) get_laph_sinks(mode);
