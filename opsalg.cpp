@@ -884,7 +884,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
             else os << indent << "sum -= ";
             os << std::to_string(fabs(num_coeff[n])) << " * ";
             for(unsigned int p=0; p<numfacts; p+=3){
-                os << "(~vvvt[tf][n" << p << "][n" << p+1 << "][n" << p+2 << "])" << " * ";
+                os << "(~vvv[tf][n" << p << "][n" << p+1 << "][n" << p+2 << "])" << " * ";
             }
             for(unsigned int p=numfacts; p<(2*numfacts); p+=3){
                 os << "vvv[ti][n" << p << "][n" << p+1 << "][n" << p+2 << "]" << " * ";
@@ -915,7 +915,6 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         os << indent+"int tf1= lt*mynode_dir[TUP]+tf;\n";
         os << indent+"int tdiff= (tf1-ti+nt)%nt;\n";
         os << indent+"P->bar["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
-        os << indent+"stopper_stop( &tmr_locbar" << static_cast<unsigned int>(numfacts/3) << " );\n";
         indent.erase(0,1);
         os << indent+"} //end loop ti, tf\n";
         indent.erase(0,1);
