@@ -565,7 +565,7 @@ int quark_cont::reorder(){
     
     //compute pivoting table:
     std::vector<NRvector<unsigned int> > proppivots;
-    unsigned int count;
+    unsigned int count=0;
     for(unsigned int n=0; n<quarks.size(); n++){
         for(unsigned int s=0; s<numprops; s++){
             NRvector<unsigned int> pivot(props[s+n*numprops].dim());
