@@ -130,20 +130,25 @@ baryon_op& baryon_op::operator*=(const double& rhs){
 
 baryon_op& baryon_op::operator*=(const baryon_op& rhs){
     unsigned int nn=static_cast<unsigned int>(opnames.size());
-    unsigned int mm=static_cast<unsigned int>(rhs.opnames.size());
-    std::vector<std::string> tmpnames;
-    std::vector<NRvector<std::string> > tmpspins;
-    std::vector<double> tmpcoeffs;
-    
-    for(unsigned int n=0; n<nn; n++) for(unsigned int m=0; m<mm; m++){
-        tmpnames.push_back(opnames[n]+" "+rhs.opnames[m]);
-        tmpcoeffs.push_back(coefficients[n]*rhs.coefficients[m]);
-        NRvector<std::string> tmpvec(spinids[n]);
-        tmpspins.push_back(tmpvec.append(rhs.spinids[m]));
+    if(nn==0){
+        *this=rhs;
     }
-    opnames=tmpnames;
-    coefficients=tmpcoeffs;
-    spinids=tmpspins;
+    else{
+        unsigned int mm=static_cast<unsigned int>(rhs.opnames.size());
+        std::vector<std::string> tmpnames;
+        std::vector<NRvector<std::string> > tmpspins;
+        std::vector<double> tmpcoeffs;
+        
+        for(unsigned int n=0; n<nn; n++) for(unsigned int m=0; m<mm; m++){
+            tmpnames.push_back(opnames[n]+" "+rhs.opnames[m]);
+            tmpcoeffs.push_back(coefficients[n]*rhs.coefficients[m]);
+            NRvector<std::string> tmpvec(spinids[n]);
+            tmpspins.push_back(tmpvec.append(rhs.spinids[m]));
+        }
+        opnames=tmpnames;
+        coefficients=tmpcoeffs;
+        spinids=tmpspins;
+    }
     return *this;
 }
 
