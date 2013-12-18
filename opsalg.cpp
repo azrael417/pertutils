@@ -869,7 +869,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         indent="";
         os << std::endl << "//compute sink blocks and diagrams:\n{\n";
         indent+="\t";
-        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\",operator_id);\n";
+        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\","+std::to_string(operator_id)+");\n";
         os << indent+"int tf;\n";
         os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
         indent+="\t";
