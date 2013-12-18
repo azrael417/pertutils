@@ -43,6 +43,8 @@ baryon_op& baryon_op::bar(){
     for(unsigned int n=0; n<opnames.size(); n++){
         std::string tmpstring=opnames[n];
         double sign=1.;
+        
+        //derivatives first:
         size_t pos=-1;
         while((pos=tmpstring.find("Dp",pos+1))!=std::string::npos){
             sign*=-1.;
@@ -57,6 +59,8 @@ baryon_op& baryon_op::bar(){
         while((pos=tmpstring.find("DM",pos+1))!=std::string::npos){
             tmpstring.replace(pos, 2, "Dm");
         }
+        
+        //neutron content:
         pos=-1;
         while((pos=tmpstring.find("Nb",pos+1))!=std::string::npos){
             tmpstring.replace(pos, 2, "nb");
@@ -70,6 +74,23 @@ baryon_op& baryon_op::bar(){
             tmpstring.replace(pos, 2, "N");
             //tmpstring.erase(pos+1);
         }
+        
+        //proton content:
+        pos=-1;
+        while((pos=tmpstring.find("Pb",pos+1))!=std::string::npos){
+            tmpstring.replace(pos, 2, "pb");
+        }
+        pos=-1;
+        while((pos=tmpstring.find("P",pos+1))!=std::string::npos){
+            tmpstring.insert(pos+1, "b");
+        }
+        pos=-1;
+        while((pos=tmpstring.find("pb",pos+1))!=std::string::npos){
+            tmpstring.replace(pos, 2, "P");
+            //tmpstring.erase(pos+1);
+        }
+        
+        //write back
         opnames[n]=tmpstring;
         coefficients[n]*=sign;
     }
@@ -618,7 +639,7 @@ static void get_indices_laph(const std::string& prop, const std::string& idcs, u
     tokenize(tmptoken1[0],tmptoken2,",");
     spin1id=static_cast<unsigned int>(strtoul(tmptoken2[1].c_str(),NULL,10));
     spin1id-=1;
-    unsigned int count;
+    unsigned int count=0;
     tmptoken2[0].erase(0,1);
     if(tmptoken2[0].find("a")==0) count=0;
     if(tmptoken2[0].find("b")==0) count=1;
@@ -846,6 +867,9 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
     }
     
     unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
+    
+    std::cout << "Number of Operators: " << quarks.size() << std::endl;
+    std::cout << "Number of Diagrams: " << numprops << std::endl;
     
     if(mode.compare("human-readable")==0){
         //print contractions in human readable form
