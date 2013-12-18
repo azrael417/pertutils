@@ -869,7 +869,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         indent="";
         os << std::endl << "//compute sink blocks and diagrams:\n{\n";
         indent+="\t";
-        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\","+std::to_string(operator_id)+");\n";
+        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\n\","+std::to_string(operator_id)+");\n";
         os << indent+"int tf;\n";
         os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
         indent+="\t";
@@ -937,7 +937,7 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         os << std::endl << "//compute sink blocks and diagrams:\n{\n";
         indent+="\t";
         os << indent+"int tf, src;\n";
-        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\","+std::to_string(operator_id)+");\n";
+        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\n\","+std::to_string(operator_id)+");\n";
         os << indent << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
         indent+="\t";
         //set up temporary storage:
