@@ -91,10 +91,10 @@ public:
     //int print_laph_baryon_source(std::ostream& os, const std::string mode="local");
     //int print_laph_sums(std::ostream& os, const std::string& wwwsummed);
     int print_contractions(std::ostream& os, const std::string mode="human-readable");
-    void toggle_isospin_limit();
+    void set_isospin_limit(const bool&);
     void set_operator_id(const int&);
-    void toggle_print_introloop();
-    void toggle_print_outtroloop();
+    void set_print_introloop(const bool&);
+    void set_print_outtroloop(const bool&);
 };
 
 quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff);

@@ -413,16 +413,16 @@ void quark_cont::clear(){
     isolimit=false;
 }
 
-void quark_cont::toggle_isospin_limit(){
-    isolimit=!isolimit;
+void quark_cont::set_isospin_limit(const bool& flag){
+    isolimit=flag;
 }
 
-void quark_cont::toggle_print_introloop(){
-    print_introloop=!print_introloop;
+void quark_cont::set_print_introloop(const bool& flag){
+    print_introloop=flag;
 }
 
-void quark_cont::toggle_print_outtroloop(){
-    print_outtroloop=!print_outtroloop;
+void quark_cont::set_print_outtroloop(const bool& flag){
+    print_outtroloop=flag;
 }
 
 void quark_cont::set_operator_id(const int& id){
