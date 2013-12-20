@@ -211,7 +211,7 @@ std::ostream& operator<<(std::ostream &os,const baryon_op &obj){
 //START quark_cont
 //******************************************************************
 //******************************************************************
-quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), operator_id(-1), print_introloop(true), print_outtroloop(true){
+quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), print_introloop(true), print_outtroloop(true), operator_id(-1){
     //check for consistency:
     if(quarks.size()!=attributes.size() || quarks.size()!=idcs.size() || quarks.size()!=sym_coeff.size() || quarks.size()!=num_coeff.size()){
         std::cerr << "quark_cont::quark_cont: internal structure error!" << std::endl;
