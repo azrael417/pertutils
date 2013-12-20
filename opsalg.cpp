@@ -211,7 +211,7 @@ std::ostream& operator<<(std::ostream &os,const baryon_op &obj){
 //START quark_cont
 //******************************************************************
 //******************************************************************
-quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), operator_id(-1){
+quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), operator_id(-1), print_introloop(true), print_outtroloop(true){
     //check for consistency:
     if(quarks.size()!=attributes.size() || quarks.size()!=idcs.size() || quarks.size()!=sym_coeff.size() || quarks.size()!=num_coeff.size()){
         std::cerr << "quark_cont::quark_cont: internal structure error!" << std::endl;
@@ -415,6 +415,14 @@ void quark_cont::clear(){
 
 void quark_cont::toggle_isospin_limit(){
     isolimit=!isolimit;
+}
+
+void quark_cont::toggle_print_introloop(){
+    print_introloop=!print_introloop;
+}
+
+void quark_cont::toggle_print_outtroloop(){
+    print_outtroloop=!print_outtroloop;
 }
 
 void quark_cont::set_operator_id(const int& id){
@@ -895,19 +903,30 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
     else if(mode.compare("laph")==0){
         //print code based on laph in order to compute contractions
         unsigned int numfacts=props[0].dim();
-        indent="";
-        os << std::endl << "//compute sink blocks and diagrams:\n{\n";
-        indent+="\t";
-        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+std::to_string(operator_id)+");\n";
-        os << indent+"int tf;\n";
-        os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
-        indent+="\t";
-        os << indent+"COMPLEX sum=0.;\n";
-        for(unsigned int i=0; i<(numfacts*2); i++){
-            os << indent << "unsigned int n" << i << ";\n";
-            os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+        
+        if(print_introloop){
+            indent="";
+            os << std::endl << "//compute sink blocks and diagrams:\n{\n";
             indent+="\t";
+            os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+std::to_string(operator_id)+");\n";
+            os << indent+"int tf;\n";
+            os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
+            indent+="\t";
+            os << indent+"COMPLEX sum=0.;\n";
+            for(unsigned int i=0; i<(numfacts*2); i++){
+                os << indent << "unsigned int n" << i << ";\n";
+                os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+                indent+="\t";
+            }
         }
+        else{
+            indent="\t\t";
+            for(unsigned int i=0; i<(numfacts*2); i++){
+                indent+="\t";
+            }
+        }
+        
+        //print body:
         unsigned int massid,spin1id,spin2id,n1id,n2id;
         for(unsigned int n=0; n<num_coeff.size(); n++){
             if(n!=0) os << std::endl;
@@ -936,20 +955,30 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
             os << indent << ");" << std::endl;
         }
         os << std::endl;
-        for(unsigned int i=0; i<(numfacts*2); i++){
-            indent.erase((numfacts*2-i-1),1);
-            os << indent << "} //end loop n" << (numfacts*2-i-1) << "\n";
-        }
         
-        //finalize:
-        os << std::endl;
-        os << indent+"int tf1= lt*mynode_dir[TUP]+tf;\n";
-        os << indent+"int tdiff= (tf1-ti+nt)%nt;\n";
-        os << indent+"P->bar["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
-        indent.erase(0,1);
-        os << indent+"} //end loop ti, tf\n";
-        indent.erase(0,1);
-        os << indent+"}\n";
+        if(print_outtroloop){
+            for(unsigned int i=0; i<(numfacts*2); i++){
+                indent.erase((numfacts*2-i-1),1);
+                os << indent << "} //end loop n" << (numfacts*2-i-1) << "\n";
+            }
+            
+            //finalize:
+            os << std::endl;
+            os << indent+"int tf1= lt*mynode_dir[TUP]+tf;\n";
+            os << indent+"int tdiff= (tf1-ti+nt)%nt;\n";
+            os << indent+"P->bar["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
+            indent.erase(0,1);
+            os << indent+"} //end loop ti, tf\n";
+            indent.erase(0,1);
+            os << indent+"}\n";
+        }
+        else{
+            for(unsigned int i=0; i<(numfacts*2); i++){
+                indent.erase((numfacts*2-i-1),1);
+            }
+            indent.erase(0,1);
+            indent.erase(0,1);
+        }
     }
     else if(mode.compare("laph2")==0){
         if(laph_sinks.size()==0) get_laph_sinks(mode);
@@ -963,23 +992,35 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
         //sink blocks and diagrams:
         //********************************************************
         //********************************************************
-        os << std::endl << "//compute sink blocks and diagrams:\n{\n";
-        indent+="\t";
-        os << indent+"int tf, src;\n";
-        os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+std::to_string(operator_id)+");\n";
-        os << indent << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
-        indent+="\t";
-        //set up temporary storage:
         std::string wwwsummed("www1pt[tf][src]");
-        if(operator_id>=0){
-            wwwsummed="www1pt[tf][src]["+std::to_string(operator_id)+"]";
-        }
-        for(unsigned int i=0; i<numfacts; i++){
-            os << indent << "unsigned int n" << i << ";\n";
-            os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+        if(print_introloop){
+            os << std::endl << "//compute sink blocks and diagrams:\n{\n";
             indent+="\t";
-            
-            wwwsummed+="[n"+std::to_string(i)+"]";
+            os << indent+"int tf, src;\n";
+            os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+std::to_string(operator_id)+");\n";
+            os << indent << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
+            indent+="\t";
+            if(operator_id>=0){
+                wwwsummed="www1pt[tf][src]["+std::to_string(operator_id)+"]";
+            }
+            for(unsigned int i=0; i<numfacts; i++){
+                os << indent << "unsigned int n" << i << ";\n";
+                os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
+                indent+="\t";
+                
+                wwwsummed+="[n"+std::to_string(i)+"]";
+            }
+        }
+        else{
+            indent+="\t\t";
+            if(operator_id>=0){
+                wwwsummed="www1pt[tf][src]["+std::to_string(operator_id)+"]";
+            }
+            for(unsigned int i=0; i<numfacts; i++){
+                indent+="\t";
+                
+                wwwsummed+="[n"+std::to_string(i)+"]";
+            }
         }
         
         for(unsigned int n=0; n<num_coeff.size(); n++){
@@ -1003,14 +1044,24 @@ int quark_cont::print_contractions(std::ostream& os, const std::string mode){
             os << indent << ");" << std::endl;
         }
         os << std::endl;
-        for(unsigned int i=0; i<numfacts; i++){
-            indent.erase((numfacts-i-1),1);
-            os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
+        
+        if(print_outtroloop){
+            for(unsigned int i=0; i<numfacts; i++){
+                indent.erase((numfacts-i-1),1);
+                os << indent << "} //end loop n" << (numfacts-i-1) << "\n";
+            }
+            indent.erase(0,1);
+            os << indent << "} //end loop tf, nsrc\n";
+            indent.erase(0,1);
+            os << "}\n";
         }
-        indent.erase(0,1);
-        os << indent << "} //end loop tf, nsrc\n";
-        indent.erase(0,1);
-        os << "}\n";
+        else{
+            for(unsigned int i=0; i<numfacts; i++){
+                indent.erase((numfacts-i-1),1);
+            }
+            indent.erase(0,1);
+            indent.erase(0,1);
+        }
     }
     
     return EXIT_SUCCESS;

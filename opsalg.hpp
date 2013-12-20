@@ -67,6 +67,7 @@ private:
     std::vector<NRvector<std::string> > laph_sinks;
     std::string indent;
     bool isolimit;
+    bool print_introloop, print_outtroloop;
     int operator_id;
     
 public:
@@ -92,6 +93,8 @@ public:
     int print_contractions(std::ostream& os, const std::string mode="human-readable");
     void toggle_isospin_limit();
     void set_operator_id(const int&);
+    void toggle_print_introloop();
+    void toggle_print_outtroloop();
 };
 
 quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins, const double& coeff);
