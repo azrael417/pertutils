@@ -237,7 +237,7 @@ namespace anatools{
         col[0]="a";
         col[1]="b";
         col[2]="c";
-        for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+std::to_string(opnumber)+","+spins[s+3*opnumber];
+        for(unsigned int s=0; s<3; s++) ivec[s]=col[s]+to_string(opnumber)+","+spins[s+3*opnumber];
         idcs.push_back(ivec);
         idcs.push_back(ivec);
         
@@ -248,8 +248,8 @@ namespace anatools{
         
         //prefactor eps_abc for every single term:
         ::std::string tmp="eps_(";
-        for(unsigned int s=0; s<2; s++) tmp+=col[s]+std::to_string(opnumber)+",";
-        tmp+=col[2]+std::to_string(opnumber)+")";
+        for(unsigned int s=0; s<2; s++) tmp+=col[s]+to_string(opnumber)+",";
+        tmp+=col[2]+to_string(opnumber)+")";
         sym_coeff.push_back(tmp);
         sym_coeff.push_back(tmp);
         
@@ -431,7 +431,7 @@ namespace anatools{
         operator_id=id;
     }
     
-    static int contract_helper(const NRvector< ::std::string >& quarks, const NRvector< ::std::string >& attributes, const NRvector< ::std::string >& idcs, std::vector<NRvector< ::std::string > >& resprops, ::std::vector<NRvector< ::std::string > >& residcs, ::std::vector<double>& signs){
+    static int contract_helper(const NRvector< ::std::string >& quarks, const NRvector< ::std::string >& attributes, const NRvector< ::std::string >& idcs, ::std::vector<NRvector< ::std::string > >& resprops, ::std::vector<NRvector< ::std::string > >& residcs, ::std::vector<double>& signs){
         //count quarks and barred-quarks first and compare;
         unsigned int nu=0, nubar=0, nd=0, ndbar=0, ns=0, nsbar=0;
         for(unsigned int s=0; s<quarks.dim(); s++){
@@ -458,7 +458,7 @@ namespace anatools{
         }
         
         if(nu!=nubar || nd!=ndbar || ns!=nsbar){
-            ::std::cerr << "contract_helper: error, quark content does not allow for contraction!" << std::endl;
+            ::std::cerr << "contract_helper: error, quark content does not allow for contraction!" << ::std::endl;
             return EXIT_FAILURE;
         }
         
@@ -513,16 +513,16 @@ namespace anatools{
         residcs.resize(ncont);
         
         //go through contractions:
-        std::vector<unsigned int> svec(ns),svectmp(ns);
-        std::vector<unsigned int> dvec(nd),dvectmp(nd);
-        std::vector<unsigned int> uvec(nu),uvectmp(nu);
+        ::std::vector<unsigned int> svec(ns),svectmp(ns);
+        ::std::vector<unsigned int> dvec(nd),dvectmp(nd);
+        ::std::vector<unsigned int> uvec(nu),uvectmp(nu);
         for(unsigned int s=0; s<ns; s++) svec[s]=s;
         for(unsigned int s=0; s<nd; s++) dvec[s]=s;
         for(unsigned int s=0; s<nu; s++) uvec[s]=s;
         int spar,dpar,upar;
         
-        NRvector<std::string> props(ns+nd+nu);
-        NRvector<std::string> indices(ns+nd+nu);
+        NRvector< ::std::string > props(ns+nd+nu);
+        NRvector< ::std::string > indices(ns+nd+nu);
         for(unsigned int nsc=0; nsc<nscont; nsc++){
             reverse_copy(svec.begin(),svec.end(),svectmp.begin());
             for(unsigned int s=0; s<ns; s++){
@@ -558,11 +558,11 @@ namespace anatools{
                     resprops[idx]=props;
                     residcs[idx]=indices;
                     
-                    std::next_permutation(uvec.begin(),uvec.end());
+                    ::std::next_permutation(uvec.begin(),uvec.end());
                 }
-                std::next_permutation(dvec.begin(),dvec.end());
+                ::std::next_permutation(dvec.begin(),dvec.end());
             }
-            std::next_permutation(svec.begin(),svec.end());
+            ::std::next_permutation(svec.begin(),svec.end());
         }
         
         return EXIT_SUCCESS;
@@ -575,12 +575,12 @@ namespace anatools{
         int error;
         
         for(unsigned int n=0; n<quarks.size(); n++){
-            std::vector<NRvector<std::string> > tmpprops;
-            std::vector<NRvector<std::string> > tmpidcs;
-            std::vector<double> tmpsigns;
+            ::std::vector<NRvector< ::std::string > > tmpprops;
+            ::std::vector<NRvector< ::std::string > > tmpidcs;
+            ::std::vector<double> tmpsigns;
             error=contract_helper(quarks[n],attributes[n],idcs[n],tmpprops,tmpidcs,tmpsigns);
             if(error==EXIT_FAILURE){
-                std::cerr << "quark_cont::contract: error, contraction could not be performed" << std::endl;
+                ::std::cerr << "quark_cont::contract: error, contraction could not be performed" << ::std::endl;
                 return EXIT_FAILURE;
             }
             props.insert(props.end(), tmpprops.begin(), tmpprops.end());
@@ -593,20 +593,20 @@ namespace anatools{
     //reorder quark propagators, such that sink side is regrouped into baryons:
     int quark_cont::reorder(){
         if(props.size()==0 || props_idcs.size()==0 || props_signs.size()==0){
-            std::cerr << "quark_cont::reorder: please perform contractions first!" << std::endl;
+            ::std::cerr << "quark_cont::reorder: please perform contractions first!" << ::std::endl;
             return EXIT_FAILURE;
         }
         
         unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
         
         //compute pivoting table:
-        std::vector<NRvector<unsigned int> > proppivots;
+        ::std::vector<NRvector<unsigned int> > proppivots;
         unsigned int count=0;
         for(unsigned int n=0; n<quarks.size(); n++){
             for(unsigned int s=0; s<numprops; s++){
                 NRvector<unsigned int> pivot(props[s+n*numprops].dim());
                 for(unsigned int p=0; p<props[s+n*numprops].dim(); p++){
-                    std::string tmp=props_idcs[s+n*numprops][p];
+                    ::std::string tmp=props_idcs[s+n*numprops][p];
                     size_t pos=tmp.find_first_of(",");
                     tmp=tmp.substr(1,pos);
                     if(tmp.find("a")==0) count=0;
@@ -622,8 +622,8 @@ namespace anatools{
         //reorder:
         for(unsigned int n=0; n<quarks.size(); n++){
             for(unsigned int s=0; s<numprops; s++){
-                NRvector<std::string> tmpprops(props[s+n*numprops].dim());
-                NRvector<std::string> tmpprops_idcs(props[s+n*numprops].dim());
+                NRvector< ::std::string > tmpprops(props[s+n*numprops].dim());
+                NRvector< ::std::string > tmpprops_idcs(props[s+n*numprops].dim());
                 for(unsigned int p=0; p<props[s+n*numprops].dim(); p++){
                     tmpprops[proppivots[s+n*numprops][p]]=props[s+n*numprops][p];
                     tmpprops_idcs[proppivots[s+n*numprops][p]]=props_idcs[s+n*numprops][p];
@@ -638,14 +638,14 @@ namespace anatools{
         return EXIT_SUCCESS;
     }
     
-    static void get_indices_laph(const std::string& prop, const std::string& idcs, unsigned int& massid, unsigned int& spin1id, unsigned int& spin2id, unsigned int& n1id, unsigned int& n2id, bool isolimit=false){
+    static void get_indices_laph(const ::std::string& prop, const ::std::string& idcs, unsigned int& massid, unsigned int& spin1id, unsigned int& spin2id, unsigned int& n1id, unsigned int& n2id, bool isolimit=false){
         unsigned int sub=0;
         if(isolimit) sub=1;
         
         if(prop.find("Su")==0) massid=0;
         if(prop.find("Sd")==0) massid=1-sub;
         if(prop.find("Ss")==0) massid=2-sub;
-        std::vector<std::string> tmptoken1, tmptoken2;
+        ::std::vector< ::std::string > tmptoken1, tmptoken2;
         tokenize(idcs, tmptoken1,";");
         
         //examine single parts:
@@ -676,14 +676,14 @@ namespace anatools{
     }
     
     
-    int quark_cont::get_laph_sinks(std::string mode){
+    int quark_cont::get_laph_sinks(::std::string mode){
         unsigned int numfacts=props[0].dim();
         unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
         
         if(mode.compare("laph2")==0){
             for(unsigned int n=0; n<num_coeff.size(); n++){
                 for(unsigned int p=0; p<numprops; p++){
-                    NRvector<std::string> wwwstrings(numfacts/3);
+                    NRvector< ::std::string > wwwstrings(numfacts/3);
                     unsigned int count=0;
                     for(unsigned int s=0; s<numfacts; s+=3){
                         
@@ -694,10 +694,10 @@ namespace anatools{
                         get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],n1id[2],n2id[2],isolimit);
                         
                         //get attributes:
-                        std::string tmp[3]={"","",""};
-                        std::string attrstring="";
+                        ::std::string tmp[3]={"","",""};
+                        ::std::string attrstring="";
                         for(unsigned int l=0; l<3; l++){
-                            std::string tmpstring=props[p+numprops*n][s+l];
+                            ::std::string tmpstring=props[p+numprops*n][s+l];
                             tmpstring.erase(0,3);
                             tmpstring.erase(tmpstring.length()-1,1);
                             tmpstring=tmpstring.substr(0,tmpstring.find_first_of(";"));
@@ -708,7 +708,7 @@ namespace anatools{
                             else if(tmpstring.compare("D0")==0) tmp[id]+="wd0";
                             else if(tmpstring.compare("Dm")==0) tmp[id]+="wdm";
                             else{
-                                std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << std::endl;
+                                ::std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << ::std::endl;
                                 return EXIT_FAILURE;
                             }
                         }
@@ -720,7 +720,7 @@ namespace anatools{
                         }
                         
                         //check for attributes at prop3:
-                        attrstring+="0pt["+std::to_string(massid[0])+"]["+std::to_string(massid[1])+"]["+std::to_string(massid[2])+"][src]["+std::to_string(spin2id[0])+"][n"+std::to_string(n2id[0])+"]["+std::to_string(spin2id[1])+"][n"+std::to_string(n2id[1])+"][tf]["+std::to_string(spin2id[2])+"][n"+std::to_string(n2id[2])+"]["+std::to_string(spin1id[0])+"]["+std::to_string(spin1id[1])+"]["+std::to_string(spin1id[2])+"]";
+                        attrstring+="0pt["+to_string(massid[0])+"]["+to_string(massid[1])+"]["+to_string(massid[2])+"][src]["+to_string(spin2id[0])+"][n"+to_string(n2id[0])+"]["+to_string(spin2id[1])+"][n"+to_string(n2id[1])+"][tf]["+to_string(spin2id[2])+"][n"+to_string(n2id[2])+"]["+to_string(spin1id[0])+"]["+to_string(spin1id[1])+"]["+to_string(spin1id[2])+"]";
                         
                         wwwstrings[count]=attrstring;
                         count++;
@@ -732,14 +732,14 @@ namespace anatools{
         return EXIT_SUCCESS;
     }
     
-    int quark_cont::get_laph_sources(std::string mode){
+    int quark_cont::get_laph_sources(::std::string mode){
         unsigned int numfacts=props[0].dim();
         unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
         
         if(mode.compare("laph2")==0){
             for(unsigned int n=0; n<num_coeff.size(); n++){
                 for(unsigned int p=0; p<numprops; p++){
-                    NRvector<std::string> vvvstrings(numfacts/3);
+                    NRvector< ::std::string > vvvstrings(numfacts/3);
                     unsigned int count=0;
                     for(unsigned int s=0; s<numfacts; s+=3){
                         
@@ -750,10 +750,10 @@ namespace anatools{
                         get_indices_laph(props[p+numprops*n][s+2],props_idcs[p+numprops*n][s+2],massid[2],spin1id[2],spin2id[2],n1id[2],n2id[2]);
                         
                         //get attributes:
-                        std::string tmp[3]={"","",""};
-                        std::string attrstring="";
+                        ::std::string tmp[3]={"","",""};
+                        ::std::string attrstring="";
                         for(unsigned int l=0; l<3; l++){
-                            std::string tmpstring=props[p+numprops*n][s+l];
+                            ::std::string tmpstring=props[p+numprops*n][s+l];
                             tmpstring.erase(0,3);
                             tmpstring.erase(tmpstring.length()-1,1);
                             tmpstring=tmpstring.substr(tmpstring.find_first_of(";")+1,tmpstring.length());
@@ -764,7 +764,7 @@ namespace anatools{
                             else if(tmpstring.compare("D0")==0) tmp[id]+="vd0";
                             else if(tmpstring.compare("Dm")==0) tmp[id]+="vdm";
                             else{
-                                std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << std::endl;
+                                ::std::cerr << "quark_cont::get_laph_sinks: error, specified attribute " << tmpstring << " not in database!" << ::std::endl;
                                 return EXIT_FAILURE;
                             }
                         }
@@ -778,7 +778,7 @@ namespace anatools{
                         }
                         
                         //check for attributes at prop3:
-                        attrstring+="0pt[n"+std::to_string(n2id[0])+"][n"+std::to_string(n2id[1])+"][ti][n"+std::to_string(n2id[2])+"]";
+                        attrstring+="0pt[n"+to_string(n2id[0])+"][n"+to_string(n2id[1])+"][ti][n"+to_string(n2id[2])+"]";
                         
                         vvvstrings[count]=attrstring;
                         count++;
@@ -875,23 +875,23 @@ namespace anatools{
     //    return EXIT_SUCCESS;
     //}
     
-    int quark_cont::print_contractions(std::ostream& os, const std::string mode){
+    int quark_cont::print_contractions(::std::ostream& os, const ::std::string mode){
         if(props.size()==0 || props_idcs.size()==0 || props_signs.size()==0){
-            std::cerr << "quark_cont::print_contractions: please perform contractions first!" << std::endl;
+            ::std::cerr << "quark_cont::print_contractions: please perform contractions first!" << ::std::endl;
             return EXIT_FAILURE;
         }
         
         unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
         
-        std::cout << "Number of Operators: " << quarks.size() << std::endl;
-        std::cout << "Number of Diagrams: " << numprops << std::endl;
+        ::std::cout << "Number of Operators: " << quarks.size() << ::std::endl;
+        ::std::cout << "Number of Diagrams: " << numprops << ::std::endl;
         
         if(mode.compare("human-readable")==0){
             //print contractions in human readable form
-            std::string tmp="";
+            ::std::string tmp="";
             for(unsigned int n=0; n<quarks.size(); n++){
                 tmp+=(num_coeff[n]<0. ? " - " : " + ");
-                tmp+=std::to_string(fabs(num_coeff[n]))+" * "+sym_coeff[n]+" * [ ";
+                tmp+=to_string(fabs(num_coeff[n]))+" * "+sym_coeff[n]+" * [ ";
                 for(unsigned int s=0; s<numprops; s++){
                     tmp+=(props_signs[s+n*numprops]>0. ? "+ " : "- ");
                     for(unsigned int p=0; p<props[s+n*numprops].dim(); p++){
@@ -900,7 +900,7 @@ namespace anatools{
                 }
                 tmp+="]\n";
             }
-            os << tmp << std::endl;
+            os << tmp << ::std::endl;
         }
         else if(mode.compare("laph")==0){
             //print code based on laph in order to compute contractions
@@ -908,11 +908,11 @@ namespace anatools{
             
             if(print_introloop){
                 indent="";
-                os << std::endl << "//compute sink blocks and diagrams:\n{\n";
+                os << ::std::endl << "//compute sink blocks and diagrams:\n{\n";
                 indent+="\t";
-                os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+std::to_string(operator_id)+");\n";
+                os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+to_string(operator_id)+");\n";
                 os << indent+"int tf;\n";
-                os << indent+"for (tf=0; tf<lt; tf++){" << std::endl;
+                os << indent+"for (tf=0; tf<lt; tf++){" << ::std::endl;
                 indent+="\t";
                 os << indent+"COMPLEX sum=0.;\n";
                 for(unsigned int i=0; i<(numfacts*2); i++){
@@ -931,32 +931,32 @@ namespace anatools{
             //print body:
             unsigned int massid,spin1id,spin2id,n1id,n2id;
             for(unsigned int n=0; n<num_coeff.size(); n++){
-                if(n!=0) os << std::endl;
+                if(n!=0) os << ::std::endl;
                 if(num_coeff[n]>0.) os << indent << "sum += ";
                 else os << indent << "sum -= ";
-                os << std::to_string(fabs(num_coeff[n])) << " * ";
+                os << to_string(fabs(num_coeff[n])) << " * ";
                 for(unsigned int p=0; p<numfacts; p+=3){
                     os << "vvv[n" << p << "][n" << p+1 << "][tf][n" << p+2 << "]" << " * ";
                 }
                 for(unsigned int p=numfacts; p<(2*numfacts); p+=3){
                     os << "(~vvv[n" << p << "][n" << p+1 << "][ti][n" << p+2 << "])" << " * ";
                 }
-                os << "(" << std::endl;
+                os << "(" << ::std::endl;
                 for(unsigned int p=0; p<numprops; p++){
                     os << indent+"\t";
-                    std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
+                    ::std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
                     os << sign;
                     for(unsigned int s=0; s<numfacts; s++){
                         get_indices_laph(props[p+numprops*n][s],props_idcs[p+numprops*n][s],massid,spin1id,spin2id,n1id,n2id,isolimit);
-                        std::string tmp="vMv["+std::to_string(massid)+"][n"+std::to_string(n2id)+"]["+std::to_string(spin2id)+"][tf][n"+std::to_string(n1id)+"]["+std::to_string(spin1id)+"]";
+                        ::std::string tmp="vMv["+to_string(massid)+"][n"+to_string(n2id)+"]["+to_string(spin2id)+"][tf][n"+to_string(n1id)+"]["+to_string(spin1id)+"]";
                         if(s==0) os << tmp;
                         else os << " * " << tmp;
                     }
-                    os << std::endl;
+                    os << ::std::endl;
                 }
-                os << indent << ");" << std::endl;
+                os << indent << ");" << ::std::endl;
             }
-            os << std::endl;
+            os << ::std::endl;
             
             if(print_outtroloop){
                 for(unsigned int i=0; i<(numfacts*2); i++){
@@ -965,10 +965,10 @@ namespace anatools{
                 }
                 
                 //finalize:
-                os << std::endl;
+                os << ::std::endl;
                 os << indent+"int tf1= lt*mynode_dir[TUP]+tf;\n";
                 os << indent+"int tdiff= (tf1-ti+nt)%nt;\n";
-                os << indent+"P->bar["+std::to_string(operator_id)+"][tdiff]+= sum;\n";
+                os << indent+"P->bar["+to_string(operator_id)+"][tdiff]+= sum;\n";
                 indent.erase(0,1);
                 os << indent+"} //end loop ti, tf\n";
                 indent.erase(0,1);
@@ -994,45 +994,45 @@ namespace anatools{
             //sink blocks and diagrams:
             //********************************************************
             //********************************************************
-            std::string wwwsummed("www1pt[tf][src]");
+            ::std::string wwwsummed("www1pt[tf][src]");
             if(print_introloop){
-                os << std::endl << "//compute sink blocks and diagrams:\n{\n";
+                os << ::std::endl << "//compute sink blocks and diagrams:\n{\n";
                 indent+="\t";
                 os << indent+"int tf, src;\n";
-                os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+std::to_string(operator_id)+");\n";
-                os << indent << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << std::endl;
+                os << indent+"NODE0_PRINTF(\"Computing contractions for operator %d\\n\","+to_string(operator_id)+");\n";
+                os << indent << "for(tf=0; tf<lt; tf++) for(src=0; src<nsrc; src++){" << ::std::endl;
                 indent+="\t";
                 if(operator_id>=0){
-                    wwwsummed="www1pt[tf][src]["+std::to_string(operator_id)+"]";
+                    wwwsummed="www1pt[tf][src]["+to_string(operator_id)+"]";
                 }
                 for(unsigned int i=0; i<numfacts; i++){
                     os << indent << "unsigned int n" << i << ";\n";
                     os << indent << "for(n" << i << "=0; n" << i << "<LAPH; n" << i << "++){\n";
                     indent+="\t";
                     
-                    wwwsummed+="[n"+std::to_string(i)+"]";
+                    wwwsummed+="[n"+to_string(i)+"]";
                 }
             }
             else{
                 indent+="\t\t";
                 if(operator_id>=0){
-                    wwwsummed="www1pt[tf][src]["+std::to_string(operator_id)+"]";
+                    wwwsummed="www1pt[tf][src]["+to_string(operator_id)+"]";
                 }
                 for(unsigned int i=0; i<numfacts; i++){
                     indent+="\t";
                     
-                    wwwsummed+="[n"+std::to_string(i)+"]";
+                    wwwsummed+="[n"+to_string(i)+"]";
                 }
             }
             
             for(unsigned int n=0; n<num_coeff.size(); n++){
-                if(n!=0) os << std::endl;
+                if(n!=0) os << ::std::endl;
                 if(num_coeff[n]>0.) os << indent << wwwsummed << " += ";
-                else os << std::endl << indent << wwwsummed << " -= ";
-                os << std::to_string(fabs(num_coeff[n])) << " * (" << std::endl;
+                else os << ::std::endl << indent << wwwsummed << " -= ";
+                os << to_string(fabs(num_coeff[n])) << " * (" << ::std::endl;
                 for(unsigned int p=0; p<numprops; p++){
                     os << indent+"\t";
-                    std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
+                    ::std::string sign=(props_signs[p+n*numprops]>0. ? " + " : " - ");
                     os << sign;
                     unsigned int count=0;
                     for(unsigned int s=0; s<numfacts; s+=3){
@@ -1041,11 +1041,11 @@ namespace anatools{
                         else os << " * " << laph_sinks[p+n*numprops][count];
                         count++;
                     }
-                    os << std::endl;
+                    os << ::std::endl;
                 }
-                os << indent << ");" << std::endl;
+                os << indent << ");" << ::std::endl;
             }
-            os << std::endl;
+            os << ::std::endl;
             
             if(print_outtroloop){
                 for(unsigned int i=0; i<numfacts; i++){
