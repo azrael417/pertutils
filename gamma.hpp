@@ -10,30 +10,34 @@
 
 #ifndef _GAMMA
 #define _GAMMA
-enum gamma_id {
-    ONE,
-    GX,
-    GY,
-    GZ,
-    GT,
-    G5,
-    CG5,
-    C,
-    IG4CG5,
-    PARPLUS,
-    PARMINUS
-};
 
-enum polarization_id{
-    UPDOWNAV,
-    SING0,
-    TRIP0,
-    TRIPP1,
-    TRIPM1,
-    TRIPAV
-};
-
-NRmatrix<dcomplex> get_gamma(const gamma_id gid);
-NRmatrix<dcomplex> get_polarization(const polarization_id gid);
-
+namespace anatools{
+    
+    enum gamma_id {
+        ONE,
+        GX,
+        GY,
+        GZ,
+        GT,
+        G5,
+        CG5,
+        C,
+        IG4CG5,
+        PARPLUS,
+        PARMINUS
+    };
+    
+    enum polarization_id{
+        UPDOWNAV,
+        SING0,
+        TRIP0,
+        TRIPP1,
+        TRIPM1,
+        TRIPAV
+    };
+    
+    NRmatrix<dcomplex> get_gamma(const gamma_id gid);
+    NRmatrix<dcomplex> get_polarization(const polarization_id gid);
+    
+}
 #endif
