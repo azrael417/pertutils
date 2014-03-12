@@ -17,7 +17,7 @@ namespace anatools{
     //******************************************************************
     //******************************************************************
     //constructors
-    baryon_op::baryon_op(const ::std::vector< ::std::string >& names, const std::vector<double>& coeffs, const ::std::vector<NRvector< ::std::string > >& spins): spinids(spins), opnames(names), coefficients(coeffs){
+    baryon_op::baryon_op(const ::std::vector< ::std::string >& names, const ::std::vector<double>& coeffs, const ::std::vector<NRvector< ::std::string > >& spins): spinids(spins), opnames(names), coefficients(coeffs){
         //check sanity:
         if(opnames.size()!=coefficients.size() || opnames.size()!=spinids.size()){
             ::std::cerr << "baryon_op::baryon_op: inconsistent sizes!" << ::std::endl;
@@ -213,27 +213,27 @@ namespace anatools{
     //START quark_cont
     //******************************************************************
     //******************************************************************
-    quark_cont::quark_cont(const std::vector<NRvector<std::string> >& quarkss, const std::vector<NRvector<std::string> >& attributess, const std::vector<NRvector<std::string> >& idcss, const std::vector<std::string>& sym_coefff, const std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), print_introloop(true), print_outtroloop(true), operator_id(-1){
+    quark_cont::quark_cont(const ::std::vector<NRvector< ::std::string > >& quarkss, const ::std::vector<NRvector< ::std::string > >& attributess, const ::std::vector<NRvector< ::std::string > >& idcss, const ::std::vector< ::std::string >& sym_coefff, const ::std::vector<double>& num_coefff): quarks(quarkss), attributes(attributess), idcs(idcss), sym_coeff(sym_coefff), num_coeff(num_coefff), isolimit(false), print_introloop(true), print_outtroloop(true), operator_id(-1){
         //check for consistency:
         if(quarks.size()!=attributes.size() || quarks.size()!=idcs.size() || quarks.size()!=sym_coeff.size() || quarks.size()!=num_coeff.size()){
-            std::cerr << "quark_cont::quark_cont: internal structure error!" << std::endl;
+            ::std::cerr << "quark_cont::quark_cont: internal structure error!" << ::std::endl;
             this->clear();
         }
     }
     
-    static quark_cont get_op(const unsigned int& opnumber, const std::string& opname, const NRvector<std::string>& spins){
-        std::vector<NRvector<std::string> > quarks;
-        std::vector<NRvector<std::string> > attributess;
-        std::vector<NRvector<std::string> > idcs;
-        std::vector<std::string> sym_coeff;
-        std::vector<double> num_coeff;
+    static quark_cont get_op(const unsigned int& opnumber, const ::std::string& opname, const NRvector< ::std::string >& spins){
+        ::std::vector<NRvector< ::std::string > > quarks;
+        ::std::vector<NRvector< ::std::string > > attributess;
+        ::std::vector<NRvector< ::std::string > > idcs;
+        ::std::vector< ::std::string > sym_coeff;
+        ::std::vector<double> num_coeff;
         
-        NRvector<std::string> qvec(3);
-        NRvector<std::string> avec(3);
-        NRvector<std::string> ivec(3);
+        NRvector< ::std::string > qvec(3);
+        NRvector< ::std::string > avec(3);
+        NRvector< ::std::string > ivec(3);
         
         //indices:
-        std::string col[3];
+        ::std::string col[3];
         col[0]="a";
         col[1]="b";
         col[2]="c";
@@ -247,7 +247,7 @@ namespace anatools{
         avec[2]="loc";
         
         //prefactor eps_abc for every single term:
-        std::string tmp="eps_(";
+        ::std::string tmp="eps_(";
         for(unsigned int s=0; s<2; s++) tmp+=col[s]+std::to_string(opnumber)+",";
         tmp+=col[2]+std::to_string(opnumber)+")";
         sym_coeff.push_back(tmp);
@@ -255,8 +255,8 @@ namespace anatools{
         
         size_t pos;
         bool bar=false;
-        std::string tmpstring=opname;
-        if((pos=tmpstring.find("P"))!=std::string::npos){
+        ::std::string tmpstring=opname;
+        if((pos=tmpstring.find("P"))!=::std::string::npos){
             if(tmpstring.find("b")==(pos+1)) bar=true;
             
             qvec[0]="u";
@@ -266,7 +266,7 @@ namespace anatools{
                 for(unsigned int s=0; s<3; s++) qvec[s]+="b";
             }
             quarks.push_back(qvec);
-            num_coeff.push_back(sqrt(1./2.));
+            num_coeff.push_back(::std::sqrt(1./2.));
             
             qvec[0]="d";
             qvec[1]="u";
@@ -275,9 +275,9 @@ namespace anatools{
                 for(unsigned int s=0; s<3; s++) qvec[s]+="b";
             }
             quarks.push_back(qvec);
-            num_coeff.push_back(-sqrt(1./2.));
+            num_coeff.push_back(-::std::sqrt(1./2.));
         }
-        else if((pos=tmpstring.find("N"))!=std::string::npos){
+        else if((pos=tmpstring.find("N"))!=::std::string::npos){
             if(tmpstring.find("b")==(pos+1)) bar=true;
             
             qvec[0]="d";
@@ -287,7 +287,7 @@ namespace anatools{
                 for(unsigned int s=0; s<3; s++) qvec[s]+="b";
             }
             quarks.push_back(qvec);
-            num_coeff.push_back(sqrt(1./2.));
+            num_coeff.push_back(::std::sqrt(1./2.));
             
             qvec[0]="u";
             qvec[1]="d";
@@ -296,7 +296,7 @@ namespace anatools{
                 for(unsigned int s=0; s<3; s++) qvec[s]+="b";
             }
             quarks.push_back(qvec);
-            num_coeff.push_back(-sqrt(1./2.));
+            num_coeff.push_back(-::std::sqrt(1./2.));
         }
         if(bar) tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+2));
         else tmpstring.erase(tmpstring.begin()+pos,tmpstring.begin()+(pos+1));
@@ -311,7 +311,7 @@ namespace anatools{
     }
     
     quark_cont::quark_cont(const baryon_op& barop){
-        std::vector<std::string> token;
+        ::std::vector< ::std::string > token;
         for(unsigned int n=0; n<barop.opnames.size(); n++){
             token.clear();
             tokenize(barop.opnames[n], token);
@@ -348,15 +348,15 @@ namespace anatools{
     quark_cont& quark_cont::operator*=(const quark_cont& rhs){
         unsigned int nn=static_cast<unsigned int>(quarks.size());
         unsigned int mm=static_cast<unsigned int>(rhs.quarks.size());
-        std::vector<NRvector<std::string> > tmpquarks;
-        std::vector<NRvector<std::string> > tmpattributes;
-        std::vector<NRvector<std::string> > tmpidcs;
-        std::vector<std::string> tmpsym_coeff;
-        std::vector<double> tmpnum_coeff;
+        ::std::vector<NRvector< ::std::string > > tmpquarks;
+        ::std::vector<NRvector< ::std::string > > tmpattributes;
+        ::std::vector<NRvector< ::std::string > > tmpidcs;
+        ::std::vector< ::std::string > tmpsym_coeff;
+        ::std::vector<double> tmpnum_coeff;
         
         for(unsigned int n=0; n<nn; n++) for(unsigned int m=0; m<mm; m++){
             //quarks:
-            NRvector<std::string> tmpvec(quarks[n]);
+            NRvector< ::std::string > tmpvec(quarks[n]);
             tmpvec.append(rhs.quarks[m]);
             tmpquarks.push_back(tmpvec);
             
@@ -370,7 +370,7 @@ namespace anatools{
             tmpvec.append(rhs.idcs[m]);
             tmpidcs.push_back(tmpvec);
             
-            std::string tmp=sym_coeff[n]+" "+rhs.sym_coeff[m];
+            ::std::string tmp=sym_coeff[n]+" "+rhs.sym_coeff[m];
             tmpsym_coeff.push_back(tmp);
             tmpnum_coeff.push_back(num_coeff[n]*rhs.num_coeff[m]);
         }
@@ -383,9 +383,9 @@ namespace anatools{
         return *this;
     }
     
-    std::ostream& operator<<(std::ostream &os,const quark_cont &obj){
+    ::std::ostream& operator<<(::std::ostream &os,const quark_cont &obj){
         os.precision(10);
-        std::string tmp;
+        ::std::string tmp;
         for(unsigned int n=0; n<obj.quarks.size(); n++){
             if(obj.num_coeff[n]>=0) tmp=" + ";
             else tmp=" - ";
@@ -399,7 +399,7 @@ namespace anatools{
                 if(obj.attributes[n][s].compare("loc")==0) os << " " << obj.quarks[n][s] << "_(" << obj.idcs[n][s] << ")";
                 else os << " " << obj.quarks[n][s] << obj.attributes[n][s] << "_(" << obj.idcs[n][s] << ")";
             }
-            os << std::endl;
+            os << ::std::endl;
         }
         return os;
     }
@@ -431,7 +431,7 @@ namespace anatools{
         operator_id=id;
     }
     
-    static int contract_helper(const NRvector<std::string>& quarks, const NRvector<std::string>& attributes, const NRvector<std::string>& idcs, std::vector<NRvector<std::string> >& resprops, std::vector<NRvector<std::string> >& residcs, std::vector<double>& signs){
+    static int contract_helper(const NRvector< ::std::string >& quarks, const NRvector< ::std::string >& attributes, const NRvector< ::std::string >& idcs, std::vector<NRvector< ::std::string > >& resprops, ::std::vector<NRvector< ::std::string > >& residcs, ::std::vector<double>& signs){
         //count quarks and barred-quarks first and compare;
         unsigned int nu=0, nubar=0, nd=0, ndbar=0, ns=0, nsbar=0;
         for(unsigned int s=0; s<quarks.dim(); s++){
@@ -458,12 +458,12 @@ namespace anatools{
         }
         
         if(nu!=nubar || nd!=ndbar || ns!=nsbar){
-            std::cerr << "contract_helper: error, quark content does not allow for contraction!" << std::endl;
+            ::std::cerr << "contract_helper: error, quark content does not allow for contraction!" << std::endl;
             return EXIT_FAILURE;
         }
         
         //sort vector: innermost: u, outermost s:
-        std::vector<unsigned int> table(quarks.dim());
+        ::std::vector<unsigned int> table(quarks.dim());
         unsigned int runs=0,rund=ns,runu=ns+nd,runubar=ns+nd+nu,rundbar=ns+nd+nu+nubar,runsbar=ns+nd+nu+nubar+ndbar;
         for(unsigned int s=0; s<quarks.dim(); s++){
             if(quarks[s].find("s")==0 && quarks[s].find("sb")!=0){
@@ -493,7 +493,7 @@ namespace anatools{
         }
         
         //sort vectors;
-        NRvector<std::string> tmpquarks(quarks.dim()), tmpattributes(quarks.dim()), tmpidcs(quarks.dim());
+        NRvector< ::std::string > tmpquarks(quarks.dim()), tmpattributes(quarks.dim()), tmpidcs(quarks.dim());
         for(unsigned int s=0; s<tmpquarks.dim(); s++){
             tmpquarks[table[s]]=quarks[s];
             tmpattributes[table[s]]=attributes[s];

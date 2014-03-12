@@ -190,8 +190,8 @@ namespace anatools{
                     for(unsigned int i=0; i<3; i++){
                         ::std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << ::std::endl;
                         ::std::cout << "\t\t spin: " << quarks[i+3*b].spinid << ::std::endl;
-                        ::std::cout << "\t\t color: " << quarks[i+3*b].colorid << std::endl;
-                        ::std::cout << "\t\t source: " << quarks[i+3*b].sourceid << std::endl;
+                        ::std::cout << "\t\t color: " << quarks[i+3*b].colorid << ::std::endl;
+                        ::std::cout << "\t\t source: " << quarks[i+3*b].sourceid << ::std::endl;
                     }
                 }
             }
@@ -199,12 +199,12 @@ namespace anatools{
     };
     
     
-    BBTensor::BBTensor(const TTTensor& atens, const std::vector< fourvec<int> >& sourcepositions, const ::std::vector< ::std::string >& ordering, const ::std::vector< ::std::string >& bartypes, const bool silent) : spos(sourcepositions), baryons(bartypes), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons(0){
+    BBTensor::BBTensor(const TTTensor& atens, const ::std::vector< fourvec<int> >& sourcepositions, const ::std::vector< ::std::string >& ordering, const ::std::vector< ::std::string >& bartypes, const bool silent) : spos(sourcepositions), baryons(bartypes), numsources(static_cast<unsigned int>(sourcepositions.size())), numbaryons(0){
         unsigned int colcount=0,spincount=0,sourcecount=0;
         bool fail=false;
         
-        std::vector<std::string> order(ordering);
-        std::vector<unsigned int> modesizes;
+        ::std::vector< ::std::string > order(ordering);
+        ::std::vector<unsigned int> modesizes;
         for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
             if(order[i].find("baryon")==0){
                 numbaryons++;
@@ -224,18 +224,18 @@ namespace anatools{
             }
         }
         if( (colcount!=spincount) || (colcount!=sourcecount) ){
-            std::cerr << "BBTensor::BBtensor: error, you did not specify all the spin/color/source combinations for the quark sources!" << std::endl;
+            ::std::cerr << "BBTensor::BBtensor: error, you did not specify all the spin/color/source combinations for the quark sources!" << ::std::endl;
             fail=true;
         }
         if(3*numbaryons!=colcount){
-            std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << std::endl;
+            ::std::cerr << "BBTensor::BBtensor: error, your number of baryons is not equal three times the number of quarks!" << ::std::endl;
             fail=true;
         }
         if(numbaryons!=baryons.size()){
-            std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << std::endl;
+            ::std::cerr << "BBTensor::BBtensor: error, you have to specify exactly as many baryons in the spec list as present in the data!" << ::std::endl;
         }
         if(order.size()!=numbaryons+spincount+colcount+sourcecount){
-            std::cerr << "BBTensor::BBtensor: warning, your string list also contains other unsupported entries! These will be removed now!" << std::endl;
+            ::std::cerr << "BBTensor::BBtensor: warning, your string list also contains other unsupported entries! These will be removed now!" << ::std::endl;
             for(unsigned int i=0; i<static_cast<unsigned int>(order.size()); i++){
                 if( (order[i].find("baryon")!=0) && (order[i].find("spin")!=0) && (order[i].find("color")!=0) && (order[i].find("source")!=0) ){
                     order.erase(order.begin()+i);
@@ -255,7 +255,7 @@ namespace anatools{
             
             //group indices in order to obtain form: B(B_1,...,B_n|A_1,A_2,...A_n) with A_i=(spin_i,color_i,src_i):
             for(unsigned int b=0; b<numbaryons; b++){
-                std::stringstream searchstring;
+                ::std::stringstream searchstring;
                 for(unsigned int i=b; i<static_cast<unsigned int>(order.size()); i++){
                     searchstring.clear();
                     searchstring.str("");
@@ -270,7 +270,7 @@ namespace anatools{
                 }
             }
             for(unsigned int b=0; b<spincount; b++){
-                std::stringstream searchstring;
+                ::std::stringstream searchstring;
                 for(unsigned int i=(numbaryons+3*b+0); i<static_cast<unsigned int>(order.size()); i++){
                     searchstring.clear();
                     searchstring.str("");
@@ -332,14 +332,14 @@ namespace anatools{
             }
             
             if(!silent){
-                std::cout << "The following quark content has been specified:" << std::endl;
+                ::std::cout << "The following quark content has been specified:" << ::std::endl;
                 for(unsigned int b=0; b<numbaryons; b++){
-                    std::cout << baryons[b] << b << ":" << std::endl;
+                    ::std::cout << baryons[b] << b << ":" << ::std::endl;
                     for(unsigned int i=0; i<3; i++){
-                        std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
-                        std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
-                        std::cout << "\t\t color: " << quarks[i+3*b].colorid << std::endl;
-                        std::cout << "\t\t source: " << quarks[i+3*b].sourceid << std::endl;
+                        ::std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << ::std::endl;
+                        ::std::cout << "\t\t spin: " << quarks[i+3*b].spinid << ::std::endl;
+                        ::std::cout << "\t\t color: " << quarks[i+3*b].colorid << ::std::endl;
+                        ::std::cout << "\t\t source: " << quarks[i+3*b].sourceid << ::std::endl;
                     }
                 }
             }
@@ -358,7 +358,7 @@ namespace anatools{
         else return fourvec<int>(-1,-1,-1,-1);
     }
     
-    std::vector<std::string> BBTensor::get_baryons()const{
+    ::std::vector< ::std::string > BBTensor::get_baryons()const{
         return baryons;
     }
     
@@ -367,28 +367,28 @@ namespace anatools{
     }
     
     void BBTensor::print_info(const bool verbose)const{
-        std::cout << "The following quark content has been specified:" << std::endl;
+        ::std::cout << "The following quark content has been specified:" << ::std::endl;
         for(unsigned int b=0; b<numbaryons; b++){
-            std::cout << baryons[b] << b << ":" << std::endl;
+            ::std::cout << baryons[b] << b << ":" << ::std::endl;
             for(unsigned int i=0; i<3; i++){
-                std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << std::endl;
-                std::cout << "\t\t spin: " << quarks[i+3*b].spinid << std::endl;
-                std::cout << "\t\t color: " << quarks[i+3*b].colorid << std::endl;
-                std::cout << "\t\t source: " << quarks[i+3*b].sourceid << std::endl;
+                ::std::cout << "\t " << return_flavour(quarks[i+3*b]) << i << ":" << ::std::endl;
+                ::std::cout << "\t\t spin: " << quarks[i+3*b].spinid << ::std::endl;
+                ::std::cout << "\t\t color: " << quarks[i+3*b].colorid << ::std::endl;
+                ::std::cout << "\t\t source: " << quarks[i+3*b].sourceid << ::std::endl;
             }
         }
-        std::cout << "The source positions are:" << std::endl;
+        ::std::cout << "The source positions are:" << ::std::endl;
         for(unsigned int s=0; s<numsources; s++){
-            std::cout << "\t\t" << spos[s] << std::endl;
+            ::std::cout << "\t\t" << spos[s] << ::std::endl;
         }
         if(verbose){
-            std::cout << "The Data Layout is:" << std::endl;
+            ::std::cout << "The Data Layout is:" << ::std::endl;
             data.print_info();
         }
     }
     
     //friend functions:
-    BBTensor extract_sources(const BBTensor& a, const std::vector<bool>& idvec){
+    BBTensor extract_sources(const BBTensor& a, const ::std::vector<bool>& idvec){
         BBTensor result(a);
         
         if(idvec.size()!=a.numsources){
@@ -396,7 +396,7 @@ namespace anatools{
         }
         
         unsigned int numsnew=0;
-        std::vector< fourvec<int> > srcspos;
+        ::std::vector< fourvec<int> > srcspos;
         for(unsigned int s=0; s<a.numsources; s++){
             if(idvec[s]){
                 numsnew++;
@@ -405,7 +405,7 @@ namespace anatools{
         }
         
         if(numsnew==0){
-            std::cerr << "extract_sources: error, you cannot drop all sources!" << std::endl;
+            ::std::cerr << "extract_sources: error, you cannot drop all sources!" << ::std::endl;
             return a;
         }
         else if(numsnew==a.numsources) return a;
@@ -427,18 +427,18 @@ namespace anatools{
         
         //determine whether the number of internal quarks is the same:
         if(t1.numbaryons!=t2.numbaryons){
-            std::cerr << "BBTensor::dot: error, partial contractions not yet implemented!" << std::endl;
+            ::std::cerr << "BBTensor::dot: error, partial contractions not yet implemented!" << ::std::endl;
             return result;
         }
         unsigned int nbary=static_cast<unsigned int>(t1.baryons.size());
         for(unsigned int b=0; b<nbary; b++){
             if(t1.baryons[b].compare(t2.baryons[b])!=0){
-                std::cerr << "Warning, the order of baryons is not the same!" << std::endl;
+                ::std::cerr << "Warning, the order of baryons is not the same!" << ::std::endl;
             }
         }
         
         //determine the quark flavours which will be contracted
-        std::vector<unsigned int> intquarks1,intquarks2;
+        ::std::vector<unsigned int> intquarks1,intquarks2;
         unsigned int nqfcont1[6], nqfcont2[6];
         for(unsigned int f=0; f<6; f++){
             nqfcont1[f]=0;
@@ -453,18 +453,18 @@ namespace anatools{
             nqfcont2[t2.quarks[i].flavourid]++;
         }
         if(intquarks1.size()!=intquarks2.size()){
-            std::cerr << "BBTensor::dot: integrity error, the number of quarks which are to be contracted does not match!" << std::endl;
+            ::std::cerr << "BBTensor::dot: integrity error, the number of quarks which are to be contracted does not match!" << ::std::endl;
             return result;
         }
         for(unsigned int f=0; f<6; f++){
             if(nqfcont1[f]!=nqfcont2[f]){
-                std::cerr << "BBTensor::dot: integrity error, the number of quarks with the same flavour and which will be contracted do not match!" << std::endl;
+                ::std::cerr << "BBTensor::dot: integrity error, the number of quarks with the same flavour and which will be contracted do not match!" << ::std::endl;
                 return result;
             }
         }
         
         //set up array of indices which will be contracted:
-        std::vector<unsigned int> idt1, idt2;
+        ::std::vector<unsigned int> idt1, idt2;
         for(int f=0; f<6; f++){
             for(unsigned int i=0; i<static_cast<unsigned int>(intquarks1.size()); i++){
                 if(t1.quarks[intquarks1[i]].flavourid==f){
@@ -496,7 +496,7 @@ namespace anatools{
             //draw all possible combinations of nsmin sources from nsmax samples:
             unsigned int combcount=static_cast<unsigned int>(bico(nsmax, nsmin));
             combination comb(nsmax,nsmin);
-            std::vector<bool> combi(comb.return_combination());
+            ::std::vector<bool> combi(comb.return_combination());
             
             if(t1.numsources>t2.numsources){
                 BBTensor tmpbb(extract_sources(t1,combi));
@@ -528,7 +528,7 @@ namespace anatools{
     dcomplex projectdot(const BBTensor& t1, const BBTensor& t2, const TTTensor& poltens){
         TTTensor contraction(dot(t1,t2));
         TTTensor restens(dot(contraction,poltens));
-        std::vector<unsigned int> index(1);
+        ::std::vector<unsigned int> index(1);
         index[0]=0;
         return restens(index);
     }
@@ -537,18 +537,18 @@ namespace anatools{
     //computes the kronecker product of two baryon blocks and performs an anti-symmetrization on demand:
     BBTensor join_barblocks(const BBTensor& lhs, const BBTensor& rhs, const bool antisym){
         if(lhs.numsources!=rhs.numsources){
-            std::cerr << "join_barblocks: error, the number of sources has to be the same!" << std::endl;
+            ::std::cerr << "join_barblocks: error, the number of sources has to be the same!" << ::std::endl;
             return lhs;
         }
         
-        std::vector<std::string> baryonslhs(lhs.baryons), baryonsrhs(rhs.baryons);
-        std::vector<std::string> resbaryons(baryonslhs);
+        ::std::vector< ::std::string > baryonslhs(lhs.baryons), baryonsrhs(rhs.baryons);
+        ::std::vector< ::std::string > resbaryons(baryonslhs);
         resbaryons.insert(resbaryons.end(),baryonsrhs.begin(),baryonsrhs.end());
         unsigned int bclhs=static_cast<unsigned int>(baryonslhs.size());
         unsigned int bcrhs=static_cast<unsigned int>(baryonsrhs.size());
         
         //join quark vector and shift coordinates of second quark:
-        std::vector<quark> quarkslhs(lhs.quarks), quarksrhs(rhs.quarks);
+        ::std::vector<quark> quarkslhs(lhs.quarks), quarksrhs(rhs.quarks);
         unsigned int qclhs=static_cast<unsigned int>(quarkslhs.size());
         unsigned int qcrhs=static_cast<unsigned int>(quarksrhs.size());
         
@@ -562,7 +562,7 @@ namespace anatools{
             quarksrhs[q].colorid+=(bclhs+3*qclhs);
             quarksrhs[q].sourceid+=(bclhs+3*qclhs);
         }
-        std::vector<quark> resquarks(quarkslhs);
+        ::std::vector<quark> resquarks(quarkslhs);
         resquarks.insert(resquarks.end(),quarksrhs.begin(),quarksrhs.end());
         
         //resulting tensor:
@@ -582,17 +582,17 @@ namespace anatools{
             for(unsigned int ql=0; ql<qclhs; ql++){
                 for(unsigned int qr=0; qr<qcrhs; qr++){
                     if(quarkslhs[qr].flavourid==quarksrhs[qr].flavourid){
-                        std::cout << "ANTISYM " << ql << " " << qr << std::endl;
-                        std::cout << "SPINSWAP " << quarkslhs[ql].spinid << " <-> " << quarksrhs[qr].spinid << std::endl;
+                        ::std::cout << "ANTISYM " << ql << " " << qr << ::std::endl;
+                        ::std::cout << "SPINSWAP " << quarkslhs[ql].spinid << " <-> " << quarksrhs[qr].spinid << ::std::endl;
                         tmptens=swap(restens,quarkslhs[ql].spinid, quarksrhs[qr].spinid);
                         tmptens.print_info();
-                        std::cout << "COLSWAP " << quarkslhs[ql].colorid << " <-> " << quarksrhs[qr].colorid << std::endl;
+                        ::std::cout << "COLSWAP " << quarkslhs[ql].colorid << " <-> " << quarksrhs[qr].colorid << ::std::endl;
                         tmptens=swap(tmptens,quarkslhs[ql].colorid, quarksrhs[qr].colorid);
                         tmptens.print_info();
-                        std::cout << "SRCSWAP " << quarkslhs[ql].sourceid << " <-> " << quarksrhs[qr].sourceid << std::endl;
+                        ::std::cout << "SRCSWAP " << quarkslhs[ql].sourceid << " <-> " << quarksrhs[qr].sourceid << ::std::endl;
                         tmptens=swap(tmptens,quarkslhs[ql].sourceid, quarksrhs[qr].sourceid);
                         tmptens.print_info();
-                        std::cout << "DIFF " << std::endl;
+                        ::std::cout << "DIFF " << ::std::endl;
                         restens-=tmptens;
                         restens.print_info();
                     }
@@ -613,12 +613,12 @@ namespace anatools{
     }
     
     //I/O:
-    int write_barblock(const std::string filename, const BBTensor& tens){
-        std::ofstream output;
+    int write_barblock(const ::std::string filename, const BBTensor& tens){
+        ::std::ofstream output;
         
-        output.open(filename.c_str(),std::ios_base::binary);
+        output.open(filename.c_str(),::std::ios_base::binary);
         if(!output.good()){
-            std::cerr << "write_barblock: error while trying to open file " << filename << "!" << std::endl;
+            ::std::cerr << "write_barblock: error while trying to open file " << filename << "!" << ::std::endl;
             return EXIT_FAILURE;
         }
         
@@ -628,7 +628,7 @@ namespace anatools{
         return result;
     }
     
-    int write_barblock(std::ofstream& output, const BBTensor& tens){
+    int write_barblock(::std::ofstream& output, const BBTensor& tens){
         double* head;
         //baryon header:
         head=new double[1+tens.baryons.size()];
@@ -669,11 +669,11 @@ namespace anatools{
         return EXIT_SUCCESS;
     }
     
-    int read_barblock(const std::string filename, BBTensor& tens){
-        std::ifstream input;
-        input.open(filename.c_str(),std::ios_base::binary);
+    int read_barblock(const ::std::string filename, BBTensor& tens){
+        ::std::ifstream input;
+        input.open(filename.c_str(),::std::ios_base::binary);
         if(!input.good()){
-            std::cerr << "read_barblock: error while trying to open file " << filename << "!" << std::endl;
+            ::std::cerr << "read_barblock: error while trying to open file " << filename << "!" << ::std::endl;
             return EXIT_FAILURE;
         }
         
@@ -683,10 +683,10 @@ namespace anatools{
         return result;
     }
     
-    int read_barblock(std::ifstream& input, BBTensor& tens){
+    int read_barblock(::std::ifstream& input, BBTensor& tens){
         double dummy, *head;
         input.read(reinterpret_cast<char*>(&dummy),sizeof(double));
-        std::vector<std::string> baryons(static_cast<unsigned int>(dummy));
+        ::std::vector< ::std::string > baryons(static_cast<unsigned int>(dummy));
         head=new double[baryons.size()];
         input.read(reinterpret_cast<char*>(head),baryons.size()*sizeof(double));
         for(unsigned int b=0; b<baryons.size(); b++){
