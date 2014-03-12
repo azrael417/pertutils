@@ -24,7 +24,10 @@ namespace anatools{
         C,
         IG4CG5,
         PARPLUS,
-        PARMINUS
+        PARMINUS,
+        UTRANS,
+        G1G1,
+        G1U1
     };
     
     enum polarization_id{
@@ -32,8 +35,7 @@ namespace anatools{
         SING0,
         TRIP0,
         TRIPP1,
-        TRIPM1,
-        TRIPAV
+        TRIPM1
     };
     
     NRmatrix<dcomplex> get_gamma(const gamma_id gid);

@@ -90,6 +90,36 @@ namespace anatools{
                 result[2][0]=dcomplex(-0.5,0.);
                 result[3][1]=dcomplex(-0.5,0.);
                 break;
+            case UTRANS:
+                result[0][1]=dcomplex(1./sqrt2,0.);
+                result[0][3]=dcomplex(-1./sqrt2,0.);
+                result[1][0]=dcomplex(-1./sqrt2,0.);
+                result[1][2]=dcomplex(1./sqrt2,0.);
+                result[2][1]=dcomplex(1./sqrt2,0.);
+                result[2][3]=dcomplex(1./sqrt2,0.);
+                result[3][0]=dcomplex(-1./sqrt2,0.);
+                result[3][2]=dcomplex(-1./sqrt2,0.);
+                break;
+            case G1G1:
+                result[0][1]=dcomplex(0.5,0.);
+                result[0][3]=dcomplex(0.5,0.);
+                result[1][0]=dcomplex(-0.5,0.);
+                result[1][2]=dcomplex(-0.5,0.);
+                result[2][1]=dcomplex(0.5,0.);
+                result[2][3]=dcomplex(0.5,0.);
+                result[3][0]=dcomplex(-0.5,0.);
+                result[3][2]=dcomplex(-0.5,0.);
+                break;
+            case G1U1:
+                result[0][1]=dcomplex(0.5,0.);
+                result[0][3]=dcomplex(-0.5,0.);
+                result[1][0]=dcomplex(-0.5,0.);
+                result[1][2]=dcomplex(+0.5,0.);
+                result[2][1]=dcomplex(-0.5,0.);
+                result[2][3]=dcomplex(0.5,0.);
+                result[3][0]=dcomplex(0.5,0.);
+                result[3][2]=dcomplex(-0.5,0.);
+                break;
         }
         return result;
     }
@@ -99,40 +129,46 @@ namespace anatools{
         
         switch(pid){
             case UPDOWNAV:
-                result[0][0]=0.5;
-                result[1][1]=0.5;
-                result[2][2]=0.5;
-                result[3][3]=0.5;
+                result[0][0]=0.25;
+                result[0][2]=0.25;
+                result[1][1]=0.25;
+                result[1][3]=0.25;
+                result[2][0]=0.25;
+                result[2][2]=0.25;
+                result[3][1]=0.25;
+                result[3][3]=0.25;
                 break;
             case SING0:
                 result[0][1]=1./(2.*sqrt2);
+                result[0][3]=1./(2.*sqrt2);
                 result[1][0]=(-1.)/(2.*sqrt2);
+                result[1][2]=(-1.)/(2.*sqrt2);
+                result[2][1]=1./(2.*sqrt2);
                 result[2][3]=1./(2.*sqrt2);
+                result[3][0]=(-1.)/(2.*sqrt2);
                 result[3][2]=(-1.)/(2.*sqrt2);
                 break;
             case TRIP0:
                 result[0][1]=1./(2.*sqrt2);
+                result[0][3]=1./(2.*sqrt2);
                 result[1][0]=1./(2.*sqrt2);
+                result[1][2]=1./(2.*sqrt2);
+                result[2][1]=1./(2.*sqrt2);
                 result[2][3]=1./(2.*sqrt2);
+                result[3][0]=1./(2.*sqrt2);
                 result[3][2]=1./(2.*sqrt2);
                 break;
             case TRIPP1:
-                result[0][0]=0.5;
-                result[2][2]=0.5;
-                break;
-            case TRIPM1:
                 result[1][1]=0.5;
+                result[1][3]=0.5;
+                result[3][1]=0.5;
                 result[3][3]=0.5;
                 break;
-            case TRIPAV:
-                result[0][0]=1./6.;
-                result[1][1]=1./6.;
-                result[2][2]=1./6.;
-                result[3][3]=1./6.;
-                result[0][1]=1./(6.*sqrt2);
-                result[1][0]=1./(6.*sqrt2);
-                result[2][3]=1./(6.*sqrt2);
-                result[3][2]=1./(6.*sqrt2);
+            case TRIPM1:
+                result[0][0]=0.5;
+                result[0][2]=0.5;
+                result[2][0]=0.5;
+                result[2][2]=0.5;
                 break;
         }
         return result;
