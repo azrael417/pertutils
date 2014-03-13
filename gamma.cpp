@@ -101,24 +101,24 @@ namespace anatools{
                 result[3][2]=dcomplex(-1./sqrt2,0.);
                 break;
             case G1G1:
-                result[0][1]=dcomplex(0.5,0.);
-                result[0][3]=dcomplex(0.5,0.);
-                result[1][0]=dcomplex(-0.5,0.);
-                result[1][2]=dcomplex(-0.5,0.);
-                result[2][1]=dcomplex(0.5,0.);
-                result[2][3]=dcomplex(0.5,0.);
-                result[3][0]=dcomplex(-0.5,0.);
-                result[3][2]=dcomplex(-0.5,0.);
+                result[0][1]=dcomplex(1./(2.*sqrt2),0.);
+                result[0][3]=dcomplex(1./(2.*sqrt2),0.);
+                result[1][0]=dcomplex(-1./(2.*sqrt2),0.);
+                result[1][2]=dcomplex(-1./(2.*sqrt2),0.);
+                result[2][1]=dcomplex(1./(2.*sqrt2),0.);
+                result[2][3]=dcomplex(1./(2.*sqrt2),0.);
+                result[3][0]=dcomplex(-1./(2.*sqrt2),0.);
+                result[3][2]=dcomplex(-1./(2.*sqrt2),0.);
                 break;
             case G1U1:
-                result[0][1]=dcomplex(0.5,0.);
-                result[0][3]=dcomplex(-0.5,0.);
-                result[1][0]=dcomplex(-0.5,0.);
-                result[1][2]=dcomplex(+0.5,0.);
-                result[2][1]=dcomplex(-0.5,0.);
-                result[2][3]=dcomplex(0.5,0.);
-                result[3][0]=dcomplex(0.5,0.);
-                result[3][2]=dcomplex(-0.5,0.);
+                result[0][1]=dcomplex(1./(2.*sqrt2),0.);
+                result[0][3]=dcomplex(-1./(2.*sqrt2),0.);
+                result[1][0]=dcomplex(-1./(2.*sqrt2),0.);
+                result[1][2]=dcomplex(1./(2.*sqrt2),0.);
+                result[2][1]=dcomplex(-1./(2.*sqrt2),0.);
+                result[2][3]=dcomplex(1./(2.*sqrt2),0.);
+                result[3][0]=dcomplex(1./(2.*sqrt2),0.);
+                result[3][2]=dcomplex(-1./(2.*sqrt2),0.);
                 break;
         }
         return result;
