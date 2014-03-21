@@ -25,6 +25,9 @@ namespace anatools{
         IG4CG5,
         PARPLUS,
         PARMINUS,
+    };
+    
+    enum basak_gamma_id {
         UTRANS,
         G1G1,
         G1U1
@@ -39,7 +42,8 @@ namespace anatools{
     };
     
     NRmatrix<dcomplex> get_gamma(const gamma_id gid);
-    NRmatrix<dcomplex> get_polarization(const polarization_id gid);
+    NRmatrix<double> get_gamma(const basak_gamma_id gid);
+    NRmatrix<double> get_polarization(const polarization_id gid);
     
 }
 #endif

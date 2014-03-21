@@ -90,42 +90,50 @@ namespace anatools{
                 result[2][0]=dcomplex(-0.5,0.);
                 result[3][1]=dcomplex(-0.5,0.);
                 break;
+        }
+        return result;
+    }
+    
+    NRmatrix<double> get_gamma(const basak_gamma_id gid){
+        NRmatrix<double> result(4,4,0.);
+        
+        switch(gid){
             case UTRANS:
-                result[0][1]=dcomplex(1./sqrt2,0.);
-                result[0][3]=dcomplex(-1./sqrt2,0.);
-                result[1][0]=dcomplex(-1./sqrt2,0.);
-                result[1][2]=dcomplex(1./sqrt2,0.);
-                result[2][1]=dcomplex(1./sqrt2,0.);
-                result[2][3]=dcomplex(1./sqrt2,0.);
-                result[3][0]=dcomplex(-1./sqrt2,0.);
-                result[3][2]=dcomplex(-1./sqrt2,0.);
+                result[0][1]=1./sqrt2;
+                result[0][3]=-1./sqrt2;
+                result[1][0]=-1./sqrt2;
+                result[1][2]=1./sqrt2;
+                result[2][1]=1./sqrt2;
+                result[2][3]=1./sqrt2;
+                result[3][0]=-1./sqrt2;
+                result[3][2]=-1./sqrt2;
                 break;
             case G1G1:
-                result[0][1]=dcomplex(1./(2.*sqrt2),0.);
-                result[0][3]=dcomplex(1./(2.*sqrt2),0.);
-                result[1][0]=dcomplex(-1./(2.*sqrt2),0.);
-                result[1][2]=dcomplex(-1./(2.*sqrt2),0.);
-                result[2][1]=dcomplex(1./(2.*sqrt2),0.);
-                result[2][3]=dcomplex(1./(2.*sqrt2),0.);
-                result[3][0]=dcomplex(-1./(2.*sqrt2),0.);
-                result[3][2]=dcomplex(-1./(2.*sqrt2),0.);
+                result[0][1]=1./(2.*sqrt2);
+                result[0][3]=1./(2.*sqrt2);
+                result[1][0]=-1./(2.*sqrt2);
+                result[1][2]=-1./(2.*sqrt2);
+                result[2][1]=1./(2.*sqrt2);
+                result[2][3]=1./(2.*sqrt2);
+                result[3][0]=-1./(2.*sqrt2);
+                result[3][2]=-1./(2.*sqrt2);
                 break;
             case G1U1:
-                result[0][1]=dcomplex(1./(2.*sqrt2),0.);
-                result[0][3]=dcomplex(-1./(2.*sqrt2),0.);
-                result[1][0]=dcomplex(-1./(2.*sqrt2),0.);
-                result[1][2]=dcomplex(1./(2.*sqrt2),0.);
-                result[2][1]=dcomplex(-1./(2.*sqrt2),0.);
-                result[2][3]=dcomplex(1./(2.*sqrt2),0.);
-                result[3][0]=dcomplex(1./(2.*sqrt2),0.);
-                result[3][2]=dcomplex(-1./(2.*sqrt2),0.);
+                result[0][1]=1./(2.*sqrt2);
+                result[0][3]=-1./(2.*sqrt2);
+                result[1][0]=-1./(2.*sqrt2);
+                result[1][2]=1./(2.*sqrt2);
+                result[2][1]=-1./(2.*sqrt2);
+                result[2][3]=1./(2.*sqrt2);
+                result[3][0]=1./(2.*sqrt2);
+                result[3][2]=-1./(2.*sqrt2);
                 break;
         }
         return result;
     }
     
-    NRmatrix<dcomplex> get_polarization(const polarization_id pid){
-        NRmatrix<dcomplex> result(4,4,0.);
+    NRmatrix<double> get_polarization(const polarization_id pid){
+        NRmatrix<double> result(4,4,0.);
         
         switch(pid){
             case UPDOWNAV:
@@ -149,14 +157,14 @@ namespace anatools{
                 result[3][2]=(-1.)/(2.*sqrt2);
                 break;
             case TRIP0:
-                result[0][1]=1./(2.*sqrt2);
-                result[0][3]=1./(2.*sqrt2);
-                result[1][0]=1./(2.*sqrt2);
-                result[1][2]=1./(2.*sqrt2);
-                result[2][1]=1./(2.*sqrt2);
-                result[2][3]=1./(2.*sqrt2);
-                result[3][0]=1./(2.*sqrt2);
-                result[3][2]=1./(2.*sqrt2);
+                result[0][1]=-1./(2.*sqrt2);
+                result[0][3]=-1./(2.*sqrt2);
+                result[1][0]=-1./(2.*sqrt2);
+                result[1][2]=-1./(2.*sqrt2);
+                result[2][1]=-1./(2.*sqrt2);
+                result[2][3]=-1./(2.*sqrt2);
+                result[3][0]=-1./(2.*sqrt2);
+                result[3][2]=-1./(2.*sqrt2);
                 break;
             case TRIPP1:
                 result[1][1]=0.5;
