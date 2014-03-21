@@ -596,6 +596,10 @@ namespace anatools{
             ::std::cerr << "quark_cont::reorder: please perform contractions first!" << ::std::endl;
             return EXIT_FAILURE;
         }
+        if(quarks.size()==0){
+            ::std::cerr << "the quark vector is empty, something is wrong!" << ::std::endl;
+            return EXIT_FAILURE;
+        }
         
         unsigned int numprops=static_cast<unsigned int>(props.size()/quarks.size());
         
