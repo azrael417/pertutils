@@ -16,7 +16,7 @@ MAKEFILE = Makefile
 MPP = false
 OMP = true
 #OMP = false
-ARCH = MAC
+ARCH = VAN
 #ARCH = VAN
 
 #Compiler Type:
