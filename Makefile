@@ -59,7 +59,7 @@ OPT              = -O2 -msse4.2
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth/lib/libpertutils.so.1.0 /home/tkurth/lib/libpertutils.so
+FINISH           = cp libpertutils.so.1.0 ~/lib/; ln -sf ~/lib/libpertutils.so.1.0 ~/lib/libpertutils.so
 endif
 
 ifeq ($(ARCH),MAC)
