@@ -106,6 +106,7 @@ namespace anatools{
                 gamma=1.;
             }
             else is_zeroboost=false;
+            is_improved=false;
             
             term1val(0.,0.);
             term2val(0.,0.);
