@@ -25,11 +25,11 @@ namespace anatools{
         rtol=atol;
         
         double astart;
-        rhomin=log(::std::pow(mumin,2.));
-        rhomax=log(::std::pow(mumax,2.));
+        rhomin=::std::log(::std::pow(mumin,2.));
+        rhomax=::std::log(::std::pow(mumax,2.));
         if( fabs(mustart)>atol && fabs(alphastart)>atol ){
             set_betavec();
-            perform_integration(alphastart/pimath,log(::std::pow(mustart,2.)),rhomin,mucount);
+            perform_integration(alphastart/pimath,::std::log(::std::pow(mustart,2.)),rhomin,mucount);
             astart=yvec[yvec.size()-1]/pimath;
         }
         else{
@@ -43,7 +43,7 @@ namespace anatools{
                 default: mustart=2.;
                     break;
             }
-            rhostart=log(::std::pow(mustart,2.));
+            rhostart=::std::log(::std::pow(mustart,2.));
             
             //obtaining starting values by running from mz:
             if(numflavours!=0){
@@ -74,8 +74,8 @@ namespace anatools{
         rtol=atol;
         
         double astart;
-        rhomin=log(::std::pow(mumin,2.));
-        rhomax=log(::std::pow(mumax,2.));
+        rhomin=::std::log(::std::pow(mumin,2.));
+        rhomax=::std::log(::std::pow(mumax,2.));
         switch(numflavours){
             case 3: mustart=0.99*mc_msbar;
                 break;
@@ -86,7 +86,7 @@ namespace anatools{
             default: mustart=2.;
                 break;
         }
-        rhostart=log(::std::pow(mustart,2.));
+        rhostart=::std::log(::std::pow(mustart,2.));
         
         //obtaining starting values by running from mz:
         if(numflavours!=0){
@@ -278,7 +278,7 @@ namespace anatools{
     
     double alpha::operator()(const double mu){
         double result;
-        double rho=log(::std::pow(mu,2.));
+        double rho=::std::log(::std::pow(mu,2.));
         
         if(interpolated){
             result=interpolation->interp(rho);
@@ -296,7 +296,7 @@ namespace anatools{
     
     double alpha::get(const double mu){
         double result;
-        double rho=log(::std::pow(mu,2.));
+        double rho=::std::log(::std::pow(mu,2.));
         
         if(interpolated){
             result=interpolation->interp(rho);
@@ -321,9 +321,9 @@ namespace anatools{
         int numflavoursbackup=numflavours;
         numflavours=0;
         set_betavec();
-        double L=rmin-log(LQCD*LQCD);
+        double L=rmin-::std::log(LQCD*LQCD);
         
-        double result=1./(betavec[0]*L)*(1.-betavec[1]*log(L)/(::std::pow(betavec[0],2.)*L)+1./(::std::pow(betavec[0]*L,2.))*(::std::pow(betavec[1],2.)/::std::pow(betavec[0],2.)*(::std::pow(log(L),2.)-log(L)-1.)+betavec[2]/betavec[0]));
+        double result=1./(betavec[0]*L)*(1.-betavec[1]*::std::log(L)/(::std::pow(betavec[0],2.)*L)+1./(::std::pow(betavec[0]*L,2.))*(::std::pow(betavec[1],2.)/::std::pow(betavec[0],2.)*(::std::pow(::std::log(L),2.)-::std::log(L)-1.)+betavec[2]/betavec[0]));
         
         numflavours=numflavoursbackup;
         set_betavec();
@@ -341,9 +341,9 @@ namespace anatools{
         ::std::cout << "Running down from Mz" << ::std::endl;
         
         ::std::vector<double> thresholds;
-        thresholds.push_back(log(mz*mz));
-        if(rmin<log(mb_msbar*mb_msbar)) thresholds.push_back(log(mb_msbar*mb_msbar));
-        if(rmin<log(mc_msbar*mc_msbar)) thresholds.push_back(log(mc_msbar*mc_msbar));
+        thresholds.push_back(::std::log(mz*mz));
+        if(rmin< ::std::log(mb_msbar*mb_msbar)) thresholds.push_back(::std::log(mb_msbar*mb_msbar));
+        if(rmin< ::std::log(mc_msbar*mc_msbar)) thresholds.push_back(::std::log(mc_msbar*mc_msbar));
         thresholds.push_back(0.);
         
         for(unsigned int i=0; i<(thresholds.size()-1); i++){
