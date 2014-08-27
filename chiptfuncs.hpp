@@ -101,7 +101,7 @@ namespace anatools{
             else{
                 is_improved=false;
             }
-            if(boost.norm()<1.e-9){
+            if(boost.norm()< ::std::numeric_limits<double>::epsilon()){
                 is_zeroboost=true;
                 gamma=1.;
             }
