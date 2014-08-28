@@ -440,7 +440,7 @@ namespace anatools{
         else if(l==0){
             Erf erf;
             tmp=-2.*::std::sqrt(fabs(q2))*::std::sqrt(pimath)*erf.erf(::std::sqrt(lambda*fabs(q2)));
-            tmp-=2./::std::sqrt(lambda)*::std::exp(lambda*q2);
+            //tmp-=2./::std::sqrt(lambda)*::std::exp(lambda*q2);
             result=gamma*pimath/2.*tmp;
         }
         
