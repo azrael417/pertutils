@@ -428,7 +428,7 @@ namespace anatools{
     }
     
     //this term is proportional to Dawson's Integral: term2=2/q *exp(lambda*q^2)*F(sqrt(lambda)q)
-    //where F(x)=exp(-x^2) int_0^x ds exp(-s^2):
+    //where F(x)=exp(-x^2) int_0^x ds exp(s^2):
     double Zetafunc::term2(const double q2){
         double result=0.,tmp;
         
@@ -438,7 +438,7 @@ namespace anatools{
             result=gamma*pimath/2.*tmp;
         }
         else if(l==0){
-            tmp=-4.*::std::exp(lambda*q2)*::std::sqrt(fabs(q2))*dawson(::std::sqrt(lambda)*dcomplex(0.,::std::sqrt(fabs(q2)))).im();
+            tmp=4.*(q2/::std::sqrt(fabs(q2)))*::std::exp(lambda*q2)*dawson(::std::sqrt(lambda)*dcomplex(0.,::std::sqrt(fabs(q2)))).im();
             tmp-=2./::std::sqrt(lambda)*::std::exp(lambda*q2);
             result=gamma*pimath/2.*tmp;
         }
