@@ -345,7 +345,7 @@ namespace anatools{
         tmp=term2(q2);
         term2val(tmp,0.);
         
-        result=term1val+term2val;//+term3val;
+        result=term1val+term2val+term3val;
         
         return result;
     }

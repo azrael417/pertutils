@@ -73,8 +73,8 @@ namespace anatools{
             improved=imprvd;
         }
         double operator()(const double t){
-            if(!improved) return ::std::pow(t,-(1.5+static_cast<double>(l)))*::std::exp(t*qsq)*::std::exp(-pimath*pimath*ghatwnorm*ghatwnorm/t);
-            else return ::std::pow(t,-1.5)*::std::exp(t*qsq)*::std::pow((EllipticTheta(pimath*pimath/t)-1.),3.);
+            if(!improved) return ::std::pow(t,-(1.5+static_cast<double>(l)))*::std::exp(t*qsq)*::std::exp(-sqr(pimath*ghatwnorm)/t);
+            else return ::std::pow(t,-1.5)*::std::exp(t*qsq)*::std::pow((EllipticTheta(sqr(pimath)/t)-1.),3.);
         };
     };
     
@@ -106,7 +106,6 @@ namespace anatools{
                 gamma=1.;
             }
             else is_zeroboost=false;
-            is_improved=false;
             
             term1val(0.,0.);
             term2val(0.,0.);
