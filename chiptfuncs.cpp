@@ -438,7 +438,7 @@ namespace anatools{
             result=gamma*pimath/2.*tmp;
         }
         else if(l==0){
-            tmp=-4.*::std::sqrt(fabs(q2))*::std::exp(lambda*q2)*dawson(sqrt(lambda*dcomplex(q2,0.))).im();
+            tmp=(4.*::std::exp(lambda*q2)*sqrt(dcomplex(q2,0.))*dawson(sqrt(lambda*dcomplex(q2,0.)))).re();
             tmp-=2./::std::sqrt(lambda)*::std::exp(lambda*q2);
             result=gamma*pimath/2.*tmp;
         }
