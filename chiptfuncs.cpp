@@ -433,7 +433,7 @@ namespace anatools{
         double result=0.,tmp;
         
         if(l==0){
-            tmp=4.*::std::sqrt(q2)*::std::exp(lambda*q2)*dawson(::std::sqrt(lambda*q2));
+            tmp=4.*::std::sqrt(q2)*::std::exp(lambda*q2)*dawson(sqrt(lambda*q2));
             tmp-=2./::std::sqrt(lambda)*::std::exp(lambda*q2);
             result=gamma*pimath/2.*tmp;
         }
