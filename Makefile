@@ -55,7 +55,7 @@ FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpe
 endif
 
 ifeq ($(ARCH),VAN)
-OPT              = -O2 -msse4.2
+OPT              = -O2 -march=native
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
@@ -63,7 +63,7 @@ FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpe
 endif
 
 ifeq ($(ARCH),MAC)
-OPT              = -O2 -march=core2
+OPT              = -O2 -march=native
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,${HOME}/lib/libpertutils.dylib -o ${HOME}/lib/libpertutils.1.0.dylib *.o
