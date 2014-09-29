@@ -48,7 +48,7 @@ endif
 #Compiler Optimization Level:
 ifeq ($(ARCH),INTEL)
 OPT              = -O2 -march=native -ipo
-FLAGS            = -fPIC -Wall -debug
+FLAGS            = -fPIC -Wall -debug -std=c++11
 LD               = icpc
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
 FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
