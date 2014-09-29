@@ -51,7 +51,7 @@ OPT              = -O2 -march=native -ipo
 FLAGS            = -fPIC -Wall -debug
 LD               = icpc
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 /home/tkurth/lib/; ln -sf /home/tkurth/lib/libpertutils.so.1.0 /home/tkurth/lib/libpertutils.so
+FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
 endif
 
 ifeq ($(ARCH),VAN)
@@ -59,15 +59,15 @@ OPT              = -O2 -msse4.2
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 ~/lib/; ln -sf ~/lib/libpertutils.so.1.0 ~/lib/libpertutils.so
+FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
 endif
 
 ifeq ($(ARCH),MAC)
 OPT              = -O2 -march=core2
 FLAGS            = -fPIC -Wall -g
 LD               = g++
-LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,/Users/thorstenkurth/lib/libpertutils.dylib -o /Users/thorstenkurth/lib/libpertutils.1.0.dylib *.o
-FINISH           = ln -sf /Users/thorstenkurth/lib/libpertutils.1.0.dylib /Users/thorstenkurth/lib/libpertutils.dylib
+LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,${HOME}/lib/libpertutils.dylib -o ${HOME}/lib/libpertutils.1.0.dylib *.o
+FINISH           = ln -sf ${HOME}/lib/libpertutils.1.0.dylib ${HOME}/lib/libpertutils.dylib
 endif
 
 
