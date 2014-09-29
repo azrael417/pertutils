@@ -98,7 +98,6 @@ all::
 	${CC} ${CFLAGS} -c bartens.cpp -o bartens.o ${LIBADD}
 	${CC} ${CFLAGS} -c runnings.cpp -o runnings.o ${LIBADD}
 	${CC} ${CFLAGS} -c chiptfuncs.cpp -o chiptfuncs.o ${LIBADD}
-	${CC} ${CFLAGS} -c opsalg.cpp -o opsalg.o ${LIBADD}
 	${LD} ${LINK}
 	${FINISH}
 clean::
