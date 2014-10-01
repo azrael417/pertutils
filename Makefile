@@ -58,7 +58,7 @@ LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.
 FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
 endif
 
-ifeq ($(ARCH),VAN)
+ifneq (,$(filter $(ARCH),VAN CRAY))
 OPT              = -O2 -march=native
 FLAGS            = -fPIC -Wall -g
 LD               = g++
