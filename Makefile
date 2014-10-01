@@ -82,7 +82,7 @@ MYINCLUDEDIR = -I./ -I../mathutils/
 DEFINES = 
 endif
 
-ifeq ($(ARCH),VAN)
+ifneq (,$(filter $(ARCH),VAN CRAY))
 LIBADD = -lpthread -lm
 MYINCLUDEDIR = -I./ -I../mathutils/
 DEFINES = 
