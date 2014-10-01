@@ -36,6 +36,10 @@ else
 endif
 endif
 
+ifeq ($(ARCH),CRAY)
+CC = CC
+endif
+
 ifeq ($(ARCH),MAC)
 ifeq ($(strip ${OMP}),true)
   CC = g++ -fopenmp
