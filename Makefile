@@ -12,12 +12,9 @@ MAKEFILE = Makefile
 # 1. Architecture
 
 # Compiling for a parallel machine?  blank for a scalar machine
-#MPP = true
 MPP = false
-OMP = true
-#OMP = false
+OMP = false
 ARCH = MAC
-#ARCH = VAN
 
 #Compiler Type:
 ifeq ($(ARCH),INTEL)
