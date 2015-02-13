@@ -15,6 +15,7 @@ MAKEFILE = Makefile
 MPP = false
 OMP = false
 ARCH = MAC
+INSTALLDIR=${HOME}/lib
 
 #Compiler Type:
 ifeq ($(ARCH),INTEL)
@@ -52,7 +53,7 @@ OPT              = -O2 -march=native -ipo
 FLAGS            = -fPIC -Wall -debug -std=c++11
 LD               = icpc
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
+FINISH           = cp libpertutils.so.1.0 ${INSTALLDIR}/; ln -sf ${INSTALLDIR}/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
 endif
 
 ifneq (,$(filter $(ARCH),VAN CRAY))
@@ -60,15 +61,15 @@ OPT              = -O2 -march=native
 FLAGS            = -fPIC -Wall -g
 LD               = g++
 LINK             = -shared -Wl,-soname,libpertutils.so -o libpertutils.so.1.0 *.o
-FINISH           = cp libpertutils.so.1.0 ${HOME}/lib/; ln -sf ${HOME}/lib/libpertutils.so.1.0 ${HOME}/lib/libpertutils.so
+FINISH           = cp libpertutils.so.1.0 ${INSTALLDIR}/; ln -sf ${INSTALLDIR}/libpertutils.so.1.0 ${INSTALLDIR}/libpertutils.so
 endif
 
 ifeq ($(ARCH),MAC)
 OPT              = -O2 -march=native
 FLAGS            = -fPIC -Wall -g
 LD               = g++
-LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,${HOME}/lib/libpertutils.dylib -o ${HOME}/lib/libpertutils.1.0.dylib *.o
-FINISH           = ln -sf ${HOME}/lib/libpertutils.1.0.dylib ${HOME}/lib/libpertutils.dylib
+LINK             = -dynamiclib -Wl,-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0,-install_name,${INSTALLDIR}/libpertutils.dylib -o ${INSTALLDIR}/libpertutils.1.0.dylib *.o
+FINISH           = ln -sf ${INSTALLDIR}/libpertutils.1.0.dylib ${INSTALLDIR}/libpertutils.dylib
 endif
 
 
