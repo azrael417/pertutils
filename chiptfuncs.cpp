@@ -501,7 +501,7 @@ namespace anatools{
                 }
             }
         }
-        dcomplex result=dcomplex(resultre,resultim);
+        dcomplex result(resultre,resultim);
         result*=gamma*::std::pow(pimath,static_cast<double>(1.5+l));
         
         return result;
