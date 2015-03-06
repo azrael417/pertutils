@@ -86,7 +86,6 @@ namespace anatools{
         dcomplex term1val,term2val,term3val;
         int l,m;
         int MAXRUN;
-        Zetafuncint integrand2;
         dcomplex term1(const double q2);
         double term1improved(const double q2);
         double term2(const double q2);

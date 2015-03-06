@@ -364,7 +364,7 @@ namespace anatools{
         threevec<double> nvec,npar,nperp,rvec;
             
         double resultre=0.,resultim=0.;
-#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) private(rvec,rsq,nvec,fact,tmpcomp,npar,nperp)
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) private(rvec,rsq,theta,phi,nvec,fact,tmpcomp,npar,nperp)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
@@ -453,51 +453,55 @@ namespace anatools{
     }
     
     dcomplex Zetafunc::term3(const double q2){
-        double tmp,r,theta,phi,wdprod,ghatwnorm;
-        dcomplex result(0.,0.),tmpcomp1,tmpcomp2,tmpcomp3;
-        threevec<double> wvec,ghatw,wpar,wperp;
-        
         double resultre=0.,resultim=0.;
-//#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) firstprivate(integrand2)
-        for(int z=-MAXRUN; z<=MAXRUN; z++){
-            for(int y=-MAXRUN; y<=MAXRUN; y++){
-                for(int x=-MAXRUN; x<=MAXRUN; x++){
-                    if( (x==0) && (y==0) && (z==0) ) continue; //exclude zero!
-                    wvec(static_cast<double>(x),static_cast<double>(y),static_cast<double>(z));
-                    
-                    //compute scalar product and orthogonal projection:
-                    if(!is_zeroboost){
-                        orthogonal_projection(wvec,boost,wpar,wperp);
-                        ghatw=gamma*wpar+wperp;
+#pragma omp parallel
+        {
+            double tmp,r,theta,phi,wdprod,ghatwnorm;
+            dcomplex result(0.,0.),tmpcomp1,tmpcomp2,tmpcomp3;
+            threevec<double> wvec,ghatw,wpar,wperp;
+            
+            Zetafuncint integrand2;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
+            for(int z=-MAXRUN; z<=MAXRUN; z++){
+                for(int y=-MAXRUN; y<=MAXRUN; y++){
+                    for(int x=-MAXRUN; x<=MAXRUN; x++){
+                        if( (x==0) && (y==0) && (z==0) ) continue; //exclude zero!
+                        wvec(static_cast<double>(x),static_cast<double>(y),static_cast<double>(z));
+                        
+                        //compute scalar product and orthogonal projection:
+                        if(!is_zeroboost){
+                            orthogonal_projection(wvec,boost,wpar,wperp);
+                            ghatw=gamma*wpar+wperp;
+                        }
+                        else{
+                            ghatw=wvec;
+                        }
+                        ghatwnorm=ghatw.norm();
+                        
+                        //solve the integral:
+                        integrand2.set(q2,ghatwnorm,l);
+                        Midpnt<TFunctor> int2(integrand2,0.,lambda);
+                        tmp=qromo(int2);
+                        if(l!=0) tmp*=::std::pow(ghatwnorm,static_cast<double>(l));
+                        
+                        //compute the complex parts:
+                        ghatw.get_spherical_coordinates(r,theta,phi);
+                        tmpcomp1=spherical_harmonicy(l,m,theta,phi);
+                        //exip(-ipi w*d)-term
+                        if(!is_zeroboost){
+                            wdprod=wvec*boost;
+                            tmpcomp2(cos(pimath*wdprod),-sin(pimath*wdprod));
+                        }
+                        else tmpcomp2(1.,0.);
+                        tmpcomp3=tmpcomp1*tmpcomp2*tmp;
+                        //result+=tmpcomp3;
+                        resultre+=tmpcomp3.re();
+                        resultim+=tmpcomp3.im();
                     }
-                    else{
-                        ghatw=wvec;
-                    }
-                    ghatwnorm=ghatw.norm();
-                    
-                    //solve the integral:
-                    integrand2.set(q2,ghatwnorm,l);
-                    Midpnt<TFunctor> int2(integrand2,0.,lambda);
-                    tmp=qromo(int2);
-                    if(l!=0) tmp*=::std::pow(ghatwnorm,static_cast<double>(l));
-                    
-                    //compute the complex parts:
-                    ghatw.get_spherical_coordinates(r,theta,phi);
-                    tmpcomp1=spherical_harmonicy(l,m,theta,phi);
-                    //exip(-ipi w*d)-term
-                    if(!is_zeroboost){
-                        wdprod=wvec*boost;
-                        tmpcomp2(cos(pimath*wdprod),-sin(pimath*wdprod));
-                    }
-                    else tmpcomp2(1.,0.);
-                    tmpcomp3=tmpcomp1*tmpcomp2*tmp;
-                    //result+=tmpcomp3;
-                    resultre+=tmpcomp3.re();
-                    resultim+=tmpcomp3.im();
                 }
             }
         }
-        result=dcomplex(resultre,resultim);
+        dcomplex result=dcomplex(resultre,resultim);
         result*=gamma*::std::pow(pimath,static_cast<double>(1.5+l));
         
         return result;
@@ -506,6 +510,7 @@ namespace anatools{
     double Zetafunc::term3improved(const double q2){
         double result=0.,integral;
         threevec<double> wvec;
+        Zetafuncint integrand2;
         
         //double wrapper since lower integration boundary is a singularity:
         integrand2.set(q2,0.,0,is_improved);
