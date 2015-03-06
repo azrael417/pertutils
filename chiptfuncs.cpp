@@ -363,7 +363,8 @@ namespace anatools{
         double fact,rsq,theta,phi;
         threevec<double> nvec,npar,nperp,rvec;
             
-#pragma omp parallel for reduction(+:result)
+        double resultre=0.,resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
@@ -385,10 +386,13 @@ namespace anatools{
                     //compute prefact:
                     fact*=::std::exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
                     tmpcomp=fact*spherical_harmonicy(l,m,theta,phi); //multiply with spherical harmonics
-                    result+=tmpcomp;
+                    resultre+=tmpcomp.re();
+                    resultim+=tmpcomp.im();
+                    //result+=tmpcomp;
                 }
             }
         }
+        result=dcomplex(resultre,resultim);
         
         return result;
     }
@@ -453,7 +457,8 @@ namespace anatools{
         dcomplex result(0.,0.),tmpcomp1,tmpcomp2,tmpcomp3;
         threevec<double> wvec,ghatw,wpar,wperp;
         
-#pragma omp parallel for reduction(+:result)
+        double resultre=0.,resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
@@ -486,10 +491,13 @@ namespace anatools{
                     }
                     else tmpcomp2(1.,0.);
                     tmpcomp3=tmpcomp1*tmpcomp2*tmp;
-                    result+=tmpcomp3;
+                    //result+=tmpcomp3;
+                    resultre+=tmpcomp3.re();
+                    resultim+=tmpcomp3.im();
                 }
             }
         }
+        result=dcomplex(resultre,resultim);
         result*=gamma*::std::pow(pimath,static_cast<double>(1.5+l));
         
         return result;
