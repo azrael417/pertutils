@@ -364,7 +364,7 @@ namespace anatools{
         threevec<double> nvec,npar,nperp,rvec;
             
         double resultre=0.,resultim=0.;
-#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) private(rvec,rsq,nvec)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
@@ -458,7 +458,7 @@ namespace anatools{
         threevec<double> wvec,ghatw,wpar,wperp;
         
         double resultre=0.,resultim=0.;
-//#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) firstprivate(integrand2)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
