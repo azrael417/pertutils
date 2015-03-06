@@ -458,7 +458,7 @@ namespace anatools{
         threevec<double> wvec,ghatw,wpar,wperp;
         
         double resultre=0.,resultim=0.;
-#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
+//#pragma omp parallel for reduction(+:resultre) reduction(+:resultim)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
