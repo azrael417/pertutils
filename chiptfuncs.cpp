@@ -362,7 +362,8 @@ namespace anatools{
         dcomplex result(0.,0.),tmpcomp;
         double fact,rsq,theta,phi;
         threevec<double> nvec,npar,nperp,rvec;
-        
+            
+#pragma omp parallel for reduction(+:result)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
@@ -391,7 +392,7 @@ namespace anatools{
         
         return result;
     }
-    
+
     double Zetafunc::term1improved(const double q2){
         double result=0.,rsq;
         threevec<double> nvec;
@@ -452,6 +453,7 @@ namespace anatools{
         dcomplex result(0.,0.),tmpcomp1,tmpcomp2,tmpcomp3;
         threevec<double> wvec,ghatw,wpar,wperp;
         
+#pragma omp parallel for reduction(+:result)
         for(int z=-MAXRUN; z<=MAXRUN; z++){
             for(int y=-MAXRUN; y<=MAXRUN; y++){
                 for(int x=-MAXRUN; x<=MAXRUN; x++){
