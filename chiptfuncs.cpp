@@ -333,16 +333,16 @@ namespace anatools{
         double tmp;
         //special treatment since sums are real:
         if(is_improved && is_zeroboost){
-            tmp=term1improved(q2);
+            tmp=term1spherical(q2);
             term1val(tmp,0.);
-            tmp=term3improved(q2);
+            tmp=term3spherical(q2);
             term3val(tmp,0.);
         }
         else{
-            term1val=term1(q2);
-            term3val=term3(q2);
+            term1val=term1full(q2);
+            term3val=term3full(q2);
         }
-        tmp=term2(q2);
+        tmp=term2full(q2);
         term2val(tmp,0.);
         
         result=term1val+term2val+term3val;
@@ -358,7 +358,7 @@ namespace anatools{
     }
     
     //this is term1, which is the simple sum:
-    dcomplex Zetafunc::term1(const double q2){
+    dcomplex Zetafunc::term1full(const double q2){
         dcomplex result(0.,0.),tmpcomp;
         double fact,rsq,theta,phi;
         threevec<double> nvec,npar,nperp,rvec;
@@ -397,7 +397,7 @@ namespace anatools{
         return result;
     }
 
-    double Zetafunc::term1improved(const double q2){
+    double Zetafunc::term1spherical(const double q2){
         double result=0.,rsq;
         threevec<double> nvec;
         
@@ -407,14 +407,14 @@ namespace anatools{
         //x!=0, y=z=0, 3 times for different combinations (replace x e.g. with y) and factor 2 for +/-:
         for(int x=1; x<=MAXRUN; x++){
             rsq=x*x;
-            result+=6.*::std::exp(-lambda*(rsq-q2))/(rsq-q2)*::std::pow(fabs(x),static_cast<double>(l));
+            result+=6.*::std::exp(-lambda*(rsq-q2))/(rsq-q2);
         }
         
         //x,y!=0,z=0, 3 times for different combinations and factor 4 for +/-:
         for(int x=1; x<=MAXRUN; x++){
             for(int y=1; y<=MAXRUN; y++){
                 rsq=x*x+y*y;
-                result+=12.*::std::exp(-lambda*(rsq-q2))/(rsq-q2)*::std::pow(::std::sqrt(rsq),static_cast<double>(l));
+                result+=12.*::std::exp(-lambda*(rsq-q2))/(rsq-q2);
             }
         }
         
@@ -423,7 +423,7 @@ namespace anatools{
             for(int y=1; y<=MAXRUN; y++){
                 for(int z=1; z<=MAXRUN; z++){
                     rsq=x*x+y*y+z*z;
-                    result+=8.*::std::exp(-lambda*(rsq-q2))/(rsq-q2)*::std::pow(::std::sqrt(rsq),static_cast<double>(l)); //compute the ratio
+                    result+=8.*::std::exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
                 }
             }
         }
@@ -434,7 +434,7 @@ namespace anatools{
     
     //this term is proportional to Dawson's Integral: term2=2/q *exp(lambda*q^2)*F(sqrt(lambda)q)
     //where F(x)=exp(-x^2) int_0^x ds exp(s^2) for q^2>0. For q^2<0, one can express is as the error Function: sqrt(pi)/|q| Erf(sqrt(lambda*|q|^2)):
-    double Zetafunc::term2(const double q2){
+    double Zetafunc::term2full(const double q2){
         double result=0.,tmp;
         
         if(l==0 && q2>=0.){
@@ -452,7 +452,7 @@ namespace anatools{
         return result;
     }
     
-    dcomplex Zetafunc::term3(const double q2){
+    dcomplex Zetafunc::term3full(const double q2){
         double resultre=0.,resultim=0.;
 #pragma omp parallel
         {
@@ -507,7 +507,7 @@ namespace anatools{
         return result;
     }
     
-    double Zetafunc::term3improved(const double q2){
+    double Zetafunc::term3spherical(const double q2){
         double result=0.,integral;
         threevec<double> wvec;
         Zetafuncint integrand2;
