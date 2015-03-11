@@ -87,6 +87,7 @@ namespace anatools{
         int l,m;
         int MAXRUN;
         dcomplex term1full(const double q2);
+        dcomplex term1noboost(const double q2);
         double term1spherical(const double q2);
         double term2full(const double q2);
         dcomplex term3full(const double q2);

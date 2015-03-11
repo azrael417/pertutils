@@ -338,6 +338,10 @@ namespace anatools{
             tmp=term3spherical(q2);
             term3val(tmp,0.);
         }
+        else if(is_zeroboost){
+            term1val=term1noboost(q2);
+            term3val=term3full(q2);
+        }
         else{
             term1val=term1full(q2);
             term3val=term3full(q2);
@@ -358,6 +362,7 @@ namespace anatools{
     }
     
     //this is term1, which is the simple sum:
+    //brute force sum
     dcomplex Zetafunc::term1full(const double q2){
         dcomplex result(0.,0.),tmpcomp;
         double fact,rsq,theta,phi;
@@ -396,6 +401,99 @@ namespace anatools{
         
         return result;
     }
+    
+    //can be used if boost is zero:
+    dcomplex Zetafunc::term1noboost(const double q2){
+        dcomplex result(0.,0.),sphfact,tmpcomp;
+        double fact,rsq,r,theta,phi;
+        threevec<double> nvec;
+        
+        //zero term:
+        result=-dcomplex(::std::exp(lambda*q2)/q2,0.);
+        
+        //x>0, y=z=0 and y>0, x=z=0 and z>0, x=y=0:
+        //if z=0, theta=pi/2, if x=y=0, and z!=0 theta=0.. We add the spherical harmonic factors separately for the directions, x, y and z:
+        sphfact=    spherical_harmonicy(l,m,pimath/2.   ,   0.);                                //x>0
+        sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   pimath);                            //x<0
+        sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   pimath/2.);                         //y>0
+        sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   3.*pimath/2.);                      //y<0
+        sphfact+=   spherical_harmonicy(l,m,0.          ,   0.);                                //z>0
+        sphfact+=   spherical_harmonicy(l,m,pimath      ,   0.);                                //z<0
+        for(int x=1; x<=MAXRUN; x++){
+            rsq=x*x;
+            result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(static_cast<double>(x),l)/(rsq-q2),0.)*sphfact;
+        }
+        
+        //x,y!>0, z=0:
+        //the four ylm account for the possibilities +/+, +/-, -/+, -/-:
+        for(int y=1; y<=MAXRUN; y++){
+            for(int x=1; x<=MAXRUN; x++){
+                rsq=x*x+y*y;
+                threevec<int>(x,y,0).get_spherical_coordinates(r,theta,phi);
+                //z=0:
+                sphfact=    spherical_harmonicy(l,m,theta   ,   phi);                           //x,y>0
+                sphfact+=   spherical_harmonicy(l,m,theta   ,   phi+pimath/2.);                 //x<0,y>0
+                sphfact+=   spherical_harmonicy(l,m,theta   ,   phi+pimath);                    //x<0,y<0
+                sphfact+=   spherical_harmonicy(l,m,theta   ,   phi+3.*pimath/2.);              //x>0,y<0
+                
+                //result
+                result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
+            }
+        }
+        
+        //x,z>0, y=0 and y,z>0, x=0:
+        for(int z=1; z<=MAXRUN; z++){
+            for(int x=1; x<=MAXRUN; x++){
+                rsq=x*x+z*z;
+                threevec<int>(x,0,z).get_spherical_coordinates(r,theta,phi);
+                
+                //y=0:
+                sphfact=    spherical_harmonicy(l,m,theta          ,    0);                    //x,z>0
+                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    0);                    //x>0,z<0
+                sphfact+=   spherical_harmonicy(l,m,theta          ,    pimath);               //x<0,z>0
+                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    pimath);               //x,z<0
+                //x=0:
+                sphfact+=   spherical_harmonicy(l,m,theta          ,    pimath/2.);            //y,z>0
+                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    pimath/2.);            //y>0,z<0
+                sphfact+=   spherical_harmonicy(l,m,theta          ,    3.*pimath/2.);         //y<0,z>0
+                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    3.*pimath/2.);         //y,z<0
+                
+                //result:
+                result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
+            }
+        }
+        
+        //x,y,z>0
+        double resultre=0.,resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) private(nvec,rsq,r,theta,phi,fact,tmpcomp)
+        for(int z=1; z<=MAXRUN; z++){
+            for(int y=1; y<=MAXRUN; y++){
+                for(int x=1; x<=MAXRUN; x++){
+                    nvec(static_cast<double>(x),static_cast<double>(y),static_cast<double>(z));
+                    nvec.get_spherical_coordinates(r,theta,phi);
+                    fact=::std::pow(r,l); //compute |r|^l
+                    rsq=r*r; //compute r^2
+                    fact*=::std::exp(-lambda*(rsq-q2))/(rsq-q2); //compute the ratio
+                    
+                    //compute sphfact: account for all possible orientations
+                    sphfact=dcomplex(0.,0.);
+                    for(unsigned int phii=0; phii<4; phii++){
+                        for(unsigned int thetaa=0; thetaa<2; thetaa++){
+                            sphfact+=spherical_harmonicy(l,m,theta+static_cast<double>(thetaa)*pimath/2.,phi+static_cast<double>(phii)*pimath/2.);
+                        }
+                    }
+
+                    //compute the result:
+                    tmpcomp=fact*sphfact; //ratio * ylm factor
+                    resultre+=tmpcomp.re();
+                    resultim+=tmpcomp.im();
+                }
+            }
+        }
+        result+=dcomplex(resultre,resultim);
+        
+        return result;
+    }
 
     double Zetafunc::term1spherical(const double q2){
         double result=0.,rsq;
@@ -404,7 +502,7 @@ namespace anatools{
         //zero term:
         result=-::std::exp(lambda*q2)/q2;
         
-        //x!=0, y=z=0, 3 times for different combinations (replace x e.g. with y) and factor 2 for +/-:
+        //x!=0, y=z=0, 3 times for different combinations (replace x e.g. with y) and factor 2 for +/-: makes an overall factor of 6:
         for(int x=1; x<=MAXRUN; x++){
             rsq=x*x;
             result+=6.*::std::exp(-lambda*(rsq-q2))/(rsq-q2);
