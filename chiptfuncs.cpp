@@ -340,7 +340,7 @@ namespace anatools{
         }
         else if(is_zeroboost){
             term1val=term1noboost(q2);
-            term3val=term3full(q2);
+            term3val=term3noboost(q2);
         }
         else{
             term1val=term1full(q2);
@@ -349,6 +349,7 @@ namespace anatools{
         tmp=term2full(q2);
         term2val(tmp,0.);
         
+        //result:
         result=term1val+term2val+term3val;
         
         return result;
@@ -361,7 +362,7 @@ namespace anatools{
         ::std::cout << "term3= " << term3val << ::std::endl;
     }
     
-    //this is term1, which is the simple sum:
+    //*************************************************TERM 1*************************************************
     //brute force sum
     dcomplex Zetafunc::term1full(const double q2){
         dcomplex result(0.,0.),tmpcomp;
@@ -408,11 +409,12 @@ namespace anatools{
         double fact,rsq,r,theta,phi;
         threevec<double> nvec;
         
-        //zero term:
-        result=-dcomplex(::std::exp(lambda*q2)/q2,0.);
+        //zero term is zero:
+        result=dcomplex(0.,0.);
         
+        //line terms
         //x>0, y=z=0 and y>0, x=z=0 and z>0, x=y=0:
-        //if z=0, theta=pi/2, if x=y=0, and z!=0 theta=0.. We add the spherical harmonic factors separately for the directions, x, y and z:
+        //note that z->-z is equivalent to theta->pi-theta, similar to this: x->-x yields phi->pi-phi and y->-y is phi->2pi-phi
         sphfact=    spherical_harmonicy(l,m,pimath/2.   ,   0.);                                //x>0
         sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   pimath);                            //x<0
         sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   pimath/2.);                         //y>0
@@ -424,17 +426,19 @@ namespace anatools{
             result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(static_cast<double>(x),l)/(rsq-q2),0.)*sphfact;
         }
         
+        
+        //plane terms
         //x,y!>0, z=0:
         //the four ylm account for the possibilities +/+, +/-, -/+, -/-:
         for(int y=1; y<=MAXRUN; y++){
             for(int x=1; x<=MAXRUN; x++){
-                rsq=x*x+y*y;
                 threevec<int>(x,y,0).get_spherical_coordinates(r,theta,phi);
+                rsq=r*r;
                 //z=0:
                 sphfact=    spherical_harmonicy(l,m,theta   ,   phi);                           //x,y>0
-                sphfact+=   spherical_harmonicy(l,m,theta   ,   phi+pimath/2.);                 //x<0,y>0
-                sphfact+=   spherical_harmonicy(l,m,theta   ,   phi+pimath);                    //x<0,y<0
-                sphfact+=   spherical_harmonicy(l,m,theta   ,   phi+3.*pimath/2.);              //x>0,y<0
+                sphfact+=   spherical_harmonicy(l,m,theta   ,   pimath-phi);                    //x<0,y>0
+                sphfact+=   spherical_harmonicy(l,m,theta   ,   pimath+phi);                    //x,y<0
+                sphfact+=   spherical_harmonicy(l,m,theta   ,   2.*pimath-phi);                 //x>0,y<0
                 
                 //result
                 result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
@@ -444,25 +448,27 @@ namespace anatools{
         //x,z>0, y=0 and y,z>0, x=0:
         for(int z=1; z<=MAXRUN; z++){
             for(int x=1; x<=MAXRUN; x++){
-                rsq=x*x+z*z;
                 threevec<int>(x,0,z).get_spherical_coordinates(r,theta,phi);
+                rsq=r*r;
                 
                 //y=0:
                 sphfact=    spherical_harmonicy(l,m,theta          ,    0);                    //x,z>0
-                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    0);                    //x>0,z<0
+                sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    0);                    //x>0,z<0
                 sphfact+=   spherical_harmonicy(l,m,theta          ,    pimath);               //x<0,z>0
-                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    pimath);               //x,z<0
+                sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    pimath);               //x,z<0
                 //x=0:
                 sphfact+=   spherical_harmonicy(l,m,theta          ,    pimath/2.);            //y,z>0
-                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    pimath/2.);            //y>0,z<0
+                sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    pimath/2.);            //y>0,z<0
                 sphfact+=   spherical_harmonicy(l,m,theta          ,    3.*pimath/2.);         //y<0,z>0
-                sphfact+=   spherical_harmonicy(l,m,theta+pimath/2.,    3.*pimath/2.);         //y,z<0
+                sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    3.*pimath/2.);         //y,z<0
                 
                 //result:
                 result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
             }
         }
         
+        
+        //cubic terms
         //x,y,z>0
         double resultre=0.,resultim=0.;
 #pragma omp parallel for reduction(+:resultre) reduction(+:resultim) private(nvec,rsq,r,theta,phi,fact,tmpcomp)
@@ -477,10 +483,11 @@ namespace anatools{
                     
                     //compute sphfact: account for all possible orientations
                     sphfact=dcomplex(0.,0.);
-                    for(unsigned int phii=0; phii<4; phii++){
-                        for(unsigned int thetaa=0; thetaa<2; thetaa++){
-                            sphfact+=spherical_harmonicy(l,m,theta+static_cast<double>(thetaa)*pimath/2.,phi+static_cast<double>(phii)*pimath/2.);
-                        }
+                    for(unsigned int thetaa=0; thetaa<2; thetaa++){
+                        sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,phi);            //x,y>0
+                        sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,pimath-phi);     //x<0,y>0
+                        sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,pimath+phi);     //x,y<0
+                        sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,2.*pimath-phi);  //x>0,y<0
                     }
 
                     //compute the result:
@@ -530,6 +537,7 @@ namespace anatools{
         return result;
     }
     
+    //*************************************************TERM 2*************************************************
     //this term is proportional to Dawson's Integral: term2=2/q *exp(lambda*q^2)*F(sqrt(lambda)q)
     //where F(x)=exp(-x^2) int_0^x ds exp(s^2) for q^2>0. For q^2<0, one can express is as the error Function: sqrt(pi)/|q| Erf(sqrt(lambda*|q|^2)):
     double Zetafunc::term2full(const double q2){
@@ -550,6 +558,7 @@ namespace anatools{
         return result;
     }
     
+    //*************************************************TERM 3*************************************************
     dcomplex Zetafunc::term3full(const double q2){
         double resultre=0.,resultim=0.;
 #pragma omp parallel
@@ -601,6 +610,173 @@ namespace anatools{
         }
         dcomplex result(resultre,resultim);
         result*=gamma*::std::pow(pimath,static_cast<double>(1.5+l));
+        
+        return result;
+    }
+    
+    dcomplex Zetafunc::term3noboost(const double q2){
+        dcomplex result(0.,0.),sphfact,tmpcomp;
+        double tmp,r,theta,phi;
+        
+        //zero term is zero:
+        result=dcomplex(0.,0.);
+        
+        //line terms
+        //x>0, y=z=0 and y>0, x=z=0 and z>0, x=y=0:
+        //note that z->-z is equivalent to theta->pi-theta, similar to this: x->-x yields phi->pi-phi and y->-y is phi->2pi-phi
+        sphfact=    spherical_harmonicy(l,m,pimath/2.   ,   0.);                                //x>0
+        sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   pimath);                            //x<0
+        sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   pimath/2.);                         //y>0
+        sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   3.*pimath/2.);                      //y<0
+        sphfact+=   spherical_harmonicy(l,m,0.          ,   0.);                                //z>0
+        sphfact+=   spherical_harmonicy(l,m,pimath      ,   0.);                                //z<0
+        
+        double resultre=0., resultim=0.;
+#pragma omp parallel
+        {
+            Zetafuncint integrand2;
+#pragma omp parallel for reduction(+:resultre) private(tmp)
+            for(int x=1; x<=MAXRUN; x++){
+                integrand2.set(q2,x,l);
+                Midpnt<TFunctor> int2(integrand2,0.,lambda);
+                tmp=qromo(int2);
+                if(l!=0) tmp*=::std::pow(x,static_cast<double>(l));
+                resultre+=tmp;
+            }
+        }
+        result+=resultre*sphfact;
+        
+        
+        //plane-terms
+        resultre=0.;
+        resultim=0.;
+        double* integrals=new double[MAXRUN*MAXRUN];
+#pragma omp parallel
+        {
+            Zetafuncint integrand2;
+            //do integrals first:
+#pragma omp parallel for shared(integrals) private(r,theta,phi,tmp)
+            for(int y=1; y<=MAXRUN; y++){
+                for(int x=y; x<=MAXRUN; x++){
+                    threevec<int>(x,y,0).get_spherical_coordinates(r,theta,phi);
+                    
+                    //integral
+                    integrand2.set(q2,r,l);
+                    Midpnt<TFunctor> int2(integrand2,0.,lambda);
+                    tmp=qromo(int2);
+                    if(l!=0) tmp*=::std::pow(r,static_cast<double>(l));
+                    
+                    //store results: it is symmetrc in x and y:
+                    integrals[x-1+MAXRUN*(y-1)]=tmp;
+                    integrals[y-1+MAXRUN*(x-1)]=tmp;
+                }
+            }
+            
+            //angular parts
+            //x,y!>0, z=0:
+            //the four ylm account for the possibilities +/+, +/-, -/+, -/-:
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) shared(integrals) private(r,theta,phi,tmp,tmpcomp)
+            for(int y=1; y<=MAXRUN; y++){
+                for(int x=1; x<=MAXRUN; x++){
+                    threevec<int>(x,y,0).get_spherical_coordinates(r,theta,phi);
+                    
+                    //z=0:
+                    sphfact=    spherical_harmonicy(l,m,theta   ,   phi);                           //x,y>0
+                    sphfact+=   spherical_harmonicy(l,m,theta   ,   pimath-phi);                    //x<0,y>0
+                    sphfact+=   spherical_harmonicy(l,m,theta   ,   pimath+phi);                    //x,y<0
+                    sphfact+=   spherical_harmonicy(l,m,theta   ,   2.*pimath-phi);                 //x>0,y<0
+                    
+                    //result
+                    tmpcomp=integrals[y-1+MAXRUN*(x-1)]*sphfact;
+                    resultre+=tmpcomp.re();
+                    resultre+=tmpcomp.im();
+                }
+            }
+        
+            //x,z>0, y=0 and y,z>0, x=0:
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) shared(integrals) private(r,theta,phi,tmp,tmpcomp)
+            for(int z=1; z<=MAXRUN; z++){
+                for(int x=1; x<=MAXRUN; x++){
+                    threevec<int>(x,0,z).get_spherical_coordinates(r,theta,phi);
+                    
+                    //y=0:
+                    sphfact=    spherical_harmonicy(l,m,theta          ,    0);                    //x,z>0
+                    sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    0);                    //x>0,z<0
+                    sphfact+=   spherical_harmonicy(l,m,theta          ,    pimath);               //x<0,z>0
+                    sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    pimath);               //x,z<0
+                    //x=0:
+                    sphfact+=   spherical_harmonicy(l,m,theta          ,    pimath/2.);            //y,z>0
+                    sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    pimath/2.);            //y>0,z<0
+                    sphfact+=   spherical_harmonicy(l,m,theta          ,    3.*pimath/2.);         //y<0,z>0
+                    sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    3.*pimath/2.);         //y,z<0
+                    
+                    //result:
+                    tmpcomp=integrals[z-1+MAXRUN*(x-1)]*sphfact;
+                    resultre+=tmpcomp.re();
+                    resultre+=tmpcomp.im();
+                }
+            }
+        }
+        delete [] integrals;
+        result+=dcomplex(resultre,resultim);
+        
+        
+        //cubic terms:
+        resultre=0.;
+        resultim=0.;
+        integrals=new double[MAXRUN*MAXRUN*MAXRUN];
+#pragma omp parallel
+        {
+            //do integrals first
+            Zetafuncint integrand2;
+#pragma omp parallel for shared(integrals) private(r,theta,phi,tmp)
+            for(int z=1; z<=MAXRUN; z++){
+                for(int y=z; y<=MAXRUN; y++){
+                    for(int x=y; x<=MAXRUN; x++){
+                        threevec<int>(x,y,z).get_spherical_coordinates(r,theta,phi);
+                        
+                        //integral
+                        integrand2.set(q2,r,l);
+                        Midpnt<TFunctor> int2(integrand2,0.,lambda);
+                        tmp=qromo(int2);
+                        if(l!=0) tmp*=::std::pow(r,static_cast<double>(l));
+                        
+                        //store results: it is symmetrc in x and y:
+                        integrals[x-1+MAXRUN*((y-1)+MAXRUN*(z-1))]=tmp;
+                        integrals[z-1+MAXRUN*((x-1)+MAXRUN*(y-1))]=tmp;
+                        integrals[y-1+MAXRUN*((z-1)+MAXRUN*(x-1))]=tmp;
+                    }
+                }
+            }
+
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) shared(integrals) private(r,theta,phi,tmpcomp)
+            for(int z=1; z<=MAXRUN; z++){
+                for(int y=1; y<=MAXRUN; y++){
+                    for(int x=1; x<=MAXRUN; x++){
+                        threevec<int>(x,y,z).get_spherical_coordinates(r,theta,phi);
+                        
+                        //compute sphfact: account for all possible orientations
+                        sphfact=dcomplex(0.,0.);
+                        for(unsigned int thetaa=0; thetaa<2; thetaa++){
+                            sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,phi);            //x,y>0
+                            sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,pimath-phi);     //x<0,y>0
+                            sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,pimath+phi);     //x,y<0
+                            sphfact+=spherical_harmonicy(l,m,static_cast<double>(thetaa)*pimath-theta,2.*pimath-phi);  //x>0,y<0
+                        }
+                        
+                        //compute the result:
+                        tmpcomp=integrals[x-1+MAXRUN*((y-1)+MAXRUN*(z-1))]*sphfact; //integral * ylm factor
+                        resultre+=tmpcomp.re();
+                        resultim+=tmpcomp.im();
+                    }
+                }
+            }
+        }
+        delete [] integrals;
+        result+=dcomplex(resultre,resultim);
+        
+        //multiply result by factor:
+        result*=::std::pow(pimath,static_cast<double>(1.5+l));
         
         return result;
     }
