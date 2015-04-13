@@ -27,7 +27,7 @@ namespace anatools{
         double astart;
         rhomin=::std::log(::std::pow(mumin,2.));
         rhomax=::std::log(::std::pow(mumax,2.));
-        if( fabs(mustart)>atol && fabs(alphastart)>atol ){
+        if( std::abs(mustart)>atol && std::abs(alphastart)>atol ){
             set_betavec();
             perform_integration(alphastart/pimath,::std::log(::std::pow(mustart,2.)),rhomin,mucount);
             astart=yvec[yvec.size()-1]/pimath;
@@ -116,7 +116,7 @@ namespace anatools{
         avector[0]=astart;
         Output out(stepcount);
         
-        if(fabs(rmin-rmax)<atol){
+        if(std::abs(rmin-rmax)<atol){
             xvec.clear();
             yvec.clear();
             xvec.push_back(rmin);
@@ -284,7 +284,7 @@ namespace anatools{
             result=interpolation->interp(rho);
         }
         else if(yvec.size()==1){
-            if(fabs(rho-xvec[0])<atol) result=yvec[0];
+            if(std::abs(rho-xvec[0])<atol) result=yvec[0];
             else result=-1.;
         }
         else{
@@ -302,7 +302,7 @@ namespace anatools{
             result=interpolation->interp(rho);
         }
         else if(yvec.size()==1){
-            if(fabs(rho-xvec[0])<atol) result=yvec[0];
+            if(std::abs(rho-xvec[0])<atol) result=yvec[0];
             else result=-1.;
         }
         else{
@@ -355,7 +355,7 @@ namespace anatools{
             set_betavec();
             
             //integrate:
-            nsteps=static_cast<int>(lround(fabs(rup-rdown)*1.e2));
+            nsteps=static_cast<int>(lround(std::abs(rup-rdown)*1.e2));
             perform_integration(astart,rup,rdown,nsteps);
             
             //update starting values:

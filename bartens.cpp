@@ -690,8 +690,8 @@ namespace anatools{
         head=new double[baryons.size()];
         input.read(reinterpret_cast<char*>(head),baryons.size()*sizeof(double));
         for(unsigned int b=0; b<baryons.size(); b++){
-            if(fabs(head[b])<1.e-9) baryons[b]="neutron";
-            else if(fabs(head[b]-1.)<1.e-9) baryons[b]="proton";
+            if(std::abs(head[b])<1.e-9) baryons[b]="neutron";
+            else if(std::abs(head[b]-1.)<1.e-9) baryons[b]="proton";
         }
         delete [] head;
         tens.baryons=baryons;
