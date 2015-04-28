@@ -116,6 +116,8 @@ namespace anatools{
         void set_numterms_sum(const int run);
         void set_boost(const threevec<double> boostvec, const double gammaa);
         void print_contributions();
+        double getGamma()const{ return gamma;}
+        threevec<double> getBoost()const{ return boost;}
         
         friend double qromb(double &func, double a, double b, const double eps);
     };
