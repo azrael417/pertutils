@@ -95,7 +95,7 @@ namespace anatools{
         double term3spherical(const double q2);
         
     public:
-        Zetafunc(const int ll=0, const int mm=0, const double gammaa=1., const threevec<double> boostvec=threevec<double>(0.,0.,0.), const double lambdaa=1., const int maxrun=10) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {
+        Zetafunc(const int ll, const int mm, const double gammaa=1., const threevec<double> boostvec=threevec<double>(0.,0.,0.), const double lambdaa=1., const int maxrun=10) : boost(boostvec), gamma(gammaa), lambda(lambdaa), l(ll), m(mm), MAXRUN(maxrun) {
             if( (l==0) && (m==0) ){
                 is_improved=true;
             }
