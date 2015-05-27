@@ -41,9 +41,9 @@ namespace anatools{
         TRIPM1
     };
     
-    NRmatrix<dcomplex> get_gamma(const gamma_id gid);
-    NRmatrix<double> get_gamma(const basak_gamma_id gid);
-    NRmatrix<double> get_polarization(const polarization_id gid);
+    Matrix<dcomplex> get_gamma(const gamma_id gid);
+    Matrix<double> get_gamma(const basak_gamma_id gid);
+    Matrix<double> get_polarization(const polarization_id gid);
     
 }
 #endif

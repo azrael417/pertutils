@@ -9,10 +9,12 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
+using namespace mathutils;
+
 namespace anatools{
 
-    NRmatrix<dcomplex> get_gamma(const gamma_id gid){
-        NRmatrix<dcomplex> result(4,4,0.);
+    Matrix<dcomplex> get_gamma(const gamma_id gid){
+        Matrix<dcomplex> result(4,4,0.);
         
         switch(gid){
             case ONE:
@@ -94,8 +96,8 @@ namespace anatools{
         return result;
     }
     
-    NRmatrix<double> get_gamma(const basak_gamma_id gid){
-        NRmatrix<double> result(4,4,0.);
+    Matrix<double> get_gamma(const basak_gamma_id gid){
+        Matrix<double> result(4,4,0.);
         
         switch(gid){
             case UTRANS:
@@ -132,8 +134,8 @@ namespace anatools{
         return result;
     }
     
-    NRmatrix<double> get_polarization(const polarization_id pid){
-        NRmatrix<double> result(4,4,0.);
+    Matrix<double> get_polarization(const polarization_id pid){
+        Matrix<double> result(4,4,0.);
         
         switch(pid){
             case UPDOWNAV:
