@@ -7,17 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		18562BAE177876CC009D87D6 /* bartens.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 18562BAC177876CC009D87D6 /* bartens.hpp */; };
 		18C64BF6141F7A890001F398 /* chiptfuncs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435B141E28A700E1F771 /* chiptfuncs.cpp */; };
 		18C64BF7141F7A890001F398 /* runnings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1881435F141E28A700E1F771 /* runnings.cpp */; };
 		18D1B00A1726D3A600F0C0CE /* gamma.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 18D1B0091726D3A600F0C0CE /* gamma.hpp */; };
 		18D1B0201726E8DC00F0C0CE /* gamma.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D1B01E1726E8DC00F0C0CE /* gamma.cpp */; };
-		18E0E7DB177B501C00E992E0 /* bartens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18562BAB177876CC009D87D6 /* bartens.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		18562BAB177876CC009D87D6 /* bartens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bartens.cpp; sourceTree = "<group>"; };
-		18562BAC177876CC009D87D6 /* bartens.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bartens.hpp; sourceTree = "<group>"; };
+		1808D34B1B164DCF00EFB184 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1881435B141E28A700E1F771 /* chiptfuncs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chiptfuncs.cpp; sourceTree = "<group>"; };
 		1881435C141E28A700E1F771 /* chiptfuncs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = chiptfuncs.hpp; sourceTree = "<group>"; };
 		1881435D141E28A700E1F771 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -43,10 +40,9 @@
 		18C7933A141A6EA600680CE1 = {
 			isa = PBXGroup;
 			children = (
+				1808D34B1B164DCF00EFB184 /* README.md */,
 				1881435D141E28A700E1F771 /* Makefile */,
 				1881435E141E28A700E1F771 /* pertutils.hpp */,
-				18562BAC177876CC009D87D6 /* bartens.hpp */,
-				18562BAB177876CC009D87D6 /* bartens.cpp */,
 				1881435C141E28A700E1F771 /* chiptfuncs.hpp */,
 				1881435B141E28A700E1F771 /* chiptfuncs.cpp */,
 				18D1B0091726D3A600F0C0CE /* gamma.hpp */,
@@ -65,7 +61,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				18D1B00A1726D3A600F0C0CE /* gamma.hpp in Headers */,
-				18562BAE177876CC009D87D6 /* bartens.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,7 +133,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				18D1B0201726E8DC00F0C0CE /* gamma.cpp in Sources */,
-				18E0E7DB177B501C00E992E0 /* bartens.cpp in Sources */,
 				18C64BF6141F7A890001F398 /* chiptfuncs.cpp in Sources */,
 				18C64BF7141F7A890001F398 /* runnings.cpp in Sources */,
 			);
