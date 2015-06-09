@@ -1,7 +1,7 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-namespace anatools{
+namespace pertutils{
     
     //******************************************************************
     //******************************************************************
@@ -11,15 +11,17 @@ namespace anatools{
     Xifunc::Xifunc(double MLSQMIN, double MLSQMAX, int MLCOUNT, double ss) : MLsqmin(MLSQMIN), MLsqmax(MLSQMAX), MLcount(MLCOUNT), s(ss) {
         MLstep=(MLsqmax-MLsqmin)/(static_cast<double>(MLcount));
         
-        xvec.clear();
-        yvec.clear();
         double MLsq, dummy;
+        std::vector<double> xvectmp, yvectmp;
         for(int i=0; i<=MLcount; i++){
             MLsq=MLsqmin+static_cast<double>(i)*MLstep;
-            xvec.push_back(MLsq);
+            xvectmp.push_back(MLsq);
             dummy=Xifuncnorm(MLsq,s);
-            yvec.push_back(dummy);
+            yvectmp.push_back(dummy);
         }
+        xvec.assign(xvectmp);
+        yvec.assign(yvectmp);
+        
         interpolation=new spline_interp(xvec,yvec);
     }
     
@@ -32,7 +34,7 @@ namespace anatools{
             ::std::cerr << "Xifunc: error, cannot open " << filename << "for reading!" << ::std::endl;
         }
         else{
-            xvec.clear();
+            std::vector<double> xvectmp, yvectmp;
             yvec.clear();
             input >> MLsqmin;
             input >> MLsqmax;
@@ -40,11 +42,14 @@ namespace anatools{
             input >> s;
             for(int i=0; i<=MLcount; i++){
                 input >> token;
-                xvec.push_back(token);
+                xvectmp.push_back(token);
                 input >> token;
-                yvec.push_back(token);
+                yvectmp.push_back(token);
             }
             input.close();
+            xvec.assign(xvectmp);
+            yvec.assign(yvectmp);
+            
             interpolation=new spline_interp(xvec,yvec);
         }
     }

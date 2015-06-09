@@ -9,9 +9,8 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-using namespace mathutils;
 
-namespace anatools{
+namespace pertutils{
 
     Matrix<dcomplex> get_gamma(const gamma_id gid){
         Matrix<dcomplex> result(4,4,0.);

@@ -1,7 +1,7 @@
 #ifndef _CHIPTFUNCS
 #define _CHIPTFUNCS
 
-namespace anatools{
+namespace pertutils{
     
     //******************************************************************
     //******************************************************************
@@ -11,7 +11,7 @@ namespace anatools{
     class Xifunc{
     private:
         double MLsqmin, MLsqmax, MLcount, MLstep, s;
-        ::std::vector<double> xvec, yvec;
+        Vector<double> xvec, yvec;
         spline_interp* interpolation;
         
     public:

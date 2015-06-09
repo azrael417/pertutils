@@ -1,21 +1,23 @@
 #include "mathutils.hpp"
 #include "pertutils.hpp"
 
-namespace anatools{
+namespace pertutils{
     
     void alpha::set_betavec(){
-        betavec.clear();
         
-        betavec.push_back(betazero());
+        std::vector<double> betatmp;
+        betatmp.push_back(betazero());
         if(looporder>1){
-            betavec.push_back(betaone());
+            betatmp.push_back(betaone());
         }
         if(looporder>2){
-            betavec.push_back(betatwo());
+            betatmp.push_back(betatwo());
         }
         if(looporder>3){
-            betavec.push_back(betathree());
+            betatmp.push_back(betathree());
         }
+        
+        betavec.assign(betatmp);
         betfunc.set(betavec);
     }
     
@@ -111,16 +113,16 @@ namespace anatools{
     }
     
     void alpha::perform_integration(double astart, double rmin, double rmax, int stepcount){
-        ::std::vector<double> avector(1);
+        Vector<double> avector(1);
         double rstep=(rmax-rmin)/(static_cast<double>(stepcount));
         avector[0]=astart;
         Output out(stepcount);
         
         if(std::abs(rmin-rmax)<atol){
-            xvec.clear();
-            yvec.clear();
-            xvec.push_back(rmin);
-            yvec.push_back(astart*pimath);
+            xvec.resize(1);
+            yvec.resize(1);
+            xvec[0]=rmin;
+            yvec[0]=astart*pimath;
         }
         
         else{
@@ -133,11 +135,11 @@ namespace anatools{
                 bsintegrator.integrate();
             }
             
-            xvec.clear();
-            yvec.clear();
-            for(int i=0; i<(out.count); i++){
-                xvec.push_back((out.xsave[i]));
-                yvec.push_back((out.ysave[0][i])*pimath);
+            xvec.resize(out.count);
+            yvec.resize(out.count);
+            for(int i=0; i<out.count; i++){
+                xvec[i]=out.xsave[i];
+                yvec[i]=out.ysave[0][i]*pimath;
             }
         }
         integrated=true;
@@ -209,8 +211,8 @@ namespace anatools{
             ::std::cerr << "alpha: error, cannot open " << filename << "for reading!" << ::std::endl;
         }
         else{
-            xvec.clear();
-            yvec.clear();
+            xvec.resize(mucount+1);
+            yvec.resize(mucount+1);
             input >> mustart;
             input >> alphastart;
             input >> mumin;
@@ -218,9 +220,9 @@ namespace anatools{
             input >> mucount;
             for(int i=0; i<=mucount; i++){
                 input >> token;
-                xvec.push_back(token);
+                xvec[i]=token;
                 input >> token;
-                yvec.push_back(token);
+                yvec[i]=token;
             }
             input.close();
             

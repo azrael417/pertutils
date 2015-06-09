@@ -1,7 +1,7 @@
 #ifndef _RUNNINGS
 #define _RUNNINGS
 
-namespace anatools{
+namespace pertutils{
     
     //Konstanten:
     const double zeta3=1.20205690;
@@ -23,10 +23,10 @@ namespace anatools{
     const double scale_conversion=0.197327;
     
     struct betafunction : public TFunctor{
-        ::std::vector<double> betavec;
-        betafunction(::std::vector<double> betas) : betavec(betas) {}
+        Vector<double> betavec;
+        betafunction(Vector<double> betas) : betavec(betas) {}
         betafunction(){}
-        void set(::std::vector<double> betas){ betavec=betas; }
+        void set(Vector<double> betas){ betavec=betas; }
         double operator()(const double a){
             double result=0.0;
             for(unsigned int i=0; i<betavec.size(); i++){
@@ -35,7 +35,7 @@ namespace anatools{
             return result;
         }
         
-        void operator()(const double x, ::std::vector<double> &y, ::std::vector<double> &dydx){
+        void operator()(const double x, Vector<double> &y, Vector<double> &dydx){
 #pragma unused(x)
             dydx[0]=0.0;
             for(unsigned int i=0; i<betavec.size(); i++){
@@ -54,7 +54,7 @@ namespace anatools{
         bool integrated, interpolated;
         double rhomin,rhomax,rhostart;
         
-        ::std::vector<double> xvec, yvec, betavec;
+        Vector<double> xvec, yvec, betavec;
         spline_interp* interpolation;
         void set_betavec();
         //double afunc(double astart, double sstart, double sziel, int numsteps);

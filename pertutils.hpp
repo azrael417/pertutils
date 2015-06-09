@@ -11,6 +11,8 @@
 #ifndef _PERTUTILS
 #define _PERTUTILS
 
+using namespace mathutils;
+
 #include "gamma.hpp"
 #include "runnings.hpp"
 #include "chiptfuncs.hpp"
