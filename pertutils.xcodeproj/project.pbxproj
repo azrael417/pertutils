@@ -106,7 +106,7 @@
 		18C7933C141A6EA600680CE1 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0630;
+				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Bergische Universität Wuppertal";
 			};
 			buildConfigurationList = 18C7933F141A6EA600680CE1 /* Build configuration list for PBXProject "pertutils" */;
