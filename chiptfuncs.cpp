@@ -411,7 +411,7 @@ namespace pertutils{
     //can be used if boost is zero:
     dcomplex Zetafunc::term1noboost(const double q2){
         dcomplex result(0.,0.),sphfact,tmpcomp;
-        double fact,rsq,r,theta,phi;
+        double fact,rsq,r,theta,phi,resultre,resultim;
         threevec<double> nvec;
         
         //zero term is zero:
@@ -426,15 +426,23 @@ namespace pertutils{
         sphfact+=   spherical_harmonicy(l,m,pimath/2.   ,   3.*pimath/2.);                      //y<0
         sphfact+=   spherical_harmonicy(l,m,0.          ,   0.);                                //z>0
         sphfact+=   spherical_harmonicy(l,m,pimath      ,   0.);                                //z<0
+        //reduce
+        resultre=0.,resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) firstprivate(q2,sphfact) private(rsq,r,tmpcomp) schedule(static)
         for(int x=1; x<=MAXRUN; x++){
             rsq=x*x;
-            result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(static_cast<double>(x),l)/(rsq-q2),0.)*sphfact;
+            tmpcomp=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(static_cast<double>(x),l)/(rsq-q2),0.)*sphfact;
+            resultre+=tmpcomp.re();
+            resultim+=tmpcomp.im();
         }
+        result+=dcomplex(resultre,resultim);
         
         
         //plane terms
         //x,y!>0, z=0:
         //the four ylm account for the possibilities +/+, +/-, -/+, -/-:
+        resultre=0.,resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) firstprivate(q2) private(rsq,r,theta,phi,sphfact,tmpcomp) schedule(static)
         for(int y=1; y<=MAXRUN; y++){
             for(int x=1; x<=MAXRUN; x++){
                 threevec<int>(x,y,0).get_spherical_coordinates(r,theta,phi);
@@ -446,11 +454,17 @@ namespace pertutils{
                 sphfact+=   spherical_harmonicy(l,m,theta   ,   2.*pimath-phi);                 //x>0,y<0
                 
                 //result
-                result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
+                tmpcomp=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
+                resultre+=tmpcomp.re();
+                resultim+=tmpcomp.im();
             }
         }
+        result+=dcomplex(resultre,resultim);
+        
         
         //x,z>0, y=0 and y,z>0, x=0:
+        resultre=0.,resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) firstprivate(q2) private(rsq,r,theta,phi,sphfact,tmpcomp) schedule(static)
         for(int z=1; z<=MAXRUN; z++){
             for(int x=1; x<=MAXRUN; x++){
                 threevec<int>(x,0,z).get_spherical_coordinates(r,theta,phi);
@@ -468,15 +482,18 @@ namespace pertutils{
                 sphfact+=   spherical_harmonicy(l,m,pimath-theta   ,    3.*pimath/2.);         //y,z<0
                 
                 //result:
-                result+=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
+                tmpcomp=dcomplex(::std::exp(-lambda*(rsq-q2))*::std::pow(r,l)/(rsq-q2),0.)*sphfact;
+                resultre+=tmpcomp.re();
+                resultim+=tmpcomp.im();
             }
         }
+        result+=dcomplex(resultre,resultim);
         
         
         //cubic terms
         //x,y,z>0
-        double resultre=0.,resultim=0.;
-#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) private(nvec,rsq,r,theta,phi,fact,tmpcomp)
+        resultre=0., resultim=0.;
+#pragma omp parallel for reduction(+:resultre) reduction(+:resultim) firstprivate(q2) private(nvec,rsq,r,theta,phi,fact,tmpcomp) schedule(static)
         for(int z=1; z<=MAXRUN; z++){
             for(int y=1; y<=MAXRUN; y++){
                 for(int x=1; x<=MAXRUN; x++){
